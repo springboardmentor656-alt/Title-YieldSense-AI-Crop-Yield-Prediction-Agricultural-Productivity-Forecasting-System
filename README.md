@@ -1,12 +1,6 @@
 # 🌾 YieldSense AI 
 ## Crop Yield Prediction & Agricultural Productivity Forecasting
 
-![Python](https://img.shields.io/badge/Python-3.11-blue)
-![FastAPI](https://img.shields.io/badge/FastAPI-Backend-green)
-![Next.js](https://img.shields.io/badge/Next.js-Frontend-black)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
-
 ## 📖 Overview
 
 **YieldSense AI** is an AI-powered web platform designed to help farmers and agricultural organizations make informed decisions by predicting crop yields using environmental, soil, and farm data.
@@ -32,20 +26,20 @@ The platform combines machine learning with a modern web interface to provide ac
 
 ### Frontend
 
-* Next.js 14
+* ![Next.js](https://img.shields.io/badge/Next.js-Frontend-black)
 * TypeScript
 * Tailwind CSS
 
 ### Backend
 
-* FastAPI
-* Python
+* ![FastAPI](https://img.shields.io/badge/FastAPI-Backend-green)
+* ![Python](https://img.shields.io/badge/Python-3.11-blue)
 * JWT Authentication
 * Pydantic
 
 ### Database
 
-* PostgreSQL
+* ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue)
 
 ### Machine Learning
 
