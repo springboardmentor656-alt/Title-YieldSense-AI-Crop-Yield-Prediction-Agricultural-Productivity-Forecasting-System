@@ -1,114 +1,63 @@
-# YieldSense AI – Project Objectives
+# Project Objectives — YieldSense AI
 
-## Project Title
+## 1. Problem Statement
 
-**YieldSense AI: Crop Yield Prediction & Agricultural Productivity Forecasting System**
+Smallholder and commercial farmers across India face significant uncertainty in predicting crop yield due to variable weather, soil conditions, pest pressure, and inconsistent access to agronomic data. Existing decision-support tools are fragmented, not localized to Indian agro-climatic zones, and rarely combine historical yield data with real-time environmental signals. This leads to suboptimal input planning (seed, fertilizer, irrigation), poor risk mitigation, and reduced farm profitability.
 
----
+**YieldSense AI** aims to close this gap by providing a unified, data-driven platform that forecasts crop yield and agricultural productivity using historical, environmental, and soil data — surfaced through an accessible web interface for farmers, cooperatives, agribusinesses, and government officers.
 
-## Project Vision
+## 2. Vision
 
-YieldSense AI aims to empower farmers, agribusiness organizations, cooperatives, and government agencies with intelligent, data-driven insights for improving agricultural productivity, crop planning, and sustainable farming practices through Artificial Intelligence and Machine Learning.
+To become a trusted, farmer-first decision-support system that turns fragmented agricultural data into actionable, localized yield predictions and productivity recommendations.
 
-The platform integrates historical agricultural datasets, weather information, soil characteristics, and predictive analytics to estimate crop yields and provide actionable recommendations.
+## 3. Core Objectives
 
----
+| # | Objective | Description |
+|---|-----------|--------------|
+| O1 | **Accurate Yield Forecasting** | Predict crop yield (tons/hectare) using historical production data, weather, and soil parameters. |
+| O2 | **User-Centric Onboarding** | Capture user role, location, and crop preferences to personalize predictions from the first session. |
+| O3 | **Multi-Stakeholder Support** | Serve Farmers, Cooperative Members, Agribusinesses, and Government Officers with role-appropriate views. |
+| O4 | **Data Integration Layer** | Aggregate and normalize datasets from FAOSTAT, USDA, and Kaggle agricultural sources. |
+| O5 | **Scalable ML Pipeline** | Build a preprocessing and feature-engineering pipeline reusable across Scikit-Learn, XGBoost, and TensorFlow models. |
+| O6 | **Actionable Analytics** | Provide dashboards and visualizations (Chart.js/Recharts) that translate predictions into farming decisions. |
+| O7 | **Secure, Role-Based Access** | Implement authentication and RBAC so data and features are scoped correctly per user type. |
+| O8 | **Extensibility for Future Modules** | Architect the system so Weather Analysis, Soil Analysis, Recommendation Engine, and Risk Assessment modules can be added without rework. |
 
-## Problem Background
+## 4. Milestone-1 Scope
 
-Agriculture remains highly dependent on environmental conditions, making crop production vulnerable to:
+Milestone-1 focuses on **foundation**, not full ML delivery:
 
-* Unpredictable weather patterns
-* Soil degradation
-* Inefficient resource utilization
-* Lack of data-driven decision-making
-* Limited access to modern technological solutions
+- Repository and documentation scaffolding
+- System architecture and database design
+- UI/UX wireframes and design system
+- Backend and frontend project initialization
+- Authentication + combined onboarding (account + farm profile creation) across all 5 roles
+- Agricultural dataset sourcing plan
+- Data preprocessing pipeline (raw → processed)
 
-Traditional farming methods often rely on experience rather than analytical insights, leading to reduced productivity and increased risks.
+Model training, weather API integration, and the recommendation engine are explicitly **out of scope** for Milestone-1 and are deferred to later milestones (see `README.md` → Future Roadmap).
 
-YieldSense AI addresses these challenges by delivering intelligent forecasting capabilities that support informed agricultural decisions.
+## 5. Success Criteria for Milestone-1
 
----
+- [x] Repository structure matches architecture defined in `system-architecture.md`
+- [x] Backend boots (`uvicorn main:app`) with a working `/health` endpoint
+- [x] Frontend boots (`npm run dev`) and renders the onboarding flow
+- [x] Onboarding endpoint creates the account, farm profile, and issues a valid JWT in one call; RBAC enforced on protected routes
+- [x] `preprocess.py` runs end-to-end on a sample raw CSV and outputs a cleaned dataset to `backend/data/processed/`
+- [x] All documentation in `docs/` is complete and internally consistent
 
-## Primary Objectives
+## 6. Target Users
 
-### 1. Develop an AI-Based Crop Yield Prediction System
+1. **Farmer** — primary user; wants a simple yield estimate for their crop and land.
+2. **Cooperative Member** — manages data for multiple farmer members.
+3. **Agribusiness** — needs aggregated regional yield trends for supply planning.
+4. **Government Officer** — needs district/state-level productivity analytics for policy planning.
 
-Build machine learning models capable of predicting crop yields using:
+(A 5th role, **Admin**, exists for internal platform operations and is not exposed in the public onboarding flow.)
 
-* Historical crop production data
-* Weather information
-* Soil characteristics
-* Agricultural practices
-* Regional farming trends
+## 7. Non-Goals (Milestone-1)
 
----
-
-### 2. Improve Agricultural Productivity
-
-Provide farmers with actionable insights regarding:
-
-* Suitable crop selection
-* Productivity enhancement strategies
-* Risk reduction measures
-* Efficient resource allocation
-
----
-
-### 3. Enable Smart Decision Making
-
-Support stakeholders including:
-
-* Farmers
-* Cooperative societies
-* Agribusiness companies
-* Government departments
-
-through data-driven recommendations and analytics dashboards.
-
----
-
-### 4. Integrate Multiple Agricultural Data Sources
-
-The system will combine information from:
-
-* FAOSTAT datasets
-* USDA agricultural databases
-* Kaggle agricultural datasets
-* Weather APIs
-* Soil datasets
-* User-generated farm information
-
----
-
-### 5. Support Future Intelligent Features
-
-The architecture is designed to support future modules including:
-
-* User Management
-* Weather Analysis
-* Soil Analysis
-* Recommendation Engines
-* Risk Assessment Systems
-* Analytics Dashboards
-* Advanced Machine Learning Models
-* Cloud Deployment on AWS and Azure
-
----
-
-## Expected Outcomes
-
-The project aims to deliver:
-
-* Improved crop productivity
-* Reduced farming risks
-* Better agricultural planning
-* Enhanced decision-making capabilities
-* Sustainable farming practices
-* Data-driven agricultural ecosystems
-
----
-
-## Long-Term Vision
-
-YieldSense AI seeks to become a comprehensive Smart Agriculture Platform that integrates Artificial Intelligence, Big Data, and Predictive Analytics to transform traditional farming into intelligent, sustainable, and profitable agricultural operations.
+- No production deployment (Docker/AWS/Azure is a future milestone)
+- No trained ML model in the repo yet — only the pipeline that will feed one
+- No mobile app (web-first, responsive design only)
+- No persistent database wiring yet — auth/onboarding use an in-memory store as a stand-in (see `system-architecture.md` §8)
