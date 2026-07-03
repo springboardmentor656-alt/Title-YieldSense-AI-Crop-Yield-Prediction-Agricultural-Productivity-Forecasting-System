@@ -1,0 +1,219 @@
+# Agricultural Workflow
+
+## User Onboarding Workflow
+
+```text
+Welcome to YieldSense AI 🌾
+
+Step 1:
+Who are you?
+
+☑ Farmer
+☐ Cooperative Member
+☐ Agribusiness
+☐ Government Officer
+
+↓
+
+Step 2:
+Where is your farm?
+
+State:
+District:
+
+↓
+
+Step 3:
+What crops do you grow?
+
+☑ Rice
+☐ Cotton
+☐ Wheat
+☐ Maize
+
+↓
+
+[ Start My Smart Farming Journey 🚜 ]
+```
+
+---
+
+# Overall Agricultural Workflow
+
+```text
+User Registration
+        │
+        ▼
+Role Selection
+(Farmer/Admin)
+        │
+        ▼
+Farm Information Collection
+(State, District, Land Size)
+        │
+        ▼
+Crop Information Input
+(Crop Type, Season, Practices)
+        │
+        ▼
+Weather Data Collection
+(API Integration)
+        │
+        ▼
+Soil Data Analysis
+(Soil Quality Parameters)
+        │
+        ▼
+Historical Dataset Processing
+(FAOSTAT, USDA, Kaggle)
+        │
+        ▼
+Machine Learning Models
+(Scikit-Learn, XGBoost, TensorFlow)
+        │
+        ▼
+Crop Yield Prediction
+        │
+        ▼
+Recommendations & Insights
+        │
+        ▼
+Analytics Dashboard
+        │
+        ▼
+Risk Assessment Reports
+```
+
+---
+
+# Data Flow Diagram (Level 0)
+
+```text
+                +-------------------+
+                |      Farmer       |
+                +-------------------+
+                          │
+                          ▼
+               +----------------------+
+               |    YieldSense AI     |
+               +----------------------+
+                  │      │       │
+                  │      │       │
+                  ▼      ▼       ▼
+
+          Weather   Soil Data   Historical
+            APIs                Datasets
+
+                  │
+                  ▼
+
+          Machine Learning Engine
+
+                  │
+                  ▼
+
+          Yield Predictions
+
+                  │
+                  ▼
+
+       Recommendations & Analytics
+```
+
+---
+
+# Data Flow Diagram (Level 1)
+
+```text
+User
+ │
+ ▼
+User Authentication
+ │
+ ▼
+Farm Data Collection
+ │
+ ▼
+Data Validation
+ │
+ ▼
+Data Storage
+(Database)
+ │
+ ▼
+Preprocessing Pipeline
+ │
+ ▼
+Feature Engineering
+ │
+ ▼
+Machine Learning Models
+ │
+ ▼
+Prediction Engine
+ │
+ ▼
+Visualization Dashboard
+ │
+ ▼
+Decision Support System
+```
+
+---
+
+# Future Agricultural Workflow
+
+The platform architecture supports future enhancements including:
+
+## Weather Analysis Module
+
+Functions:
+
+* Rainfall forecasting
+* Temperature analysis
+* Climate risk monitoring
+* Seasonal recommendations
+
+---
+
+## Soil Analysis Module
+
+Functions:
+
+* Soil nutrient assessment
+* pH analysis
+* Fertility recommendations
+* Crop suitability evaluation
+
+---
+
+## Recommendation Engine
+
+Functions:
+
+* Best crop recommendations
+* Irrigation guidance
+* Fertilizer suggestions
+* Risk mitigation strategies
+
+---
+
+## Risk Assessment Module
+
+Functions:
+
+* Drought risk prediction
+* Flood impact estimation
+* Pest outbreak forecasting
+* Economic risk evaluation
+
+---
+
+## Analytics Dashboard
+
+Functions:
+
+* Production trends
+* Regional comparisons
+* Historical analytics
+* Interactive visualizations
