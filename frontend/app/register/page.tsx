@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Register() {
-
+  const router = useRouter();
   const [email,setEmail] = useState("");
   const [password,setPassword] = useState("");
   const [show,setShow] = useState(false);
@@ -11,34 +12,33 @@ export default function Register() {
 
   const registerUser = async () => {
 
-  try {
-
-  const res = await fetch(
-      "http://127.0.0.1:8000/register/",{
-        method: "POST",
-
-        headers: {
-          "Content-Type": "application/json",
-        },
-
-        body: JSON.stringify({
-          email: email,
-          password: password,
-        }),
-      }
-    );
+  const response = await fetch(
+    "http://127.0.0.1:8000/register",
+    {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        email:email,
+        password:password
+      })
+    }
+  );
 
 
-    const data = await res.json();
+  const data = await response.json();
+
+
+  if(response.ok){
 
     alert(data.message);
+    router.push("/login");
 
+  }
+  else{
 
-  } catch (error) {
-
-    console.log("REAL ERROR:", error);
-
-    alert("Frontend cannot reach backend");
+    alert(data.detail);
 
   }
 

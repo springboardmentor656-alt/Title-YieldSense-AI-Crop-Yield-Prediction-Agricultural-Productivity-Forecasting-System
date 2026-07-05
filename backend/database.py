@@ -1,13 +1,14 @@
-from sqlalchemy import create_engine
+import psycopg2
 
-DATABASE_URL = "postgresql://postgres:Lovely%40123@localhost:5432/yieldsense_db"
 
-engine = create_engine(DATABASE_URL)
+def get_conn():
 
-try:
-    connection = engine.connect()
-    print("Database connected successfully")
-    connection.close()
+    conn = psycopg2.connect(
+        host="localhost",
+        database="yieldsense_db",
+        user="postgres",
+        password="Lovely@123",
+        port="5432"
+    )
 
-except Exception as e:
-    print("Database connection failed", e)
+    return conn
