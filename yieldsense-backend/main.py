@@ -1,21 +1,22 @@
 from fastapi import FastAPI
-from routes.auth import router as auth_router
+from fastapi.middleware.cors import CORSMiddleware
+from routes.auth import router
 
-app = FastAPI(title="YieldSense AI Core")
+app = FastAPI(
+    title="YieldSense AI Core"
+)
 
-app.include_router(auth_router)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(router)
 
 
 @app.get("/")
 def home():
-    return {
-        "message": "Welcome to YieldSense AI Backend!"
-    }
-
-
-@app.get("/api/v1/health")
-def health_check():
-    return {
-        "status": "healthy",
-        "service": "YieldSense Engine Core"
-    }
+    return {"message": "Welcome to YieldSense AI Backend!"}
