@@ -1,39 +1,23 @@
-import Link from "next/link";
-
-export default function Home() {
+export default function Dashboard() {
   return (
-    <div className="min-h-screen bg-green-100 flex flex-col items-center justify-center">
-
-      <h1 className="text-5xl font-bold text-green-700 mb-4">
-        YieldSense AI
+    <div className="min-h-screen bg-purple-100 flex flex-col items-center justify-center">
+      <h1 className="text-5xl font-bold text-purple-700 mb-6">
+        Dashboard
       </h1>
 
-      <p className="text-gray-700 mb-10 text-xl">
-        AI-Powered Crop Yield Prediction System
-      </p>
+      <div className="bg-white p-8 rounded-2xl shadow-lg w-96">
+        <p className="text-lg mb-4">
+          🌾 Total Farms: 25
+        </p>
 
-      <div className="flex flex-col gap-4 w-80">
+        <p className="text-lg mb-4">
+          📈 Average Yield: 4.8 Tons/Hectare
+        </p>
 
-        <Link href="/login">
-          <button className="w-full bg-green-600 text-white py-3 rounded-xl hover:bg-green-700">
-            Login Page
-          </button>
-        </Link>
-
-        <Link href="/farm-profile">
-          <button className="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700">
-            Farm Profile
-          </button>
-        </Link>
-
-        <Link href="/dashboard">
-          <button className="w-full bg-purple-600 text-white py-3 rounded-xl hover:bg-purple-700">
-            Dashboard
-          </button>
-        </Link>
-
+        <p className="text-lg">
+          🤖 AI Prediction Accuracy: 92%
+        </p>
       </div>
-
     </div>
   );
 }
