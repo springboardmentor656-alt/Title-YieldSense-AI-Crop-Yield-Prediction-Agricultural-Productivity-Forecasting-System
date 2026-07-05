@@ -1,0 +1,12 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Next.js
+yieldsense-frontend/node_modules/
+yieldsense-frontend/.next/
+
+# OS files
+.DS_Store
+Thumbs.db
