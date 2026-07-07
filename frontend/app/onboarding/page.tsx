@@ -3,6 +3,7 @@
 
 "use client";
 
+import { ALL_STATES_AND_UTS, DISTRICTS_BY_STATE } from "../../data/indiaLocations";
 import { useRouter } from "next/navigation";
 import { useOnboarding } from "../../hooks/useOnboarding";
 
@@ -77,29 +78,40 @@ export default function OnboardingPage() {
         )}
 
         {step === 2 && (
-          <section className="stepBody" key="step2">
-            <h2 className="stepTitle">Where is your farm?</h2>
-            <p className="stepSubtitle">We'll localize predictions to your region.</p>
-            <div className="field">
-              <label className="fieldLabel">State</label>
-              <input
-                className="input"
-                placeholder="e.g. Telangana"
-                value={data.state}
-                onChange={(e) => setLocation(e.target.value, data.district)}
-              />
-            </div>
-            <div className="field">
-              <label className="fieldLabel">District</label>
-              <input
-                className="input"
-                placeholder="e.g. Krishna"
-                value={data.district}
-                onChange={(e) => setLocation(data.state, e.target.value)}
-              />
-            </div>
-          </section>
-        )}
+  <section className="stepBody" key="step2">
+    <h2 className="stepTitle">Where is your farm?</h2>
+    <p className="stepSubtitle">We'll localize predictions to your region.</p>
+    <div className="field">
+      <label className="fieldLabel">State</label>
+      <select
+        className="input"
+        value={data.state}
+        onChange={(e) => setLocation(e.target.value, "")}
+      >
+        <option value="" disabled>Select a state</option>
+        {ALL_STATES_AND_UTS.map((state) => (
+          <option key={state} value={state}>{state}</option>
+        ))}
+      </select>
+    </div>
+    <div className="field">
+      <label className="fieldLabel">District</label>
+      <select
+        className="input"
+        value={data.district}
+        onChange={(e) => setLocation(data.state, e.target.value)}
+        disabled={!data.state}
+      >
+        <option value="" disabled>
+          {data.state ? "Select a district" : "Select a state first"}
+        </option>
+        {(DISTRICTS_BY_STATE[data.state] ?? []).map((district) => (
+          <option key={district} value={district}>{district}</option>
+        ))}
+      </select>
+    </div>
+  </section>
+)}
 
         {step === 3 && (
           <section className="stepBody" key="step3">
@@ -275,11 +287,32 @@ export default function OnboardingPage() {
           transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
         .input:focus {
-          outline: none;
-          border-color: #2e7d32;
-          box-shadow: 0 0 0 3px #e8f5e9;
-        }
+  outline: none;
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 3px #e8f5e9;
+}
 
+select.input 
+{
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235F6368' stroke-width='1.5' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.9rem center;
+  padding-right: 2.5rem;
+  cursor: pointer;
+}
+select.input:disabled 
+{
+  background-color: #ececec;
+  cursor: not-allowed;
+  color: #999;
+}
+
+.chipRow {
+  ...
+
+.chipRow {
+  ...
         .chipRow {
           display: flex;
           flex-wrap: wrap;
