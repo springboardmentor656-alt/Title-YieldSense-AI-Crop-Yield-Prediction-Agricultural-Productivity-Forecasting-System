@@ -3,68 +3,97 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+
 export default function Register() {
+
   const router = useRouter();
+
   const [email,setEmail] = useState("");
   const [password,setPassword] = useState("");
   const [show,setShow] = useState(false);
 
 
+
   const registerUser = async () => {
 
-  const response = await fetch(
-    "http://127.0.0.1:8000/register",
-    {
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify({
-        email:email,
-        password:password
-      })
+
+    const response = await fetch(
+      "http://127.0.0.1:8000/register",
+      {
+        method:"POST",
+
+        headers:{
+          "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+          email:email,
+          password:password
+        })
+
+      }
+    );
+
+
+
+    const data = await response.json();
+
+
+
+    if(response.ok){
+
+      alert(data.message);
+
+      router.push("/login");
+
     }
-  );
+
+    else{
+
+      alert(data.detail);
+
+    }
 
 
-  const data = await response.json();
+  };
 
-
-  if(response.ok){
-
-    alert(data.message);
-    router.push("/login");
-
-  }
-  else{
-
-    alert(data.detail);
-
-  }
-
-};
-
-
-
+  
   return (
 
-    <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-black via-green-950 to-green-800">
+    <div className="
+    min-h-screen 
+    flex 
+    justify-center 
+    items-center 
+    bg-gradient-to-br 
+    from-black 
+    via-green-950 
+    to-green-800
+    ">
 
 
-      <div className="bg-white/10 backdrop-blur-md p-10 rounded-2xl w-96 text-white shadow-2xl">
-
+      <div className="
+      bg-white/10 
+      backdrop-blur-md 
+      p-10 
+      rounded-2xl 
+      w-96 
+      text-white 
+      shadow-2xl
+      ">
 
         <h1 className="text-3xl font-bold text-center">
+
           🌱 YieldSense AI
+
         </h1>
 
 
         <p className="text-center text-green-200 mt-2 mb-8">
+
           Farmer Registration
+
         </p>
-
-
-
 
         <input
 
@@ -86,72 +115,53 @@ export default function Register() {
 
         />
 
-
-
-
-
-        
         <div className="relative">
 
-  <input
 
-    className="
-    w-full
-    p-3
-    rounded-lg
-    bg-white
-    text-black
-    outline-none
-    pr-14
-    "
+        <input
 
-    placeholder="Enter Password"
+        className="
+        w-full
+        p-3
+        rounded-lg
+        bg-white
+        text-black
+        outline-none
+        pr-14
+        "
 
-    type={show ? "text":"password"}
+        placeholder="Enter Password"
 
-    value={password}
+        type={show ? "text":"password"}
 
-    onChange={(e)=>setPassword(e.target.value)}
+        value={password}
 
-  />
+        onChange={(e)=>setPassword(e.target.value)}
 
+        />
 
-  <button
+        <button
 
-    type="button"
+        type="button"
 
-    onClick={()=>setShow(!show)}
+        onClick={()=>setShow(!show)}
 
-    className="
-    absolute
-    right-4
-    top-1/2
-    -translate-y-1/2
-    text-black
-    text-lg
-    z-10
-    "
+        className="
+        absolute
+        right-4
+        top-1/2
+        -translate-y-1/2
+        text-black
+        text-lg
+        "
 
-  >
-
-    {show ? "🔒" : "👁️"}
-
-  </button>
-
-
-</div>
-        <p 
-        onClick={()=>alert("Password reset feature coming soon")}
-        className="text-sm text-green-300 mt-3 cursor-pointer hover:underline"
         >
 
-        Forgot Password?
+        {show ? "🔒":"👁️"}
 
-        </p>
+        </button>
 
-
-
-
+        </div>
 
         <button
 
@@ -174,11 +184,40 @@ export default function Register() {
         </button>
 
 
+
+
+        <p className="text-center mt-5 text-green-200">
+
+        Already have an account?
+
+        <span
+
+        onClick={()=>router.push("/login")}
+
+        className="
+        text-green-400 
+        cursor-pointer 
+        ml-2 
+        hover:underline
+        "
+
+        >
+
+        Login
+
+        </span>
+
+
+        </p>
+
+
+
+
       </div>
 
 
     </div>
 
-  )
+  );
 
 }

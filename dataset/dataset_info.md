@@ -1,30 +1,41 @@
 # Dataset Information
 
-Dataset Source:
-Kaggle Crop Yield Dataset
+Dataset Name:
+Crop Yield Prediction Dataset
 
-Purpose:
-Used for agricultural productivity forecasting.
 
-Input Features:
+Source:
+Kaggle
 
-- Crop Type
-- Location
-- Temperature
+
+Raw Dataset:
+
+dataset/raw/yield_df.csv
+
+
+Processed Dataset:
+
+dataset/processed/cleaned_crop_yield.csv
+
+
+Preprocessing Completed:
+
+- Loaded dataset using Pandas
+- Checked missing values
+- Removed duplicate data
+- Generated cleaned dataset
+
+
+Features:
+
+- Crop
+- Year
+- Area
 - Rainfall
-- Soil Information
-- Previous Yield Data
+- Pesticides
+- Temperature
 
 
-Output:
+Target:
 
-Predicted Crop Yield (kg/hectare)
-
-
-Data Processing:
-
-Python Pandas will be used for:
-
-- Cleaning missing values
-- Feature selection
-- Preparing data for Machine Learning model
+Crop Yield
