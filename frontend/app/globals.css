@@ -1,0 +1,33 @@
+@import "tailwindcss";
+/* If your project uses Tailwind v3 instead, keep your existing
+   @tailwind base; @tailwind components; @tailwind utilities;
+   lines and just add the :root block below under them. */
+
+:root {
+  --color-bg: #f5f6f2;
+  --color-surface: #ffffff;
+  --color-ink: #1e2420;
+  --color-ink-soft: #5b6660;
+  --color-primary: #1f5f45;
+  --color-primary-dark: #163f2f;
+  --color-gold: #c68a2e;
+  --color-sky: #3d7ea6;
+  --color-soil: #8b5e3c;
+  --color-border: #e3e1d8;
+  --color-danger: #c1443b;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-display), sans-serif;
+}
+
+.font-mono-num {
+  font-family: var(--font-mono), monospace;
+  font-variant-numeric: tabular-nums;
+}
