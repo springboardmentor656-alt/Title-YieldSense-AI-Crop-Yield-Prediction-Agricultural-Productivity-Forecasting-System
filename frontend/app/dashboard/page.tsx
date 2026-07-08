@@ -3,6 +3,8 @@
 
 "use client";
 
+
+import Navbar from "../../components/Navbar";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -47,7 +49,9 @@ export default function DashboardPage() {
 
   const firstName = profile?.fullName?.split(" ")[0] ?? "there";
 
-  return (
+  return(
+  <>
+    <Navbar />
     <main className="page">
       <section className="header">
         <div>
@@ -156,5 +160,6 @@ export default function DashboardPage() {
         }
       `}</style>
     </main>
-  );
+  </>
+);
 }

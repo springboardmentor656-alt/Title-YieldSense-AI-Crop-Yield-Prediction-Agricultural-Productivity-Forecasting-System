@@ -10,11 +10,13 @@ const initialState: OnboardingData = {
   role: "Farmer", state: "", district: "", crops: [], fullName: "", email: "", password: "",
 };
 
-export function useOnboarding() {
+export function useOnboarding() 
+{
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [data, setData] = useState<OnboardingData>(initialState);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isDuplicateEmail, setIsDuplicateEmail] = useState(false);
 
   const setRole = (role: OnboardingRole) => setData((prev) => ({ ...prev, role }));
   const setLocation = (state: string, district: string) => setData((prev) => ({ ...prev, state, district }));
@@ -40,6 +42,7 @@ export function useOnboarding() {
   const submit = async (): Promise<OnboardingResponse> => {
     setSubmitting(true);
     setSubmitError(null);
+    setIsDuplicateEmail(false);
     try {
       return await onboardingService.submit({
         full_name: data.fullName,
@@ -51,6 +54,8 @@ export function useOnboarding() {
         crops: data.crops,
       });
     } catch (err) {
+      const status = (err as { status?: number })?.status;
+      setIsDuplicateEmail(status === 409);
       setSubmitError(err instanceof Error ? err.message : "Onboarding failed.");
       throw err;
     } finally {
@@ -58,5 +63,8 @@ export function useOnboarding() {
     }
   };
 
-  return { step, data, setRole, setLocation, toggleCrop, setAccountField, nextStep, prevStep, isStepValid, submit, submitting, submitError };
+  return {
+    step, data, setRole, setLocation, toggleCrop, setAccountField,
+    nextStep, prevStep, isStepValid, submit, submitting, submitError, isDuplicateEmail,
+  };
 }

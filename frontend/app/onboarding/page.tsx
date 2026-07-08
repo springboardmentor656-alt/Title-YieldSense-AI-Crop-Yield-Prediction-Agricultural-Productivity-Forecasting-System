@@ -3,9 +3,10 @@
 
 "use client";
 
-import { ALL_STATES_AND_UTS, DISTRICTS_BY_STATE } from "../../data/indiaLocations";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useOnboarding } from "../../hooks/useOnboarding";
+import { ALL_STATES_AND_UTS, DISTRICTS_BY_STATE } from "../../data/indiaLocations";
 
 const ROLES = [
   { label: "Farmer", icon: "🧑‍🌾" },
@@ -21,8 +22,17 @@ const CROPS = [
   { label: "Maize", icon: "🌽" },
 ] as const;
 
+function getFieldError(field: "fullName" | "email" | "password", value: string): string | null {
+  if (!value) return null;
+  if (field === "fullName" && value.trim().length < 2) return "Enter your full name.";
+  if (field === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return "Enter a valid email address.";
+  if (field === "password" && value.length < 8) return "Password must be at least 8 characters.";
+  return null;
+}
+
 export default function OnboardingPage() {
   const router = useRouter();
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
   const {
     step, data, setRole, setLocation, toggleCrop, setAccountField,
     nextStep, prevStep, isStepValid, submit, submitting, submitError,
@@ -78,40 +88,40 @@ export default function OnboardingPage() {
         )}
 
         {step === 2 && (
-  <section className="stepBody" key="step2">
-    <h2 className="stepTitle">Where is your farm?</h2>
-    <p className="stepSubtitle">We'll localize predictions to your region.</p>
-    <div className="field">
-      <label className="fieldLabel">State</label>
-      <select
-        className="input"
-        value={data.state}
-        onChange={(e) => setLocation(e.target.value, "")}
-      >
-        <option value="" disabled>Select a state</option>
-        {ALL_STATES_AND_UTS.map((state) => (
-          <option key={state} value={state}>{state}</option>
-        ))}
-      </select>
-    </div>
-    <div className="field">
-      <label className="fieldLabel">District</label>
-      <select
-        className="input"
-        value={data.district}
-        onChange={(e) => setLocation(data.state, e.target.value)}
-        disabled={!data.state}
-      >
-        <option value="" disabled>
-          {data.state ? "Select a district" : "Select a state first"}
-        </option>
-        {(DISTRICTS_BY_STATE[data.state] ?? []).map((district) => (
-          <option key={district} value={district}>{district}</option>
-        ))}
-      </select>
-    </div>
-  </section>
-)}
+          <section className="stepBody" key="step2">
+            <h2 className="stepTitle">Where is your farm?</h2>
+            <p className="stepSubtitle">We'll localize predictions to your region.</p>
+            <div className="field">
+              <label className="fieldLabel">State</label>
+              <select
+                className="input"
+                value={data.state}
+                onChange={(e) => setLocation(e.target.value, "")}
+              >
+                <option value="" disabled>Select a state</option>
+                {ALL_STATES_AND_UTS.map((state) => (
+                  <option key={state} value={state}>{state}</option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label className="fieldLabel">District</label>
+              <select
+                className="input"
+                value={data.district}
+                onChange={(e) => setLocation(data.state, e.target.value)}
+                disabled={!data.state}
+              >
+                <option value="" disabled>
+                  {data.state ? "Select a district" : "Select a state first"}
+                </option>
+                {(DISTRICTS_BY_STATE[data.state] ?? []).map((district) => (
+                  <option key={district} value={district}>{district}</option>
+                ))}
+              </select>
+            </div>
+          </section>
+        )}
 
         {step === 3 && (
           <section className="stepBody" key="step3">
@@ -131,14 +141,20 @@ export default function OnboardingPage() {
             </div>
 
             <h2 className="stepTitle" style={{ marginTop: "1.75rem" }}>Create your account</h2>
+
             <div className="field">
               <label className="fieldLabel">Full name</label>
               <input
                 className="input"
                 value={data.fullName}
                 onChange={(e) => setAccountField("fullName", e.target.value)}
+                onBlur={() => setTouched((t) => ({ ...t, fullName: true }))}
               />
             </div>
+            {touched.fullName && getFieldError("fullName", data.fullName) && (
+              <p className="fieldError">{getFieldError("fullName", data.fullName)}</p>
+            )}
+
             <div className="field">
               <label className="fieldLabel">Email</label>
               <input
@@ -146,8 +162,13 @@ export default function OnboardingPage() {
                 type="email"
                 value={data.email}
                 onChange={(e) => setAccountField("email", e.target.value)}
+                onBlur={() => setTouched((t) => ({ ...t, email: true }))}
               />
             </div>
+            {touched.email && getFieldError("email", data.email) && (
+              <p className="fieldError">{getFieldError("email", data.email)}</p>
+            )}
+
             <div className="field">
               <label className="fieldLabel">Password</label>
               <input
@@ -155,8 +176,12 @@ export default function OnboardingPage() {
                 type="password"
                 value={data.password}
                 onChange={(e) => setAccountField("password", e.target.value)}
+                onBlur={() => setTouched((t) => ({ ...t, password: true }))}
               />
             </div>
+            {touched.password && getFieldError("password", data.password) && (
+              <p className="fieldError">{getFieldError("password", data.password)}</p>
+            )}
 
             {submitError && <div className="errorBanner">{submitError}</div>}
           </section>
@@ -287,32 +312,31 @@ export default function OnboardingPage() {
           transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
         .input:focus {
-  outline: none;
-  border-color: #2e7d32;
-  box-shadow: 0 0 0 3px #e8f5e9;
-}
+          outline: none;
+          border-color: #2e7d32;
+          box-shadow: 0 0 0 3px #e8f5e9;
+        }
 
-select.input 
-{
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235F6368' stroke-width='1.5' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.9rem center;
-  padding-right: 2.5rem;
-  cursor: pointer;
-}
-select.input:disabled 
-{
-  background-color: #ececec;
-  cursor: not-allowed;
-  color: #999;
-}
+        select.input {
+          appearance: none;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235F6368' stroke-width='1.5' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 0.9rem center;
+          padding-right: 2.5rem;
+          cursor: pointer;
+        }
+        select.input:disabled {
+          background-color: #ececec;
+          cursor: not-allowed;
+          color: #999;
+        }
 
-.chipRow {
-  ...
+        .fieldError {
+          color: #c62828;
+          font-size: 0.8rem;
+          margin: -0.9rem 0 1rem;
+        }
 
-.chipRow {
-  ...
         .chipRow {
           display: flex;
           flex-wrap: wrap;

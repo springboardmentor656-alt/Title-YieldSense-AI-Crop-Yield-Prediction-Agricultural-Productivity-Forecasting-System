@@ -11,16 +11,20 @@ import type {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api/v1";
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+async function request<T>(path: string, options: RequestInit = {}): Promise<T> 
+{
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers: { "Content-Type": "application/json", ...options.headers },
     ...options,
   });
 
-  if (!response.ok) {
-    const errorBody = await response.json().catch(() => ({}));
-    throw new Error(errorBody.detail ?? `Request failed with status ${response.status}`);
-  }
+  if (!response.ok) 
+{
+  const errorBody = await response.json().catch(() => ({}));
+  const error = new Error(errorBody.detail ?? `Request failed with status ${response.status}`) as Error & { status?: number };
+  error.status = response.status;
+  throw error;
+}
 
   return response.json() as Promise<T>;
 }
