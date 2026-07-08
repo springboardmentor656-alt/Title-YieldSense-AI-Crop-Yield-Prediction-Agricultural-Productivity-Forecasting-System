@@ -39,10 +39,6 @@ It analyzes agricultural data such as crop details, soil parameters, weather fac
 
 ## 📂 Project Structure
 
-## 📂 Project Structure
-
-## 📂 Project Structure
-
 ```text
 YieldSense AI
 │
