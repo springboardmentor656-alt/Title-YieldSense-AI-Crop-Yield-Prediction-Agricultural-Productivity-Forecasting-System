@@ -1,14 +1,14 @@
 # 🌱 YieldSense AI - Crop Yield Prediction Agricultural Productivity Forecasting System
 
 
-# 📌 Overview  
+## 📌 Overview  
 
 YieldSense AI is an AI-powered agriculture platform that predicts crop yield using Machine Learning.
 
 It analyzes agricultural data such as crop details, soil parameters, weather factors, and historical data to provide productivity insights for farmers.
 
 
-# 🎯 Objectives
+## 🎯 Objectives
 
 - Predict crop yield using Machine Learning
 - Process agricultural datasets
@@ -17,33 +17,37 @@ It analyzes agricultural data such as crop details, soil parameters, weather fac
 - Display insights through dashboard
 
 
-# 🛠️ Tech Stack
+## 🛠️ Tech Stack
 
-# Frontend
+### Frontend
 - Next.js
 - React
 - Tailwind CSS
 
-# Backend
+### Backend
 - FastAPI
 - JWT Authentication
 
-# Database
+### Database
 - PostgreSQL
 
-# Machine Learning
+### Machine Learning
 - Python
 - Pandas
 - Scikit-Learn
 
 
-# 📂 Project Structure
+## 📂 Project Structure
 
+## 📂 Project Structure
+
+## 📂 Project Structure
+
+```text
 YieldSense AI
-
 │
 ├── backend
-│   ├── main.py
+│   ├── app.py
 │   ├── auth.py
 │   ├── auth_handler.py
 │   ├── database.py
@@ -59,15 +63,20 @@ YieldSense AI
 │   ├── raw
 │   └── processed
 │
-└── docs
-    ├── architecture.md
-    ├── workflow.md
-    ├── dataset_info.md
-    ├── ui_screens.md
-    └── setup.md
+├── docs
+│   ├── architecture.md
+│   ├── workflow.md
+│   ├── setup.md
+│   ├── dataset_info.md
+│   ├── schema.sql
+│   ├── project_requirements.md
+│   └── ui_screens.md
+│
+└── README.md
+```
 
 
-# 🔐 Authentication Module
+## 🔐 Authentication Module
 
 - User Registration
 - User Login
@@ -76,7 +85,7 @@ YieldSense AI
 - Role Based Access
 
 
-# ✨ Features
+## ✨ Features
 
 - Farmer/Admin Authentication
 - Farm Data Management
@@ -85,7 +94,7 @@ YieldSense AI
 - Analytics Dashboard
 
 
-# 🔄 Workflow
+## 🔄 Workflow
 
 1. User Login/Register  
 2. Enter agricultural information  
@@ -94,7 +103,7 @@ YieldSense AI
 5. Display results on dashboard  
 
 
-# 📌 Milestone 1 Completed
+## 📌 Milestone 1 Completed
 
 ✔ Project Setup  
 ✔ Frontend Development  
@@ -104,7 +113,7 @@ YieldSense AI
 ✔ Dataset Preparation  
 
 
-# 🚀 Future Scope
+## 🚀 Future Scope
 
 - Weather API Integration
 - Advanced Prediction Models

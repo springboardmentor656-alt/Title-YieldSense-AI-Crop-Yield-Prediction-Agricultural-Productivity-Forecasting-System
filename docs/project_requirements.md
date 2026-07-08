@@ -1,19 +1,19 @@
 # YieldSense AI - Project Requirements
 
 
-# Problem Statement
+## Problem Statement
 
 Traditional crop yield estimation is difficult because agricultural productivity depends on weather, soil, crop type and historical farming data.
 
 YieldSense AI uses Machine Learning to predict crop yield and provide data-driven agricultural insights.
 
 
-# Aim
+## Aim
 
 To develop an AI-based crop yield prediction system using FastAPI, Machine Learning and Next.js.
 
 
-# Objectives
+## Objectives
 
 - Build secure user authentication system
 - Collect and preprocess agricultural datasets
@@ -22,7 +22,7 @@ To develop an AI-based crop yield prediction system using FastAPI, Machine Learn
 - Provide yield insights and analytics
 
 
-# Technologies Used
+## Technologies Used
 
 Frontend:
 - Next.js
@@ -41,7 +41,7 @@ AI:
 - Machine Learning
 
 
-# Features
+## Features
 
 - Farmer/Admin Login
 - Farm Profile Management
@@ -50,6 +50,6 @@ AI:
 - Analytics Dashboard
 
 
-# Expected Outcome
+## Expected Outcome
 
 A smart agricultural platform that predicts crop productivity and helps farmers make better decisions.
