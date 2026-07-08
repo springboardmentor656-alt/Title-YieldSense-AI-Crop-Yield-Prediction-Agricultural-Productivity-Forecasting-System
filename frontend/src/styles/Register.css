@@ -4,63 +4,65 @@ body{
     font-family:Arial, sans-serif;
 
     background-image:url("../assets/YieldSense AI.png");
-    background-size:100% 100%;
-    background-position:top center;
+    background-size:cover;
+    background-position:center;
     background-repeat:no-repeat;
     background-attachment:fixed;
-    overflow:hidden;
 }
 
-.register-container{
+.farm-container{
     min-height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
+    padding:40px 20px;
     box-sizing:border-box;
-    padding-top:120px;
 }
 
-.register-card{
-    width:380px;
+.farm-card{
+    width:520px;
     background:rgba(255,255,255,0.95);
-    padding:18px 22px;
+    padding:30px;
     border-radius:20px;
-    text-align:center;
     box-shadow:0 10px 30px rgba(0,0,0,0.25);
-    margin-top:0px;
-
 }
 
-.register-card h1{
-    font-size:28px;
+.farm-card h1{
+    text-align:center;
     color:#2e7d32;
-    margin-top:0;
-    margin-bottom:10px;
+    margin:0;
+    font-size:36px;
 }
 
-.register-card label{
-    display:block;
-    text-align:left;
-    margin-top:10px;
-    margin-bottom:5px;
-    color:#1b5e20;
+.subtitle{
+    text-align:center;
+    color:#555;
+    margin:10px 0 25px;
     font-size:15px;
+}
+
+.farm-card label{
+    display:block;
+    color:#1b5e20;
+    font-size:16px;
     font-weight:600;
+    margin-top:12px;
+    margin-bottom:6px;
 }
 
 .input-box{
     position:relative;
     width:100%;
-    margin-bottom:10px;
+    margin-bottom:12px;
 }
 
 .input-box input{
     width:100%;
-    padding:9px 9px 9px 38px;
+    padding:12px 12px 12px 45px;
     border:2px solid #2e7d32;
     border-radius:10px;
-    font-size:15px;
     outline:none;
+    font-size:15px;
     box-sizing:border-box;
 }
 
@@ -78,32 +80,47 @@ body{
     font-size:18px;
 }
 
-.register-card button{
+.row{
+    display:flex;
+    gap:15px;
+}
+
+.column{
+    flex:1;
+}
+
+.farm-card button{
     width:100%;
-    padding:10px;
-    background:#0b5d1e;
-    color:white;
+    padding:14px;
+    margin-top:20px;
     border:none;
     border-radius:10px;
+    background:#0b5d1e;
+    color:white;
     font-size:18px;
     font-weight:bold;
     cursor:pointer;
-    margin-top:8px;
-    transition:0.3s;
+    transition:.3s;
 }
 
-.register-card button:hover{
+.farm-card button:hover{
     background:#0a4b19;
 }
 
-.register-card p{
-    margin-top:15px;
-    font-size:15px;
-    color:#444;
-}
+@media(max-width:768px){
 
-.register-card span{
-    color:#0b5d1e;
-    font-weight:bold;
-    cursor:pointer;
+    .farm-card{
+        width:100%;
+        padding:22px;
+    }
+
+    .row{
+        flex-direction:column;
+        gap:0;
+    }
+
+    .farm-card h1{
+        font-size:30px;
+    }
+
 }

@@ -1,10 +1,19 @@
+//import "./App.css";
+//import Register from "./pages/Register";
+
+//function App() {
+  //return (
+    //<Register />
+ // );
+//}
+
+//export default App;
+
 import "./App.css";
-import Register from "./pages/Register";
+import FarmOnboarding from "./pages/FarmOnboarding";
 
 function App() {
-  return (
-    <Register />
-  );
+  return <FarmOnboarding />;
 }
 
 export default App;

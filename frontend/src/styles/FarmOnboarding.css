@@ -1,0 +1,193 @@
+body{
+    margin:0;
+    padding:0;
+    font-family:Arial, sans-serif;
+
+    background-image:url("../assets/YieldSense AI.png");
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    background-attachment:fixed;
+
+    overflow:hidden;
+}
+
+/* Page */
+.farm-container{
+    width:100%;
+    height:112vh;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* Card */
+.farm-card{
+    width:470px;
+    height:67vh;
+
+    background:rgba(255,255,255,0.95);
+
+    border-radius:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.25);
+
+    display:flex;
+    flex-direction:column;
+
+    padding:20px;
+}
+
+/* Heading */
+.farm-card h1{
+    margin:0;
+    color:#2e7d32;
+    text-align:center;
+    font-size:38px;
+}
+
+/* Subtitle */
+.subtitle{
+    margin-top:8px;
+    margin-bottom:18px;
+
+    text-align:center;
+    color:#666;
+    font-size:16px;
+}
+
+/* Scroll Area */
+.form-content{
+    flex:1;
+    overflow-y:auto;
+    overflow-x:hidden;
+
+    padding-right:6px;
+}
+
+/* Scrollbar */
+
+.form-content::-webkit-scrollbar{
+    width:6px;
+}
+
+.form-content::-webkit-scrollbar-thumb{
+    background:#2e7d32;
+    border-radius:10px;
+}
+
+/* Labels */
+
+.farm-card label{
+    display:block;
+
+    margin-top:10px;
+    margin-bottom:5px;
+
+    color:#1b5e20;
+    font-size:15px;
+    font-weight:600;
+}
+
+/* Input */
+
+.input-box{
+    position:relative;
+    width:100%;
+    margin-bottom:8px;
+}
+
+.input-box input{
+    width:100%;
+
+    padding:12px 12px 12px 42px;
+
+    border:2px solid #2e7d32;
+    border-radius:10px;
+
+    outline:none;
+
+    font-size:15px;
+
+    box-sizing:border-box;
+}
+
+.input-box input:focus{
+    border-color:#1b5e20;
+    box-shadow:0 0 6px rgba(46,125,50,0.3);
+}
+
+/* Icons */
+
+.input-icon{
+    position:absolute;
+
+    left:15px;
+    top:50%;
+
+    transform:translateY(-50%);
+
+    color:#2e7d32;
+    font-size:18px;
+}
+
+/* Latitude Longitude */
+
+.row{
+    display:flex;
+    gap:15px;
+}
+
+.column{
+    flex:1;
+}
+
+/* Button */
+
+button{
+    width:100%;
+
+    padding:14px;
+
+    margin-top:15px;
+
+    background:#0b5d1e;
+    color:white;
+
+    border:none;
+    border-radius:10px;
+
+    font-size:18px;
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+    flex-shrink:0;
+}
+
+button:hover{
+    background:#084916;
+}
+
+/* Mobile */
+
+@media(max-width:600px){
+
+    .farm-card{
+        width:90%;
+        height:85vh;
+        padding:18px;
+    }
+
+    .row{
+        flex-direction:column;
+        gap:0;
+    }
+
+    .farm-card h1{
+        font-size:30px;
+    }
+
+}
