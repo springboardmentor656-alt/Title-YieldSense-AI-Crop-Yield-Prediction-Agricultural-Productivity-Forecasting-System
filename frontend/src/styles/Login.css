@@ -1,0 +1,103 @@
+body{
+    margin:0;
+    padding:0;
+    font-family:Arial, sans-serif;
+
+    background-image:url("../assets/YieldSense AI.png"); /* nee background image */
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    background-attachment:fixed;
+}
+
+.login-container{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+}
+
+.login-card{
+    width:430px;
+    background: rgba(255, 255, 255, 0.95);
+    padding:35px;
+    border-radius:20px;
+    text-align:center;
+    box-shadow:0 10px 30px rgba(0,0,0,0.25);
+    margin-top:60px;
+}
+
+.login-card h1{
+    font-size:50px;
+    color:#2e7d32;
+    margin-top:0;
+    margin-bottom:35px;
+}
+
+.login-card label{
+    display:block;
+    text-align:left;
+    margin-top:15px;
+    margin-bottom:8px;
+    color:#1b5e20;
+    font-size:17px;
+    font-weight:600;
+}
+
+/* Input Box */
+.input-box{
+    position: relative;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+/* Input Field */
+.input-box input{
+    width: 100%;
+    padding: 14px 14px 14px 45px;
+    border: 2px solid #2e7d32;
+    border-radius: 10px;
+    font-size: 16px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+/* Icons */
+.input-icon{
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #2e7d32;
+    font-size: 18px;
+}
+
+.login-card button{
+    width:100%;
+    padding:15px;
+    background:#0b5d1e;
+    color:white;
+    border:none;
+    border-radius:10px;
+    font-size:20px;
+    font-weight:bold;
+    cursor:pointer;
+    margin-top:10px;
+}
+
+.login-card button:hover{
+    background:#0a4b19;
+}
+
+.login-card p{
+    margin-top:22px;
+    font-size:16px;
+    color:#444;
+}
+
+.login-card span{
+    color:#0b5d1e;
+    font-weight:bold;
+    cursor:pointer;
+}
