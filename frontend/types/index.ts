@@ -1,4 +1,3 @@
-// Shared TypeScript types mirroring backend Pydantic schemas.
 // File: frontend/types/index.ts
 
 export type UserRole = "farmer" | "cooperative" | "agribusiness" | "government" | "admin";
@@ -9,7 +8,6 @@ export type OnboardingRole =
   | "Agribusiness"
   | "Government Officer";
 
-// Maps the display label shown in the UI to the backend role key.
 export const ROLE_KEY_MAP: Record<OnboardingRole, UserRole> = {
   "Farmer": "farmer",
   "Cooperative Member": "cooperative",
@@ -18,6 +16,8 @@ export const ROLE_KEY_MAP: Record<OnboardingRole, UserRole> = {
 };
 
 export type CropOption = "Rice" | "Cotton" | "Wheat" | "Maize";
+export type BusinessType = "Input Supplier" | "Crop Buyer" | "Processor" | "Other";
+export type JurisdictionLevel = "District" | "State" | "National";
 
 export interface RegisterRequest {
   full_name: string;
@@ -45,7 +45,10 @@ export interface OnboardingRequest {
   role: UserRole;
   state: string;
   district: string;
-  crops: CropOption[];
+  crops?: CropOption[];
+  organization_name?: string;
+  business_type?: BusinessType;
+  jurisdiction_level?: JurisdictionLevel;
 }
 
 export interface OnboardingResponse {
@@ -61,6 +64,9 @@ export interface OnboardingData {
   state: string;
   district: string;
   crops: CropOption[];
+  organizationName: string;
+  businessType: BusinessType | "";
+  jurisdictionLevel: JurisdictionLevel | "";
   fullName: string;
   email: string;
   password: string;
