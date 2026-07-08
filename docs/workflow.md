@@ -1,31 +1,27 @@
 # YieldSense AI Workflow
 
-1. Farmer registers/logs into the system.
+Step 1:
+User Registration/Login
 
-2. Farmer creates farm profile:
-   - Farm location
-   - Latitude and longitude
-   - Soil information
+Step 2:
+JWT Authentication Verification
 
-3. Backend receives farmer data using FastAPI.
+Step 3:
+Farmer enters farm details
 
-4. Weather API provides climate information.
+Step 4:
+System processes agricultural data
 
-5. Data combined:
-   - Crop details
-   - Soil parameters
-   - Weather data
+Step 5:
+Machine Learning model analyzes input
 
-6. Machine Learning model predicts:
-   - Expected crop yield
-   - Agricultural insights
+Step 6:
+Crop yield prediction generated
 
-Technology Flow:
+Step 7:
+Dashboard displays:
 
-Next.js Frontend
-        ↓
-FastAPI Backend
-        ↓
-PostgreSQL Database
-        ↓
-ML Prediction Model
+- Yield Results
+- Weather Insights
+- Farm Analytics
+- Reports

@@ -68,7 +68,7 @@ return(
 
 
 <p className="text-center text-green-200 mt-2 mb-8">
-Farmer Login
+Farmer / Admin Login
 </p>
 
 

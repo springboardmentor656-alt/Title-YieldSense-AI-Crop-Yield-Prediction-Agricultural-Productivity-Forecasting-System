@@ -1,73 +1,21 @@
-# YieldSense AI - UI Screens
+# YieldSense AI UI Screens
 
 
-## 1. Authentication Screen
+## Authentication
 
-Status: Completed
-
-Features:
-- Farmer Registration
-- Farmer Login
-- Password visibility option
-- JWT authentication
-- FastAPI backend integration
-- PostgreSQL user storage
+- Register Page
+- Login Page
 
 
-Workflow:
+## Farmer Screens
 
-User → Next.js Frontend → FastAPI Backend → PostgreSQL Database
-
-
---------------------------------------------------
+- Farm Profile
+- Prediction Dashboard
 
 
-## 2. Farm Profile Screen
+## Dashboard Features
 
-Status: Completed
-
-Features:
-- Farm name input
-- Latitude input
-- Longitude input
-- Soil pH input
-
-Purpose:
-Collect farmer land details for crop yield prediction.
-
-
---------------------------------------------------
-
-
-## 3. Dashboard Screen
-
-Status: Completed (Initial Version)
-
-Features:
-- Crop Yield Prediction section
-- Weather Insights section
-- Farm Analytics section
-
-Future Integration:
-- ML model prediction
-- Weather API
-- Recommendation system
-
-
---------------------------------------------------
-
-
-## Technology Stack
-
-Frontend:
-- Next.js
-- Tailwind CSS
-
-Backend:
-- FastAPI
-
-Database:
-- PostgreSQL
-
-Authentication:
-- JWT Token
+- Crop Yield Prediction Card
+- Weather Insights Card
+- Farm Analytics Card
+- Feature Importance Card

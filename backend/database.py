@@ -1,6 +1,6 @@
 import psycopg2
 
-
+# connects fastAPI with PostgreSQL
 def get_conn():
 
     conn = psycopg2.connect(

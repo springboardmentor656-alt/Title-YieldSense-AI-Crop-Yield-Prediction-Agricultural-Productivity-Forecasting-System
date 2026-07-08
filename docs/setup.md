@@ -1,6 +1,6 @@
 # Project Setup
 
-Backend:
+# Backend:
 
 Framework:
 FastAPI
@@ -22,7 +22,7 @@ Backend Running:
 http://127.0.0.1:8000/docs
 
 
-Frontend:
+# Frontend:
 
 Framework:
 Next.js
@@ -35,7 +35,7 @@ Frontend Running:
 http://localhost:3000
 
 
-Database:
+# Database:
 
 PostgreSQL
 Database Name:

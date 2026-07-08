@@ -2,11 +2,9 @@ from passlib.context import CryptContext
 from jose import jwt
 from datetime import datetime, timedelta
 
-
 # JWT Configuration
 SECRET_KEY = "yieldsense_secret_key"
 ALGORITHM = "HS256"
-
 
 # Password hashing
 pwd_context = CryptContext(
@@ -14,11 +12,9 @@ pwd_context = CryptContext(
     deprecated="auto"
 )
 
-
 # Convert normal password → hashed password
 def hash_password(password: str):
     return pwd_context.hash(password)
-
 
 # Check login password with database password
 def verify_password(plain_password: str, hashed_password: str):
@@ -26,7 +22,6 @@ def verify_password(plain_password: str, hashed_password: str):
         plain_password,
         hashed_password
     )
-
 
 # Generate JWT token after login
 def create_token(data: dict):
@@ -40,7 +35,6 @@ def create_token(data: dict):
             "exp": expire_time
         }
     )
-
 
     token = jwt.encode(
         user_data,

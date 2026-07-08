@@ -1,44 +1,54 @@
 # YieldSense AI Architecture
 
 
-Frontend Layer:
+# User Layer
 
-Next.js + TypeScript
+- Farmer
+- Admin
 
+# Frontend Layer
 
-Backend Layer:
+Technology:
+Next.js + React + Tailwind CSS
 
+Components:
+- Login Page
+- Registration Page
+- Farm Profile
+- Dashboard
+
+# Backend Layer
+
+Technology:
 FastAPI
 
+Modules:
+- Authentication APIs
+- JWT Security
+- Prediction APIs
 
-Authentication:
+# Database Layer
 
-JWT Authentication
-
-
-Database:
-
+Technology:
 PostgreSQL
 
+Stores:
+- User Details
+- Farmer Information
+- Authentication Data
 
-Machine Learning:
+# AI Layer
 
-Python ML Model
+Technology:
+Machine Learning
 
+Modules:
+- Dataset Processing
+- Model Training
+- Crop Yield Prediction
 
-External Services:
+# Output Layer
 
-Weather API
-
-
-Flow:
-
-Farmer
- ↓
-Frontend
- ↓
-FastAPI Backend
- ↓
-Database + ML Model
- ↓
-Crop Yield Prediction
+- Yield Prediction Results
+- Analytics Dashboard
+- Reports

@@ -1,15 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routes.auth import router
+from auth import router
 
-
+# main.py initializes FastAPI application and connects API routes
 app = FastAPI(
     title="YieldSense AI",
     description="Crop Yield Prediction System",
     version="1.0"
 )
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -25,9 +24,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 app.include_router(router)
-
 
 @app.get("/")
 def home():
@@ -42,11 +39,10 @@ def home():
 
     }
 
-
-
-@app.get("/health")
-def health():
-
+@app.get("/api/v1/health")
+def health_check():
+    
     return {
-        "status":"OK"
-    }
+        "status":"healthy",
+        "service":"YieldSense Engine Core"
+    }   
