@@ -1,0 +1,31 @@
+.recent-activity{
+     width:100%;
+    box-sizing:border-box;
+    
+    background:#fff;
+    margin-top:35px;
+    padding:30px;
+    border-radius:20px;
+    box-shadow:0 10px 25px rgba(0,0,0,.12);
+}
+
+.recent-activity h2{
+    color:#1b5e20;
+    margin-bottom:20px;
+}
+
+.recent-activity ul{
+    list-style:none;
+    padding:0;
+    margin:0;
+}
+
+.recent-activity li{
+    background:#f5fff5;
+    border-left:5px solid #2e7d32;
+    padding:15px;
+    margin-bottom:12px;
+    border-radius:10px;
+    font-size:16px;
+    color:#333;
+}

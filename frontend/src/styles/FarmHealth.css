@@ -1,0 +1,49 @@
+.farm-health{
+     width:100%;
+    box-sizing:border-box;
+
+    background:#fff;
+    margin-top:35px;
+    padding:35px;
+    border-radius:20px;
+    box-shadow:0 10px 25px rgba(0,0,0,.12);
+    text-align:center;
+}
+
+.farm-health h2{
+    color:#1b5e20;
+    margin-bottom:30px;
+}
+
+.progress-circle{
+    width:220px;
+    height:220px;
+    margin:auto;
+    border-radius:50%;
+    background:conic-gradient(#2e7d32 0deg 331deg,#ddd 331deg 360deg);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.inner-circle{
+    width:165px;
+    height:165px;
+    border-radius:50%;
+    background:white;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+}
+
+.inner-circle h1{
+    color:#2e7d32;
+    margin:0;
+    font-size:46px;
+}
+
+.inner-circle p{
+    color:#666;
+    font-size:18px;
+}

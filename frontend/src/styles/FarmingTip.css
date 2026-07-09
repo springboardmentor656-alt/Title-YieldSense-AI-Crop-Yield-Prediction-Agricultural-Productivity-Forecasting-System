@@ -1,0 +1,21 @@
+.farming-tip{
+    width:100%;
+    box-sizing:border-box;
+    
+    background:#fff;
+    margin-top:35px;
+    padding:30px;
+    border-radius:20px;
+    box-shadow:0 10px 25px rgba(0,0,0,.12);
+}
+
+.farming-tip h2{
+    color:#1b5e20;
+    margin-bottom:20px;
+}
+
+.farming-tip p{
+    color:#555;
+    font-size:17px;
+    line-height:1.7;
+}

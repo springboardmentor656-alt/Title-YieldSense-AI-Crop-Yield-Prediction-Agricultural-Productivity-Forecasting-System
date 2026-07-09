@@ -1,0 +1,55 @@
+.ai-card{
+    background:#fff;
+    margin-top:35px;
+    padding:30px;
+    border-radius:20px;
+    box-shadow:0 10px 25px rgba(0,0,0,.12);
+}
+
+.ai-card h2{
+    color:#1b5e20;
+    margin-bottom:25px;
+}
+
+.best-crop{
+    text-align:center;
+    padding:20px;
+    background:#f5fff5;
+    border-radius:15px;
+    margin-bottom:25px;
+}
+
+.best-crop h3{
+    margin:0;
+    color:#2e7d32;
+}
+
+.best-crop h1{
+    margin:10px 0;
+    color:#1b5e20;
+    font-size:42px;
+}
+
+.ai-info{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.info-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:#f8fff8;
+    padding:15px 18px;
+    border-radius:12px;
+    border-left:5px solid #2e7d32;
+}
+
+.info-row span{
+    color:#444;
+}
+
+.info-row strong{
+    color:#1b5e20;
+}

@@ -1,0 +1,111 @@
+.sidebar{
+    width:270px;
+    height:100vh;
+    background:#0d5d1e;
+    color:white;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+
+    position:fixed;
+    left:0;
+    top:0;
+}
+
+.sidebar-top{
+    text-align:center;
+    padding:30px 20px;
+}
+
+.logo{
+    width:110px;
+    height:110px;
+    border-radius:50%;
+    object-fit:cover;
+    background:white;
+    padding:8px;
+}
+
+.sidebar-top h2{
+    color:white;
+    margin-top:20px;
+    font-size:36px;
+}
+
+.menu{
+    list-style:none;
+    padding:0 25px;
+}
+
+.menu li{
+    display:flex;
+    align-items:center;
+    gap:15px;
+
+    padding:15px 18px;
+
+    margin-bottom:12px;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    font-size:20px;
+
+    transition:.3s;
+}
+
+.menu li:hover{
+    background:rgba(255,255,255,.15);
+}
+
+.menu li.active{
+    background:rgba(255,255,255,.25);
+}
+
+.sidebar-bottom{
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.profile-btn,
+.logout-btn{
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:10px;
+
+    border:none;
+    cursor:pointer;
+
+    border-radius:10px;
+
+    padding:14px;
+
+    font-size:18px;
+    font-weight:bold;
+
+    transition:.3s;
+}
+
+.profile-btn{
+    background:white;
+    color:#0d5d1e;
+}
+
+.logout-btn{
+    background:#d32f2f;
+    color:white;
+}
+
+.profile-btn:hover{
+    background:#eeeeee;
+}
+
+.logout-btn:hover{
+    background:#b71c1c;
+}

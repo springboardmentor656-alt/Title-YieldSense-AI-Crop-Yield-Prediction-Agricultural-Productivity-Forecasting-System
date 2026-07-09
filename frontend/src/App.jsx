@@ -9,11 +9,20 @@
 
 //export default App;
 
+//import "./App.css";
+//import FarmOnboarding from "./pages/FarmOnboarding";
+
+//function App() {
+  //return <FarmOnboarding />;
+//}
+
+//export default App;
+
 import "./App.css";
-import FarmOnboarding from "./pages/FarmOnboarding";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
-  return <FarmOnboarding />;
+  return <Dashboard />;
 }
 
 export default App;
