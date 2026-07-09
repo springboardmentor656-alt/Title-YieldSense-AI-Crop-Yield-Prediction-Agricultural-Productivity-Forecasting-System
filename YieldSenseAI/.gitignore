@@ -1,0 +1,21 @@
+# Byte-compiled / optimized / DLL files
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+.venv
+venv/
+ENV/
+env/
+
+# Databases
+*.db
+*.sqlite
+
+# Next.js build and dependencies
+**/node_modules/
+**/.next/
+out/
+build/
+.env*

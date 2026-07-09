@@ -1,14 +1,16 @@
 "use client";
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export default function Login() {
   const router = useRouter();
+  const [role, setRole] = useState('farmer');
 
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate authentication and route directly to the dashboard
-    router.push('/dashboard');
+    // Navigate to role-specific dashboard path
+    router.push(`/dashboard/${role}`);
   };
 
   return (
@@ -27,6 +29,17 @@ export default function Login() {
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1">Password</label>
             <input type="password" defaultValue="farmer123" className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-green-500 transition-colors" placeholder="••••••••" required />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-1">Login As Role</label>
+            <select value={role} onChange={(e) => setRole(e.target.value)} className="w-full px-4 py-3 bg-slate-800 border border-white/10 rounded-xl text-white focus:outline-none focus:border-green-500 transition-colors">
+              <option value="farmer">Farmer</option>
+              <option value="administrator">Administrator</option>
+              <option value="consultant">Agri Consultant</option>
+              <option value="researcher">Researcher</option>
+              <option value="department">Agriculture Department</option>
+            </select>
           </div>
 
           <button type="submit" className="w-full py-4 mt-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-green-500/30 transition-all">
