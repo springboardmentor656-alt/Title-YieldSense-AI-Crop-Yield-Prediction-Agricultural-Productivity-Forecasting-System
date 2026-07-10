@@ -1,14 +1,18 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
+import joblib
+import pandas as pd
+
 
 from backend.database import SessionLocal, engine, Base
 from backend.models import User
-from backend.schemas import UserCreate, UserLogin
+from backend.schemas import UserCreate, UserLogin, PredictionInput
 from backend.auth import hash_password, verify_password, create_access_token
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+model = joblib.load("models/crop_yield_model.pkl")
 
 
 def get_db():
@@ -64,4 +68,28 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     return {
         "access_token": token,
         "token_type": "bearer"
+    }
+@app.post("/api/v1/predict-yield")
+def predict_yield(data: PredictionInput):
+
+    weather_status = (
+        "Optimal"
+        if 20 <= data.avg_temp <= 30
+        else "Stress Detected"
+    )
+
+
+
+    input_data = pd.DataFrame({
+        "average_rain_fall_mm_per_year": [data.average_rain_fall_mm_per_year],
+        "pesticides_tonnes": [data.pesticides_tonnes],
+        "avg_temp": [data.avg_temp]
+    })
+    print(input_data.columns)
+    prediction = model.predict(input_data)
+
+    return {
+        "estimated_yield": float(prediction[0]),
+        "weather_status": weather_status,
+
     }
