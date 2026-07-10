@@ -13,10 +13,17 @@ if "Unnamed: 0" in df.columns:
     df.drop("Unnamed: 0", axis=1, inplace=True)
 
 # Convert categorical columns
-df = pd.get_dummies(df, columns=["Area", "Item"])
+#
 
 # Features and target
-X = df.drop("hg/ha_yield", axis=1)
+X = df[
+    [
+        'average_rain_fall_mm_per_year',
+        'pesticides_tonnes',
+        'avg_temp'
+    ]
+]
+
 y = df["hg/ha_yield"]
 
 # Train-test split
