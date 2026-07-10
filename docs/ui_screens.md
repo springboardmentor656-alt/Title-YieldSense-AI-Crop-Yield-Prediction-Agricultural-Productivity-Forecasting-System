@@ -1,5 +1,6 @@
-# YieldSense AI UI Screens
+# UI Screens
 
+YieldSense AI contains:
 
 ## Authentication
 
@@ -7,15 +8,18 @@
 - Login Page
 
 
-## Farmer Screens
+## Farm Module
 
-- Farm Profile
-- Prediction Dashboard
+- Farm Details Form
+- Soil Information Form
 
 
-## Dashboard Features
+## Dashboard
 
-- Crop Yield Prediction Card
-- Weather Insights Card
-- Farm Analytics Card
-- Feature Importance Card
+Displays:
+
+- Farm Management
+- Soil Analysis
+- Weather Monitoring
+- AI Yield Prediction
+- Recommendations

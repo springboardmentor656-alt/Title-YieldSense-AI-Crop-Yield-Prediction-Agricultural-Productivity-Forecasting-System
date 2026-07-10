@@ -1,27 +1,28 @@
-# YieldSense AI Workflow
+# Project Workflow
 
-Step 1:
-User Registration/Login
 
-Step 2:
-JWT Authentication Verification
+User Registration
 
-Step 3:
-Farmer enters farm details
+↓
 
-Step 4:
-System processes agricultural data
+Login Authentication
 
-Step 5:
-Machine Learning model analyzes input
+↓
 
-Step 6:
-Crop yield prediction generated
+Enter Farm Details
 
-Step 7:
-Dashboard displays:
+↓
 
-- Yield Results
-- Weather Insights
-- Farm Analytics
-- Reports
+Store Data in PostgreSQL
+
+↓
+
+Process Agricultural Dataset
+
+↓
+
+Generate Prediction
+
+↓
+
+Display Dashboard Results

@@ -1,42 +1,30 @@
 # Project Setup
 
-# Backend:
 
-Framework:
-FastAPI
+## Backend Setup
 
-Environment:
-Python Virtual Environment
+Install dependencies
 
-Installed packages:
-
-fastapi
-uvicorn
-passlib
-psycopg2
-sqlalchemy
+pip install -r requirements.txt
 
 
-Backend Running:
+Run FastAPI server
 
-http://127.0.0.1:8000/docs
-
-
-# Frontend:
-
-Framework:
-Next.js
-TypeScript
-Tailwind CSS
+uvicorn app:app --reload
 
 
-Frontend Running:
+## Frontend Setup
 
-http://localhost:3000
+Install packages
+
+npm install
 
 
-# Database:
+Run Next.js
 
-PostgreSQL
-Database Name:
-yieldsense_db
+npm run dev
+
+
+## Database
+
+PostgreSQL database is used for storing users and farm records.

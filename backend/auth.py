@@ -9,100 +9,75 @@ from auth_handler import (
     create_token
 )
 
+
 router = APIRouter()
 
 
-# ---------------- USER MODEL ----------------
-
 class User(BaseModel):
+
+    name: str | None = None
     email: str
     password: str
-    role:str="Farmer"
+    role: str = "Farmer"
 
 
-# ---------------- FARM MODEL ----------------
-
-class Farm(BaseModel):
-    farm_name: str
-    area: float
-    latitude: float
-    longitude: float
-    nitrogen: float
-    phosphorus: float
-    potassium: float
-    soil_ph: float
-
-
-# ---------------- REGISTER ----------------
 
 @router.post("/register")
-def register(user: User):
+def register(user:User):
 
     conn = get_conn()
-    cursor = conn.cursor()
+    cur = conn.cursor()
 
-    cursor.execute(
-        """
-        SELECT email
-        FROM users
-        WHERE email=%s
-        """,
+
+    cur.execute(
+        "SELECT * FROM users WHERE email=%s",
         (user.email,)
     )
 
-    existing_user = cursor.fetchone()
 
-
-    if existing_user:
-
-        cursor.close()
-        conn.close()
+    if cur.fetchone():
 
         raise HTTPException(
             status_code=400,
-            detail="Email already registered"
+            detail="User already exists"
         )
 
 
-    hashed = hash_password(user.password)
-
-
-    cursor.execute(
+    cur.execute(
         """
-        INSERT INTO users(email,password_hash, role)
+        INSERT INTO users(email,password_hash,role)
         VALUES(%s,%s,%s)
         """,
 
         (
         user.email,
-        hashed,
+        hash_password(user.password),
         user.role
         )
 
     )
 
-    conn.commit()
 
-    cursor.close()
-    conn.close()
+    conn.commit()
 
 
     return {
-        "message":"Farmer registered successfully"
+        "message":"User registered successfully"
     }
 
 
-# ---------------- LOGIN ----------------
+
 
 @router.post("/login")
-def login(user: User):
+def login(user:User):
 
     conn = get_conn()
-    cursor = conn.cursor()
+    cur = conn.cursor()
 
-    cursor.execute(
+
+    cur.execute(
         """
-        SELECT email,password_hash,role
+        SELECT password_hash,role
         FROM users
         WHERE email=%s
         """,
@@ -111,99 +86,45 @@ def login(user: User):
 
     )
 
-    db_user = cursor.fetchone()
+
+    result = cur.fetchone()
 
 
-    cursor.close()
-    conn.close()
-
-
-    if db_user is None:
+    if result is None:
 
         raise HTTPException(
-            status_code=400,
-            detail="Invalid email"
+            status_code=401,
+            detail="User not found"
         )
 
 
-    if not verify_password(
+    if verify_password(
         user.password,
-        db_user[1]
-    ):
+        result[0]
+    ) == False:
 
         raise HTTPException(
-            status_code=400,
-            detail="Invalid password"
+            status_code=401,
+            detail="Wrong password"
         )
 
 
-    token=create_token(
+
+    token = create_token(
         {
-            "email":db_user[0],
-            "role":db_user[2]
+        "email":user.email,
+        "role":result[1]
         }
     )
 
 
-    return {
-        "message":"Login successful",
-        "access_token":token
-    }
-
-
-# ---------------- FARM DETAILS ----------------
-
-@router.post("/farm")
-def save_farm(farm: Farm):
-
-    conn=get_conn()
-
-    cursor=conn.cursor()
-
-
-    cursor.execute(
-
-        """
-        INSERT INTO farms
-        (
-        farm_name,
-        area,
-        latitude,
-        longitude,
-        nitrogen,
-        phosphorus,
-        potassium,
-        soil_ph
-        )
-
-        VALUES(%s,%s,%s,%s,%s,%s,%s,%s)
-
-        """,
-
-        (
-
-        farm.farm_name,
-        farm.area,
-        farm.latitude,
-        farm.longitude,
-        farm.nitrogen,
-        farm.phosphorus,
-        farm.potassium,
-        farm.soil_ph
-
-        )
-
-    )
-
-
-    conn.commit()
-
-
-    cursor.close()
-
-    conn.close()
-
 
     return {
-        "message":"Farm details saved successfully"
+
+        "message":"Login success",
+
+        "access_token":token,
+
+        "token_type":"bearer"
+
     }

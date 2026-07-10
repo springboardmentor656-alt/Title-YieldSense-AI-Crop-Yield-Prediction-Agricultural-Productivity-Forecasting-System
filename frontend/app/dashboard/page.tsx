@@ -1,142 +1,82 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { jwtDecode } from "jwt-decode";
-
 
 export default function Dashboard(){
 
-
-const [role,setRole] = useState("");
-
-
-useEffect(()=>{
-
-const token = localStorage.getItem("token");
-
-
-if(token){
-
-const user:any = jwtDecode(token);
-
-setRole(user.role);
-
-}
-
-},[]);
-
-
-
 return(
 
-<div className="min-h-screen bg-gradient-to-br from-black via-green-950 to-green-800 p-12 text-white">
+<div className="dashboard">
 
+<h1>🌱 YieldSense Dashboard</h1>
 
-<h1 className="text-4xl font-bold">
-
-🌱 YieldSense AI Dashboard
-
-</h1>
-
-
-<p className="text-green-300 mt-4 text-lg">
-
-Logged in as: {role}
-
+<p>
+Agricultural Productivity & Crop Yield Forecasting System
 </p>
 
 
-
-<div className="grid grid-cols-3 gap-8 mt-12">
-
+<div className="dash-grid">
 
 
-<div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-xl">
+<div className="dash-card">
 
-<h2 className="text-xl font-bold">
+<h2>🚜 Farm Management</h2>
 
-🌾 Yield Prediction
-
-</h2>
-
-
-<p className="mt-3 text-green-200">
-
-ML prediction results will appear here
-
+<p>
+Manage farm details, crop information and land records
 </p>
 
 </div>
 
+<div className="dash-card">
 
+<h2>🌱 Soil Analysis</h2>
 
+<p>Analyze soil pH, NPK nutrients and soil health</p>
 
+</div>
+<div className="dash-card">
 
-<div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-xl">
+<h2>☁ Weather Monitoring</h2>
 
-<h2 className="text-xl font-bold">
+<p>Weather data analysis for better crop prediction</p>
 
-🌦 Weather Insights
+</div>
 
-</h2>
+<div className="dash-card">
 
+<h2>🤖 AI Yield Prediction</h2>
 
-<p className="mt-3 text-green-200">
-
-Weather API data coming soon
-
+<p>
+Predict crop yield using machine learning models
 </p>
 
-</div>
-
-
-
-
-
-<div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-xl">
-
-<h2 className="text-xl font-bold">
-
-📊 Farm Analytics
-
-</h2>
-
-
-<p className="mt-3 text-green-200">
-
-Reports and visualization
-
-</p>
+<h4>⏳ Model Development Phase</h4>
 
 </div>
 
+<div className="dash-card">
 
+<h2>📊 Analytics Dashboard</h2>
 
-
-
-<div className="bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-xl">
-
-<h2 className="text-xl font-bold">
-
-📈 Feature Importance
-
-</h2>
-
-
-<p className="text-green-200 mt-5">
-
-ML model feature coefficients will appear here
-
-</p>
-
+<p>View yield trends and seasonal crop performance</p>
 
 </div>
 
+<div className="dash-card">
 
+<h2>💡 Recommendation System</h2>
+
+<p>AI based crop and fertilizer recommendations</p>
 
 </div>
 
+<div className="dash-card">
 
+<h2>⚠ Risk Assessment</h2>
+
+<p>Analyze climate and production risks</p>
+
+</div>
+
+</div>
 </div>
 
 )

@@ -9,26 +9,32 @@ export default function FarmProfile(){
 const router = useRouter();
 
 
-const [farm,setFarm] = useState({
+const [data,setData]=useState({
 
 farm_name:"",
-area:"",
+location:"",
 latitude:"",
 longitude:"",
+area:"",
+
+crop_type:"",
+season:"",
+
+soil_type:"",
+soil_ph:"",
 nitrogen:"",
 phosphorus:"",
-potassium:"",
-soil_ph:""
+potassium:""
 
 });
 
 
-const handleChange=(e:any)=>{
 
-setFarm({
+const change=(e:any)=>{
 
-...farm,
+setData({
 
+...data,
 [e.target.name]:e.target.value
 
 });
@@ -37,10 +43,11 @@ setFarm({
 
 
 
-const saveFarm = async()=>{
+
+const save=async()=>{
 
 
-const response = await fetch(
+const res=await fetch(
 "http://127.0.0.1:8000/farm",
 {
 
@@ -50,19 +57,17 @@ headers:{
 "Content-Type":"application/json"
 },
 
-body:JSON.stringify(farm)
+body:JSON.stringify(data)
 
 }
 
 );
 
 
-const data = await response.json();
 
+if(res.ok){
 
-if(response.ok){
-
-alert(data.message);
+alert("Farm details saved successfully");
 
 router.push("/dashboard");
 
@@ -70,66 +75,184 @@ router.push("/dashboard");
 
 else{
 
-alert(data.detail);
+alert("Farm save failed");
 
 }
+
 
 };
 
 
 
 
+
+
 return(
 
-<div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-black via-green-950 to-green-800">
+
+<div className="farm-page">
 
 
-<div className="bg-white/10 p-10 rounded-2xl w-96 text-white shadow-xl">
+<h2>🌱 YieldSense AI</h2>
 
-
-<h1 className="text-3xl font-bold text-center mb-6">
-
-🚜 Farm Profile
-
+<h1>
+Register Farm & Crop Information
 </h1>
 
 
-<p className="text-green-300 mb-3">
-Farm Details
-</p>
 
-
-<input name="farm_name" placeholder="Farm Name" onChange={handleChange} className="input"/>
-
-<input name="area" placeholder="Farm Area (hectares)" onChange={handleChange} className="input"/>
-
-<input name="latitude" placeholder="Latitude" onChange={handleChange} className="input"/>
-
-<input name="longitude" placeholder="Longitude" onChange={handleChange} className="input"/>
+<div className="farm-container">
 
 
 
-<p className="text-green-300 mb-3 mt-3">
-Soil Details
-</p>
 
 
-<input name="nitrogen" placeholder="Nitrogen (N)" onChange={handleChange} className="input"/>
+{/* FARM SECTION */}
 
-<input name="phosphorus" placeholder="Phosphorus (P)" onChange={handleChange} className="input"/>
 
-<input name="potassium" placeholder="Potassium (K)" onChange={handleChange} className="input"/>
+<div className="farm-card">
 
-<input name="soil_ph" placeholder="Soil pH" onChange={handleChange} className="input"/>
+
+<h2>🚜 Farm Information</h2>
+
+
+
+<div className="grid">
+
+
+
+<input
+name="farm_name"
+placeholder="Farm Name"
+onChange={change}
+/>
+
+
+<input
+name="location"
+placeholder="Location"
+onChange={change}
+/>
+
+
+
+<input
+name="latitude"
+placeholder="Latitude"
+onChange={change}
+/>
+
+
+
+<input
+name="longitude"
+placeholder="Longitude"
+onChange={change}
+/>
+
+
+
+<input
+name="area"
+placeholder="Area (hectares)"
+onChange={change}
+/>
+
+
+
+<input
+name="soil_type"
+placeholder="Soil Type"
+onChange={change}
+/>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+{/* CROP SECTION */}
+
+
+
+<div className="farm-card">
+
+
+<h2>🌾 Crop & Soil Details</h2>
+
+
+<div className="grid">
+
+
+<input
+name="crop_type"
+placeholder="Crop Type"
+onChange={change}
+/>
+
+
+
+<input
+name="season"
+placeholder="Season"
+onChange={change}
+/>
+
+
+
+<input
+name="soil_ph"
+placeholder="Soil PH"
+onChange={change}
+/>
+
+
+
+<input
+name="nitrogen"
+placeholder="Nitrogen"
+onChange={change}
+/>
+
+
+
+<input
+name="phosphorus"
+placeholder="Phosphorus"
+onChange={change}
+/>
+
+
+
+<input
+name="potassium"
+placeholder="Potassium"
+onChange={change}
+/>
+
+
+</div>
+
+
+</div>
+
+
+
+
+</div>
 
 
 
 <button
-
-onClick={saveFarm}
-
-className="w-full bg-green-500 p-3 rounded-lg font-bold mt-5"
-
+className="save-btn"
+onClick={save}
 >
 
 Save Farm Details
@@ -137,10 +260,11 @@ Save Farm Details
 </button>
 
 
-</div>
+
 
 </div>
 
-)
+
+);
 
 }

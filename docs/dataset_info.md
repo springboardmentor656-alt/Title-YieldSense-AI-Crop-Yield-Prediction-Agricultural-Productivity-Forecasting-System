@@ -1,27 +1,33 @@
 # Dataset Information
 
+The project uses agricultural datasets for crop yield prediction.
 
-Dataset Source:
+
+# Dataset Source:
 
 Kaggle Agricultural Dataset
 
 
-Dataset Contains:
+## Dataset Parameters
 
-- Crop Information
+- Crop Type
+- Season
+- Location
+- Area
+- Production Data
 - Soil Parameters
-- Weather Data
-- Production Details
+- Weather Factors
 
 
-Processing Steps:
+## Processing Steps
 
 1. Load dataset
-2. Clean missing values
-3. Feature selection
-4. Train Machine Learning model
+2. Remove missing values
+3. Clean agricultural records
+4. Prepare data for ML training
 
+Tools Used:
 
-Purpose:
-
-The processed dataset is used to train the crop yield prediction model.
+- Python
+- Pandas
+- Scikit-Learn

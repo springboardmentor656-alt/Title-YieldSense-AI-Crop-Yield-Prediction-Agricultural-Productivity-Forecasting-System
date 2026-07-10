@@ -1,37 +1,171 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+*{
+box-sizing:border-box;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+background:#d7f8e2;
+color:#001b10;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+h1{
+font-size:38px;
+font-weight:bold;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+h2{
+font-size:22px;
+font-weight:bold;
+color:#008b35;
 }
-.input{
+
+button{
+background:#00c853;
+color:white;
+border:0;
+border-radius:12px;
+padding:15px 40px;
+font-weight:bold;
+cursor:pointer;
+}
+
+
+/* AUTH PAGE */
+
+.auth{
+height:100vh;
+display:flex;
+align-items:center;
+justify-content:space-around;
+}
+
+.auth-info{
+width:50%;
+}
+
+.auth-info h1{
+font-size:45px;
+}
+
+
+.feature-box{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
+margin-top:30px;
+}
+
+
+.feature-box div,
+.form-box,
+.dash-card,
+.farm-card,
+.stats-card{
+
+background:white;
+border-radius:22px;
+padding:30px;
+box-shadow:0 12px 30px #0002;
+
+}
+
+
+.form-box{
+width:450px;
+}
+
+
+input,select{
 
 width:100%;
+height:50px;
 padding:12px;
-margin-bottom:12px;
-border-radius:8px;
-background:white;
-color:black;
-outline:none;
+margin:12px 0;
+border-radius:12px;
+border:1px solid #aaa;
+
+}
+
+
+.form-box button{
+width:100%;
+}
+
+
+.password{
+position:relative;
+}
+
+
+.password span{
+position:absolute;
+right:15px;
+top:35%;
+cursor:pointer;
+}
+
+
+
+/* DASHBOARD */
+
+.dashboard{
+padding:50px;
+}
+
+
+.stats-grid,
+.dash-grid{
+
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:25px;
+margin-top:30px;
+
+}
+
+
+.dash-card{
+height:130px;
+}
+
+
+
+/* FARM PAGE */
+
+
+.farm-page{
+
+padding:30px 50px;
+
+}
+
+
+.farm-container{
+
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:25px;
+margin-top:30px;
+
+}
+
+
+.grid{
+
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:15px;
+
+}
+
+
+.logo{
+
+font-size:22px;
+font-weight:bold;
+color:#008b35;
 
 }

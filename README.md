@@ -1,116 +1,125 @@
-# 🌱 YieldSense AI - Crop Yield Prediction Agricultural Productivity Forecasting System
+# 🌱 YieldSense AI  
+### Crop Yield Prediction & Agricultural Productivity Forecasting System
 
 
-## 📌 Overview  
+## 📌 Overview
 
-YieldSense AI is an AI-powered agriculture platform that predicts crop yield using Machine Learning.
+YieldSense AI is an AI-powered agriculture platform designed to predict crop yield and improve farming decisions using data analytics and machine learning.
 
-It analyzes agricultural data such as crop details, soil parameters, weather factors, and historical data to provide productivity insights for farmers.
+The system analyzes farm information, soil parameters, weather data, and historical datasets to provide yield insights and recommendations.
 
 
-## 🎯 Objectives
+## ✨ Features
 
-- Predict crop yield using Machine Learning
-- Process agricultural datasets
-- Provide secure user authentication
-- Create farmer and admin roles
-- Display insights through dashboard
+- 🔐 JWT Based Authentication
+- 👨‍🌾 Farmer/Admin Role Management
+- 🚜 Farm Data Management
+- 🌱 Soil Parameter Analysis
+- ☁️ Weather Data Integration
+- 🤖 AI Crop Yield Prediction
+- 📊 Analytics Dashboard
+- 💡 Smart Recommendation System
 
 
 ## 🛠️ Tech Stack
 
-### Frontend
+**Frontend**
 - Next.js
 - React
 - Tailwind CSS
 
-### Backend
+**Backend**
 - FastAPI
 - JWT Authentication
 
-### Database
+**Database**
 - PostgreSQL
 
-### Machine Learning
+**Machine Learning**
 - Python
 - Pandas
 - Scikit-Learn
 
 
-## 📂 Project Structure
-
 ```text
-YieldSense AI
+YIELDSENSE AI
 │
 ├── backend
+│   │
 │   ├── app.py
+│   ├── database.py
 │   ├── auth.py
 │   ├── auth_handler.py
-│   ├── database.py
 │   ├── preprocessing.py
-│   └── requirements.txt
+│   ├── requirements.txt
+│   │
+│   └── routes
+│       ├── dashboard.py
+│       └── farm.py
 │
-├── frontend
-│   ├── app
-│   ├── public
-│   └── package.json
 │
 ├── dataset
+│   │
 │   ├── raw
 │   └── processed
 │
+│
 ├── docs
+│   │
 │   ├── architecture.md
 │   ├── workflow.md
 │   ├── setup.md
 │   ├── dataset_info.md
-│   ├── schema.sql
 │   ├── project_requirements.md
-│   └── ui_screens.md
+│   ├── ui_screens.md
+│   └── schema.sql
+│
+│
+├── frontend
+│   │
+│   ├── app
+│   │   ├── dashboard
+|   |   ├── farm-profile
+│   │   ├── login
+│   │   ├── register
+│   │   └── globals.css
+│   │
+│   ├── components
+│   │   ├── AuthForm.tsx
+│   │   ├── FarmBox.tsx
+│   │   ├── Sidebar.tsx
+│   │   └── Card.tsx
+│   │
+│   └── package.json
+│
 │
 └── README.md
 ```
 
 
-## 🔐 Authentication Module
+## 📂 Modules
 
-- User Registration
-- User Login
-- Password Hashing
-- JWT Token Generation
-- Role Based Access
-
-
-## ✨ Features
-
-- Farmer/Admin Authentication
-- Farm Data Management
-- Crop Yield Prediction
-- Weather Insights
-- Analytics Dashboard
-
-
-## 🔄 Workflow
-
-1. User Login/Register  
-2. Enter agricultural information  
-3. Process data using ML model  
-4. Generate crop yield prediction  
-5. Display results on dashboard  
+- Authentication System
+- Farm Profile Management
+- Dataset Processing
+- Prediction Workflow
+- Dashboard Analytics
 
 
 ## 📌 Milestone 1 Completed
 
-✔ Project Setup  
-✔ Frontend Development  
-✔ FastAPI Backend  
+✔ Project Structure Setup  
+✔ Frontend UI Development  
+✔ FastAPI Backend APIs  
 ✔ JWT Authentication  
-✔ Database Integration  
-✔ Dataset Preparation  
+✔ PostgreSQL Integration  
+✔ Kaggle Dataset Collection
+✔ Initial Data Preprocessing Pipeline
 
 
-## 🚀 Future Scope
+## 🚀 Future Enhancements
 
+- ML Model Training
 - Weather API Integration
-- Advanced Prediction Models
-- Crop Recommendation System
+- Yield Forecast Visualization
+- Crop & Fertilizer Recommendations
