@@ -3,7 +3,7 @@ body{
     padding:0;
     font-family:Arial, sans-serif;
 
-    background-image:url("../assets/YieldSense AI.png"); /* nee background image */
+    background-image:url("../assets/YieldSense AI.png"); /* background image */
     background-size:cover;
     background-position:center;
     background-repeat:no-repeat;
@@ -95,9 +95,13 @@ body{
     font-size:16px;
     color:#444;
 }
-
 .login-card span{
     color:#0b5d1e;
     font-weight:bold;
     cursor:pointer;
 }
+.login-header{
+    text-align:center;
+    margin-bottom:30px;
+}
+

@@ -8,6 +8,7 @@ from app.routers.crop import router as crop_router
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers.predict import router as predict_router
 from app.routers.auth import router as auth_router
+from app.routers.farm import router as farm_router
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -31,6 +32,8 @@ app.include_router(crop_router)
 app.include_router(predict_router)
 
 app.include_router(auth_router)
+
+app.include_router(farm_router)
 
 @app.get("/")
 def home():

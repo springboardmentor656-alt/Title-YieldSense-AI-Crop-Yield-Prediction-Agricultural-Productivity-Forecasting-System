@@ -3,62 +3,56 @@ body{
     padding:0;
     font-family:Arial, sans-serif;
 
-    background-image:url("../assets/YieldSense AI.png");
+    background-image:url("../assets/YieldSense AI (2).png");
     background-size:cover;
     background-position:center;
     background-repeat:no-repeat;
     background-attachment:fixed;
 }
 
-.farm-container{
+.register-container{
     min-height:100vh;
     display:flex;
     justify-content:center;
-    align-items:center;
-    padding:40px 20px;
+    align-items:flex-start;
+    padding-top:140px;
     box-sizing:border-box;
 }
 
-.farm-card{
-    width:520px;
-    background:rgba(255,255,255,0.95);
-    padding:30px;
+.register-card{
+    width:400px;
+    background:rgba(255,255,255,.95);
+    padding:16px 20px;
     border-radius:20px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.25);
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+    
 }
 
-.farm-card h1{
+.register-card h1{
     text-align:center;
     color:#2e7d32;
-    margin:0;
     font-size:36px;
+    margin:0 0 12px 0;
+    padding:0;
 }
 
-.subtitle{
-    text-align:center;
-    color:#555;
-    margin:10px 0 25px;
-    font-size:15px;
-}
-
-.farm-card label{
+.register-card label{
     display:block;
     color:#1b5e20;
-    font-size:16px;
+    font-size:15px;
     font-weight:600;
-    margin-top:12px;
-    margin-bottom:6px;
+    margin-top:8px;
+    margin-bottom:4px;
 }
 
 .input-box{
     position:relative;
     width:100%;
-    margin-bottom:12px;
+    margin-bottom:10px;
 }
-
 .input-box input{
     width:100%;
-    padding:12px 12px 12px 45px;
+    padding:10px 10px 10px 42px;
     border:2px solid #2e7d32;
     border-radius:10px;
     outline:none;
@@ -68,59 +62,65 @@ body{
 
 .input-box input:focus{
     border-color:#1b5e20;
-    box-shadow:0 0 6px rgba(46,125,50,0.3);
+    box-shadow:0 0 8px rgba(46,125,50,.3);
 }
 
 .input-icon{
     position:absolute;
-    left:15px;
+    left:14px;
     top:50%;
     transform:translateY(-50%);
     color:#2e7d32;
-    font-size:18px;
+    font-size:16px;
 }
 
-.row{
-    display:flex;
-    gap:15px;
-}
-
-.column{
-    flex:1;
-}
-
-.farm-card button{
+.register-card button{
     width:100%;
-    padding:14px;
-    margin-top:20px;
+    margin-top:12px;
+    padding:11px;
     border:none;
     border-radius:10px;
     background:#0b5d1e;
     color:white;
-    font-size:18px;
+    font-size:17px;
     font-weight:bold;
     cursor:pointer;
     transition:.3s;
 }
 
-.farm-card button:hover{
-    background:#0a4b19;
+.register-card button:hover{
+    background:#084917;
+}
+
+.register-card p{
+    text-align:center;
+    margin-top:14px;
+    font-size:15px;
+    color:#555;
+}
+
+.register-card span{
+    color:#2e7d32;
+    font-weight:bold;
+    cursor:pointer;
 }
 
 @media(max-width:768px){
 
-    .farm-card{
+    .project-title{
+        font-size:46px;
+    }
+
+    .project-subtitle{
+        font-size:20px;
+    }
+
+    .register-card{
         width:100%;
-        padding:22px;
+        padding:25px;
     }
 
-    .row{
-        flex-direction:column;
-        gap:0;
+    .register-card h1{
+        font-size:42px;
     }
-
-    .farm-card h1{
-        font-size:30px;
-    }
-
 }

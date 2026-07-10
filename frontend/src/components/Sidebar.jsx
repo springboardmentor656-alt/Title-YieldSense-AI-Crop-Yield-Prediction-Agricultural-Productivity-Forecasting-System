@@ -11,8 +11,10 @@ import {
 
 import "../styles/Sidebar.css";
 import logo from "../assets/YieldSense AI.png";
+import { useNavigate } from "react-router-dom";
 
 function Sidebar() {
+  const navigate = useNavigate();
   return (
     <div className="sidebar">
 
@@ -26,14 +28,16 @@ function Sidebar() {
 
       <ul className="menu">
 
-        <li className="active">
+        <li className="active"
+  onClick={() => navigate("/dashboard")}
+   >
           <FaTachometerAlt />
           Dashboard
         </li>
 
-        <li>
+        <li onClick={() => navigate("/farm-onboarding")}>
           <FaLeaf />
-          My Farm
+          Farm Onboarding
         </li>
 
         <li>
@@ -65,7 +69,16 @@ function Sidebar() {
           Profile
         </button>
 
-        <button className="logout-btn">
+        <button className="logout-btn"
+        className="logout-btn"
+  onClick={() => {
+
+    localStorage.removeItem("token");
+
+    navigate("/login");
+
+  }}
+        >
           <FaSignOutAlt />
           Logout
         </button>
