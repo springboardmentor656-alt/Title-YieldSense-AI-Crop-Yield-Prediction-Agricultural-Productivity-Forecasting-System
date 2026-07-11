@@ -21,6 +21,9 @@ def run_agri_preprocessing_pipeline(input_csv_path: str, output_csv_path: str) -
         return
 
     df = pd.read_csv(input_csv_path)
+    # Kaggle's yield_df.csv includes a leftover index column — drop it if present.
+    if "Unnamed: 0" in df.columns:
+        df = df.drop(columns=["Unnamed: 0"])
 
     # 1. Impute missing climate/soil variables with the column mean.
     climate_cols = [

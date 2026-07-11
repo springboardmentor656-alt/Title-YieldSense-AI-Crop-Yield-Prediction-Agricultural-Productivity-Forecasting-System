@@ -26,6 +26,28 @@ export interface FarmResponse extends FarmPayload {
   user_id: number;
 }
 
+export interface PredictRequest {
+  farm_id: number;
+  crop_name: string;
+}
+
+export interface WeatherUsed {
+  avg_temp: number;
+  average_rain_fall_mm_per_year: number;
+  source: string;
+}
+
+export interface PredictResponse {
+  farm_id: number;
+  crop_name: string;
+  predicted_yield_kg_ha: number;
+  base_model_yield_kg_ha: number;
+  soil_adjustment_factor: number;
+  weather_used: WeatherUsed;
+  model_r2_score: number;
+  note: string;
+}
+
 class ApiError extends Error {
   status: number;
   constructor(status: number, message: string) {
@@ -34,8 +56,14 @@ class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = typeof window !== "undefined" ? localStorage.getItem("ys_token") : null;
+async function request<T>(
+  path: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("ys_token")
+      : null;
 
   const res = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
@@ -47,15 +75,25 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   });
 
   if (!res.ok) {
-    const body = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new ApiError(res.status, body.detail ?? "Request failed");
+    const body = await res.json().catch(() => ({
+      detail: res.statusText,
+    }));
+
+    throw new ApiError(
+      res.status,
+      body.detail ?? "Request failed"
+    );
   }
 
   return res.json() as Promise<T>;
 }
 
 export const api = {
-  register: (email: string, password: string, role: "Farmer" | "Admin" = "Farmer") =>
+  register: (
+    email: string,
+    password: string,
+    role: "Farmer" | "Admin" = "Farmer"
+  ) =>
     request<TokenResponse>("/api/v1/auth/register", {
       method: "POST",
       body: JSON.stringify({ email, password, role }),
@@ -74,6 +112,12 @@ export const api = {
     }),
 
   listFarms: () => request<FarmResponse[]>("/api/v1/farms"),
+
+  predict: (payload: PredictRequest) =>
+    request<PredictResponse>("/api/v1/predict", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
 };
 
 export function storeSession(token: TokenResponse) {

@@ -91,3 +91,5 @@ uvicorn main:app --reload
 cd yieldsense-frontend
 npm install
 npm run dev
+
+Note: data/model_assets.pkl is not committed (it's ~300MB — too large for git)

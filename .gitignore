@@ -12,3 +12,5 @@ node_modules/
 
 # OS
 .DS_Store
+
+yieldsense-backend/data/model_assets.pkl

@@ -52,3 +52,27 @@ class CropCreate(BaseModel):
 
 class CropResponse(CropCreate):
     id: int
+    
+    
+# --- Prediction ---
+
+class PredictRequest(BaseModel):
+    farm_id: int
+    crop_name: str = Field(min_length=1, max_length=100)
+
+
+class WeatherUsed(BaseModel):
+    avg_temp: float
+    average_rain_fall_mm_per_year: float
+    source: str
+
+
+class PredictResponse(BaseModel):
+    farm_id: int
+    crop_name: str
+    predicted_yield_kg_ha: float
+    base_model_yield_kg_ha: float
+    soil_adjustment_factor: float
+    weather_used: WeatherUsed
+    model_r2_score: float
+    note: str
