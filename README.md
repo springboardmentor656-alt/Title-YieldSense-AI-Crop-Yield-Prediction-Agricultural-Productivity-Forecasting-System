@@ -1,3 +1,5 @@
+YieldSense AI
+AI-powered Crop Yield Prediction & Agricultural Productivity Forecasting System.
 
 ### Milestone 1 Features
 - **User Authentication**  
