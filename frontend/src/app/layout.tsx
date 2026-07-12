@@ -34,6 +34,30 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme') || 'system';
+                  var dark = false;
+                  if (theme === 'dark') {
+                    dark = true;
+                  } else if (theme === 'system') {
+                    dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  }
+                  if (dark) {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {}
+              })();
+            `
+          }}
+        />
+      </head>
       <body className="font-sans antialiased">
         <AuthProvider>
           {children}
