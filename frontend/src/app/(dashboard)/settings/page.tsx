@@ -55,12 +55,10 @@ export default function SettingsPage() {
   });
 
   const toggleNotification = (key: keyof typeof notifications) => {
-    setNotifications((prev) => {
-      const newVal = !prev[key];
-      const label = key === "email" ? "Email notifications" : key === "predictions" ? "Prediction alerts" : "Weather warnings";
-      toast.success(`${label} toggled ${newVal ? "on" : "off"}`);
-      return { ...prev, [key]: newVal };
-    });
+    const newVal = !notifications[key];
+    const label = key === "email" ? "Email notifications" : key === "predictions" ? "Prediction alerts" : "Weather warnings";
+    toast.success(`${label} toggled ${newVal ? "on" : "off"}`);
+    setNotifications((prev) => ({ ...prev, [key]: newVal }));
   };
 
   return (
