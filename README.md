@@ -41,17 +41,17 @@ This codebase contains the complete implementation for **Milestone 1** (Core Sof
 ## 🏗️ Architecture
 
 ```
-┌─────────────────────────┐     ┌──────────────────────────┐
-│   Frontend (Next.js)    │────▶│   Backend (FastAPI)      │
-│   Local / Vercel Host   │     │   Local / Render Host    │
-│                         │     │                          │
-│  • React 19 + TypeScript│     │  • REST API (v1)         │
-│  • Tailwind CSS v4      │     │  • Firebase Admin SDK    │
-│  • Firebase Client SDK  │     │  • ML Inference Engine   │
-│  • App Router           │     │  • Open-Meteo Weather    │
-└─────────────────────────┘     └──────────────────────────┘
-         │                                │
-         │         ┌──────────────┐       │
+┌─────────────────────────┐      ┌──────────────────────────┐
+│   Frontend (Next.js)    │────▶│    Backend (FastAPI)      │
+│   Local / Vercel Host   │      │   Local / Render Host    │
+│                         │      │                          │
+│  • React 19 + TypeScript│      │  • REST API (v1)         │
+│  • Tailwind CSS v4      │      │  • Firebase Admin SDK    │
+│  • Firebase Client SDK  │      │  • ML Inference Engine   │
+│  • App Router           │      │  • Open-Meteo Weather    │
+└─────────────────────────┘      └──────────────────────────┘
+         │                                 │
+         │         ┌──────────────┐        │
          └────────▶│   Firebase   │◀──────┘
                    │              │
                    │  • Auth      │
