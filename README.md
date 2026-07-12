@@ -1,4 +1,4 @@
-YieldSense AI
+# YieldSense AI  
 AI-powered Crop Yield Prediction & Agricultural Productivity Forecasting System.
 
 ### Milestone 1 Features
@@ -29,4 +29,3 @@ AI-powered Crop Yield Prediction & Agricultural Productivity Forecasting System.
 **Data Source**  
 - Balanced agricultural dataset (`agri_data_balanced.csv`) for ML model training  
 - OpenWeatherMap for real-time weather  
-
