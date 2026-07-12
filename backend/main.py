@@ -23,15 +23,15 @@ async def lifespan(app: FastAPI):
     # Startup
     try:
         initialize_firebase()
-        print("✅ Firebase initialized successfully")
+        print("[Firebase] Firebase initialized successfully")
     except Exception as e:
-        print(f"⚠️  Firebase initialization warning: {e}")
+        print(f"[Firebase] Firebase initialization warning: {e}")
         print("   The app will start, but Firebase-dependent features may not work.")
 
     yield
 
     # Shutdown
-    print("🛑 Application shutting down")
+    print("[Application] Application shutting down")
 
 
 def create_application() -> FastAPI:
