@@ -1,0 +1,41 @@
+# ============================================================
+# YieldSense AI — Backend Dependencies
+# ============================================================
+
+# Core Framework
+fastapi==0.115.12
+uvicorn[standard]==0.34.2
+pydantic==2.11.3
+pydantic-settings==2.9.1
+email-validator==2.2.0
+
+# Firebase
+firebase-admin==6.8.0
+
+# HTTP Client (for Firebase REST API calls + Weather API)
+httpx==0.28.1
+
+# Data Processing
+pandas==2.3.0
+numpy==2.3.0
+
+# Machine Learning (Milestone 2)
+scikit-learn==1.7.0
+xgboost==3.0.2
+joblib==1.5.1
+matplotlib==3.10.3
+seaborn==0.13.2
+
+# CORS
+python-multipart==0.0.20
+
+# Environment
+python-dotenv==1.1.0
+
+# Testing
+pytest==8.4.1
+pytest-asyncio==1.0.0
+
+# Utilities
+python-dateutil==2.9.0
+

@@ -1,0 +1,181 @@
+/**
+ * YieldSense AI — Signup Page
+ */
+
+"use client";
+
+import React, { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Mail, Lock, Eye, EyeOff, User } from "lucide-react";
+import toast from "react-hot-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import { ROUTES } from "@/utils/constants";
+import { validateEmail, validatePassword, validateName } from "@/utils/validators";
+
+export default function SignupPage() {
+  const router = useRouter();
+  const { signup } = useAuth();
+  const [formData, setFormData] = useState({
+    display_name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    role: "farmer" as "farmer" | "admin",
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const updateField = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: "" }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const newErrors: Record<string, string> = {};
+    const nameError = validateName(formData.display_name);
+    const emailError = validateEmail(formData.email);
+    const passwordError = validatePassword(formData.password);
+
+    if (nameError) newErrors.display_name = nameError;
+    if (emailError) newErrors.email = emailError;
+    if (passwordError) newErrors.password = passwordError;
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await signup({
+        email: formData.email,
+        password: formData.password,
+        display_name: formData.display_name,
+        role: formData.role,
+      });
+      toast.success("Account created successfully!");
+      router.push(ROUTES.DASHBOARD);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Registration failed";
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="text-center mb-8">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Create your account
+        </h1>
+        <p className="text-sm text-gray-500 mt-1">
+          Start predicting crop yields with AI
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <Input
+          label="Full Name"
+          type="text"
+          placeholder="John Doe"
+          value={formData.display_name}
+          onChange={(e) => updateField("display_name", e.target.value)}
+          error={errors.display_name}
+          icon={<User className="h-4 w-4" />}
+        />
+
+        <Input
+          label="Email"
+          type="email"
+          placeholder="farmer@example.com"
+          value={formData.email}
+          onChange={(e) => updateField("email", e.target.value)}
+          error={errors.email}
+          icon={<Mail className="h-4 w-4" />}
+        />
+
+        <div className="relative">
+          <Input
+            label="Password"
+            type={showPassword ? "text" : "password"}
+            placeholder="••••••••"
+            value={formData.password}
+            onChange={(e) => updateField("password", e.target.value)}
+            error={errors.password}
+            icon={<Lock className="h-4 w-4" />}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-[38px] text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
+        </div>
+
+        <Input
+          label="Confirm Password"
+          type="password"
+          placeholder="••••••••"
+          value={formData.confirmPassword}
+          onChange={(e) => updateField("confirmPassword", e.target.value)}
+          error={errors.confirmPassword}
+          icon={<Lock className="h-4 w-4" />}
+        />
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            I am a
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { value: "farmer", label: "🌾 Farmer" },
+              { value: "admin", label: "⚙️ Admin" },
+            ].map((role) => (
+              <button
+                key={role.value}
+                type="button"
+                onClick={() => updateField("role", role.value)}
+                className={`
+                  px-4 py-2.5 rounded-xl text-sm font-medium border-2 transition-all duration-200
+                  ${
+                    formData.role === role.value
+                      ? "border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400"
+                      : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-300"
+                  }
+                `}
+              >
+                {role.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <Button type="submit" fullWidth isLoading={loading} className="mt-2">
+          Create Account
+        </Button>
+      </form>
+
+      <p className="text-center text-sm text-gray-500 mt-6">
+        Already have an account?{" "}
+        <Link
+          href={ROUTES.LOGIN}
+          className="text-green-600 hover:text-green-700 font-semibold"
+        >
+          Sign in
+        </Link>
+      </p>
+    </>
+  );
+}
