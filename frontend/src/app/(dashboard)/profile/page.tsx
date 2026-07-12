@@ -18,7 +18,7 @@ import { formatDate } from "@/utils/formatters";
 import type { UserProfile } from "@/types/user";
 
 export default function ProfilePage() {
-  const { profile, refreshProfile } = useAuth();
+  const { profile, loading, refreshProfile, logout } = useAuth();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
@@ -52,7 +52,33 @@ export default function ProfilePage() {
     }
   };
 
-  if (!profile) return <LoadingSpinner text="Loading profile..." />;
+  if (loading) return <LoadingSpinner text="Loading profile..." />;
+
+  if (!profile) {
+    return (
+      <div className="max-w-md mx-auto py-12 px-4 animate-in">
+        <Card padding="lg" className="text-center space-y-6">
+          <div className="w-16 h-16 mx-auto rounded-full bg-red-100 dark:bg-red-950/30 flex items-center justify-center text-red-600 dark:text-red-400">
+            <User className="h-8 w-8" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Profile Unavailable</h2>
+            <p className="text-sm text-gray-500">
+              We couldn't retrieve your user profile details. This might be due to an expired session, missing record, or connection issue.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Button onClick={() => refreshProfile()} className="w-full">
+              Retry Connection
+            </Button>
+            <Button variant="outline" onClick={() => logout()} className="w-full">
+              Logout & Login Again
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-in">
