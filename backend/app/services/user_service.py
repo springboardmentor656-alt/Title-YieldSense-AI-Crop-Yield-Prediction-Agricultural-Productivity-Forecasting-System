@@ -28,7 +28,30 @@ class UserService:
         doc = self.db.collection(USERS_COLLECTION).document(user_id).get()
 
         if not doc.exists:
-            raise NotFoundException(resource="User", resource_id=user_id)
+            # Self-healing: auto-create user document if it exists in Firebase Auth
+            try:
+                import firebase_admin.auth as firebase_auth
+                from app.utils.helpers import utc_now_iso
+                
+                # Fetch user details from Firebase Auth
+                fb_user = firebase_auth.get_user(user_id)
+                display_name = fb_user.display_name or fb_user.email.split('@')[0]
+                
+                # Create profile dict
+                profile_data = {
+                    "email": fb_user.email,
+                    "display_name": display_name,
+                    "role": "user",
+                    "created_at": utc_now_iso(),
+                    "updated_at": utc_now_iso()
+                }
+                
+                # Save to Firestore
+                self.db.collection(USERS_COLLECTION).document(user_id).set(profile_data)
+                profile_data["uid"] = user_id
+                return profile_data
+            except Exception:
+                raise NotFoundException(resource="User", resource_id=user_id)
 
         data = doc.to_dict()
         data["uid"] = user_id

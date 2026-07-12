@@ -16,6 +16,53 @@ export default function SettingsPage() {
   const { logout } = useAuth();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
+  // Theme switching state and handler
+  const [currentTheme, setCurrentTheme] = useState<"light" | "dark" | "system">(() => {
+    if (typeof window !== "undefined") {
+      return (localStorage.getItem("theme") as "light" | "dark" | "system") || "system";
+    }
+    return "system";
+  });
+
+  const applyTheme = (theme: "light" | "dark" | "system") => {
+    setCurrentTheme(theme);
+    if (typeof window === "undefined") return;
+
+    localStorage.setItem("theme", theme);
+    const root = document.documentElement;
+
+    if (theme === "dark") {
+      root.classList.add("dark");
+    } else if (theme === "light") {
+      root.classList.remove("dark");
+    } else {
+      // System preference check
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      if (mediaQuery.matches) {
+        root.classList.add("dark");
+      } else {
+        root.classList.remove("dark");
+      }
+    }
+    toast.success(`Theme set to ${theme}`);
+  };
+
+  // Interactive notification states
+  const [notifications, setNotifications] = useState({
+    email: true,
+    predictions: true,
+    weather: false,
+  });
+
+  const toggleNotification = (key: keyof typeof notifications) => {
+    setNotifications((prev) => {
+      const newVal = !prev[key];
+      const label = key === "email" ? "Email notifications" : key === "predictions" ? "Prediction alerts" : "Weather warnings";
+      toast.success(`${label} toggled ${newVal ? "on" : "off"}`);
+      return { ...prev, [key]: newVal };
+    });
+  };
+
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-in">
       <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -36,10 +83,15 @@ export default function SettingsPage() {
             <p className="text-xs text-gray-500">Select your preferred theme</p>
           </div>
           <div className="flex gap-2">
-            {["Light", "Dark", "System"].map((theme) => (
+            {["light", "dark", "system"].map((theme) => (
               <button
                 key={theme}
-                className="px-4 py-2 rounded-xl text-sm font-medium border-2 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-green-500 hover:text-green-600 transition-all"
+                onClick={() => applyTheme(theme as "light" | "dark" | "system")}
+                className={`px-4 py-2 rounded-xl text-sm font-medium border-2 capitalize transition-all ${
+                  currentTheme === theme
+                    ? "border-green-500 text-green-600 bg-green-50 dark:bg-green-950/20"
+                    : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-green-500 hover:text-green-600"
+                }`}
               >
                 {theme}
               </button>
@@ -58,9 +110,9 @@ export default function SettingsPage() {
         </div>
         <div className="space-y-4">
           {[
-            { label: "Email Notifications", desc: "Receive farm updates via email", enabled: true },
-            { label: "Prediction Alerts", desc: "Get notified about new predictions", enabled: true },
-            { label: "Weather Warnings", desc: "Severe weather alerts for your farms", enabled: false },
+            { key: "email" as const, label: "Email Notifications", desc: "Receive farm updates via email" },
+            { key: "predictions" as const, label: "Prediction Alerts", desc: "Get notified about new predictions" },
+            { key: "weather" as const, label: "Weather Warnings", desc: "Severe weather alerts for your farms" },
           ].map((item) => (
             <div key={item.label} className="flex items-center justify-between py-2">
               <div>
@@ -70,14 +122,14 @@ export default function SettingsPage() {
               <button
                 className={`
                   relative w-11 h-6 rounded-full transition-colors duration-200
-                  ${item.enabled ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"}
+                  ${notifications[item.key] ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"}
                 `}
-                onClick={() => toast.success(`${item.label} toggled`)}
+                onClick={() => toggleNotification(item.key)}
               >
                 <span
                   className={`
                     absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200
-                    ${item.enabled ? "translate-x-[22px]" : "translate-x-0.5"}
+                    ${notifications[item.key] ? "translate-x-[22px]" : "translate-x-0.5"}
                   `}
                 />
               </button>
