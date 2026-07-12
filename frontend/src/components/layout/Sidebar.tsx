@@ -34,10 +34,10 @@ const menuItems = [
   { label: "Notifications", icon: Bell, href: ROUTES.NOTIFICATIONS },
   { label: "Settings", icon: Settings, href: ROUTES.SETTINGS },
   { type: "divider" as const, label: "AI Features" },
-  { label: "Prediction", icon: BarChart3, href: ROUTES.PREDICTION, badge: "Soon" },
-  { label: "Weather", icon: Cloud, href: ROUTES.WEATHER, badge: "Soon" },
-  { label: "Soil Analysis", icon: Layers, href: ROUTES.SOIL, badge: "Soon" },
-  { label: "Reports", icon: FileText, href: ROUTES.REPORTS, badge: "Soon" },
+  { label: "Prediction", icon: BarChart3, href: ROUTES.PREDICTION },
+  { label: "Weather", icon: Cloud, href: ROUTES.WEATHER },
+  { label: "Soil Analysis", icon: Layers, href: ROUTES.SOIL },
+  { label: "Reports", icon: FileText, href: ROUTES.REPORTS },
 ];
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
@@ -99,11 +99,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             >
               <Icon className={`h-5 w-5 ${active ? "text-green-600" : ""}`} />
               <span className="flex-1">{item.label}</span>
-              {"badge" in item && item.badge && (
-                <span className="px-2 py-0.5 text-[10px] font-semibold uppercase rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
-                  {item.badge}
-                </span>
-              )}
             </Link>
           );
         })}
@@ -113,7 +108,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       <div className="p-4 border-t border-gray-100 dark:border-gray-800">
         <div className="px-3 py-2">
           <p className="text-xs text-gray-400">YieldSense AI v1.0.0</p>
-          <p className="text-xs text-gray-400">Milestone 1</p>
+          <p className="text-xs text-gray-400">Milestone 2</p>
         </div>
       </div>
     </div>
