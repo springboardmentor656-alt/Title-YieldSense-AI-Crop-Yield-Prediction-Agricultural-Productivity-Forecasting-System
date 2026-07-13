@@ -1,0 +1,6 @@
+Area,Item,Year,hg/ha_yield,average_rain_fall_mm_per_year,pesticides_tonnes,avg_temp,rainfall,ph
+India,Rice,2020,36500,1083,54321,26.5,980,6.8
+India,Wheat,2021,33700,,38210,24.1,620,7.1
+India,Maize,2022,29200,890,24100,,740,6.4
+India,Cotton,2023,5200,760,45200,28.3,-45,6.9
+India,Sugarcane,2024,801000,1190,61500,27.2,1120,15.2

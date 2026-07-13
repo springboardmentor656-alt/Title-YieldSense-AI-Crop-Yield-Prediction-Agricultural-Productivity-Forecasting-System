@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #eef2e6;
+  color: #17211b;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.metric-bar {
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(31, 61, 43, 0.16) 0,
+    rgba(31, 61, 43, 0.16) 1px,
+    transparent 1px,
+    transparent 24px
+  );
+}
