@@ -30,8 +30,7 @@ def submit_onboarding(payload: OnboardingRequest) -> OnboardingResponse:
     user_record = register_user(register_payload)  # raises 409 if email already exists
 
     farm_id = str(uuid4())
-    _FAKE_FARM_DB[farm_id] = 
-    {
+    _FAKE_FARM_DB[farm_id] = {
         "farm_id": farm_id,
         "user_id": user_record["user_id"],
         "state": payload.state,
