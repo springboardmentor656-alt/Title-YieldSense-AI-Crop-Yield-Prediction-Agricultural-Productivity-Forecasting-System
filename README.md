@@ -1,6 +1,5 @@
 # YieldSense AI: Crop Yield Prediction & Agricultural Productivity Forecasting System
 
-**Developer**: Tirutopu Srivardhan  
 **Milestone Status**: Milestone 1 & 2 Complete
 
 YieldSense AI is an AI-powered crop yield prediction platform designed to help farmers and agricultural organizations estimate future crop production using historical farming data, weather conditions, and soil characteristics.
