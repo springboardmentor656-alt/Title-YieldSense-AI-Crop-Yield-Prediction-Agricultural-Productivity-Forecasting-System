@@ -3,6 +3,25 @@ import React, { useState } from 'react';
 
 export default function FarmerDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  
+  // Forecast Form State
+  const [temp, setTemp] = useState('24.5');
+  const [rainfall, setRainfall] = useState('120.0');
+  const [ph, setPh] = useState('6.2');
+  const [loading, setLoading] = useState(false);
+  const [forecastResult, setForecastResult] = useState<{
+    yieldAmount: number;
+    weatherStatus: string;
+    soilSuitability: string;
+    confidence: number;
+  } | null>({
+    yieldAmount: 1250.00,
+    weatherStatus: 'Optimal',
+    soilSuitability: 'High Fertility',
+    confidence: 0.92
+  });
+
+  // Farms State
   const [farms, setFarms] = useState([
     { id: 1, name: 'North Field', location: 'Region A', size: 12.5, ph: 6.2 },
     { id: 2, name: 'Valley Farm', location: 'Region B', size: 8.2, ph: 5.8 },
@@ -10,22 +29,56 @@ export default function FarmerDashboard() {
   const [farmName, setFarmName] = useState('');
   const [location, setLocation] = useState('Region A');
   const [size, setSize] = useState('');
-  const [ph, setPh] = useState('');
+  const [farmPh, setFarmPh] = useState('');
 
   const handleAddFarm = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!farmName || !size || !ph) return;
+    if (!farmName || !size || !farmPh) return;
     const newFarm = {
       id: farms.length + 1,
       name: farmName,
       location,
       size: parseFloat(size),
-      ph: parseFloat(ph),
+      ph: parseFloat(farmPh),
     };
     setFarms([...farms, newFarm]);
     setFarmName('');
     setSize('');
-    setPh('');
+    setFarmPh('');
+  };
+
+  const handleForecastYield = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/v1/predict-yield', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          avg_temp: parseFloat(temp),
+          rainfall: parseFloat(rainfall),
+          soil_ph: parseFloat(ph),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Prediction API failed to respond.');
+      }
+
+      const data = await response.json();
+      setForecastResult({
+        yieldAmount: data.estimated_yield_kg_ha,
+        weatherStatus: data.weather_impact_assessment,
+        soilSuitability: data.soil_suitability_rating,
+        confidence: data.confidence_score,
+      });
+    } catch (err: any) {
+      alert(err.message || 'Error occurred connecting to the API server.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -75,24 +128,62 @@ export default function FarmerDashboard() {
         {/* Tab 1: Dashboard */}
         {activeTab === 'dashboard' && (
           <div className="space-y-10 relative z-10">
+            {/* Dynamic Forecast Metrics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="glass p-6 rounded-2xl hover:scale-[1.02] transition-transform">
                 <h3 className="text-slate-400 text-sm font-medium">Predicted Yield</h3>
-                <p className="text-3xl font-bold text-green-400 mt-2">1,250 <span className="text-lg text-slate-500 font-normal">kg/ha</span></p>
+                <p className="text-3xl font-bold text-green-400 mt-2">
+                  {forecastResult ? `${forecastResult.yieldAmount.toLocaleString()} ` : '— '}
+                  <span className="text-lg text-slate-500 font-normal">kg/ha</span>
+                </p>
               </div>
               <div className="glass p-6 rounded-2xl hover:scale-[1.02] transition-transform">
-                <h3 className="text-slate-400 text-sm font-medium">Avg Soil Moisture</h3>
-                <p className="text-3xl font-bold text-blue-400 mt-2">32<span className="text-lg text-slate-500 font-normal">%</span></p>
+                <h3 className="text-slate-400 text-sm font-medium">Soil Suitability</h3>
+                <p className="text-3xl font-bold text-blue-400 mt-2">
+                  {forecastResult ? forecastResult.soilSuitability : '—'}
+                </p>
               </div>
               <div className="glass p-6 rounded-2xl hover:scale-[1.02] transition-transform">
-                <h3 className="text-slate-400 text-sm font-medium">Upcoming Rainfall</h3>
-                <p className="text-3xl font-bold text-purple-400 mt-2">12 <span className="text-lg text-slate-500 font-normal">mm</span></p>
+                <h3 className="text-slate-400 text-sm font-medium">Weather Assessment</h3>
+                <p className="text-3xl font-bold text-purple-400 mt-2">
+                  {forecastResult ? forecastResult.weatherStatus : '—'}
+                </p>
               </div>
             </div>
 
-            <div className="glass-dark p-8 rounded-3xl h-80 flex flex-col items-center justify-center border border-white/5">
-              <p className="text-slate-400 text-lg font-medium">Farm Crop Map & Yield Chart (Milestone 2)</p>
-              <p className="text-slate-600 text-sm mt-1">Real-time ML insights and forecasting visualizations will load here.</p>
+            {/* Input Form for Real-time AI Yield Prediction */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="glass p-8 rounded-3xl border border-white/5 lg:col-span-1">
+                <h3 className="text-xl font-bold mb-6">Calculate Forecast</h3>
+                <form onSubmit={handleForecastYield} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Avg Temperature (°C)</label>
+                    <input type="number" step="0.1" value={temp} onChange={(e) => setTemp(e.target.value)} className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-green-500 text-white" required />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Avg Annual Rainfall (mm)</label>
+                    <input type="number" step="0.1" value={rainfall} onChange={(e) => setRainfall(e.target.value)} className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-green-500 text-white" required />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Soil pH</label>
+                    <input type="number" step="0.1" value={ph} onChange={(e) => setPh(e.target.value)} className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-green-500 text-white" required />
+                  </div>
+                  <button type="submit" disabled={loading} className="w-full py-4 mt-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:shadow-lg transition-all disabled:opacity-55">
+                    {loading ? "Analyzing..." : "Forecast Yield"}
+                  </button>
+                </form>
+              </div>
+
+              {/* Visualization Placeholder */}
+              <div className="glass-dark p-8 rounded-3xl border border-white/5 lg:col-span-2 flex flex-col items-center justify-center">
+                <svg className="w-16 h-16 text-slate-600 mb-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <p className="text-slate-400 text-lg font-medium">Model Inference Engine Output</p>
+                <p className="text-slate-600 text-sm mt-1 max-w-sm text-center">
+                  Predictive calculations are processed using the Random Forest algorithm trained on your preprocessed crop yields datasets.
+                </p>
+              </div>
             </div>
           </div>
         )}
@@ -100,7 +191,6 @@ export default function FarmerDashboard() {
         {/* Tab 2: Farm Data */}
         {activeTab === 'farm-data' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 relative z-10">
-            {/* Form */}
             <div className="glass p-8 rounded-3xl border border-white/5">
               <h3 className="text-xl font-bold mb-6">Onboard New Farm</h3>
               <form onSubmit={handleAddFarm} className="space-y-4">
@@ -125,7 +215,7 @@ export default function FarmerDashboard() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">Soil pH</label>
-                  <input type="number" step="0.1" value={ph} onChange={(e) => setPh(e.target.value)} className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-green-500 text-white" placeholder="e.g. 6.5" required />
+                  <input type="number" step="0.1" value={farmPh} onChange={(e) => setFarmPh(e.target.value)} className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-green-500 text-white" placeholder="e.g. 6.5" required />
                 </div>
                 <button type="submit" className="w-full py-4 mt-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:shadow-lg transition-all">
                   Register Farm
@@ -133,7 +223,6 @@ export default function FarmerDashboard() {
               </form>
             </div>
 
-            {/* List */}
             <div className="glass-dark p-8 rounded-3xl border border-white/5">
               <h3 className="text-xl font-bold mb-6">Registered Acreages</h3>
               <div className="space-y-4 max-h-[350px] overflow-y-auto">

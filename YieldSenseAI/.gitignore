@@ -3,6 +3,10 @@
 *.py[cod]
 *$py.class
 
+# ML Models
+*.pkl
+*.h5
+
 # Virtual Environments
 .venv
 venv/
