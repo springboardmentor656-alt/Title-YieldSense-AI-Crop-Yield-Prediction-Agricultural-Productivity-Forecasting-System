@@ -6,13 +6,11 @@ To train our machine learning models and validate our preprocessing workflows, w
 
 ### A. Kaggle Crop Yield Prediction Dataset
 - **Contents**:
-  - `Area` (Region names)
-  - `Item` (Target crop type: Wheat, Corn, Rice, Soybeans, etc.)
-  - `Year` (Annual markers)
-  - `hg/ha_yield` (Crop yield in hectograms per hectare - Target variable)
-  - `average_rain_fall_mm_per_year` (Atmospheric precipitation)
-  - `pesticides_tonnes` (Soil treatments)
-  - `avg_temp` (Climate temperature benchmarks)
+  - `avg_temp` (Climate temperature benchmarks - feature)
+  - `average_rain_fall_mm_per_year` (Atmospheric precipitation - feature)
+  - `ph` (Soil pH - feature)
+  - `yield_kg_per_ha` (Target variable - output)
+  - `rainfall` (Atmospheric precipitations logs)
 - **Use Case**: Crop yield prediction and weather correlation models.
 
 ### B. Kaggle Crop Recommendation Dataset

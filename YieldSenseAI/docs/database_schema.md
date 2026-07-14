@@ -37,7 +37,7 @@ CREATE TABLE crops (
 ---
 
 ## 2. Unstructured Database Schema (MongoDB)
-MongoDB is used for logging weather updates, high-frequency soil NPK logs, and historical prediction runs.
+MongoDB is used for logging weather updates, soil composition updates, and prediction records.
 
 ### Model Metrics Log Document Structure
 ```json
@@ -45,14 +45,16 @@ MongoDB is used for logging weather updates, high-frequency soil NPK logs, and h
   "_id": "ObjectId",
   "farm_id": 1,
   "crop_id": 2,
-  "prediction_timestamp": "2026-07-01T12:00:00Z",
+  "prediction_timestamp": "2026-07-09T12:00:00Z",
   "input_metrics": {
     "avg_temp": 24.5,
-    "precipitation": 120.2,
-    "soil_moisture": 35.0,
-    "pesticides_used": 2.5
+    "rainfall": 120.2,
+    "soil_ph": 6.2
   },
-  "predicted_yield_hg_ha": 34500.0,
+  "predicted_yield_kg_ha": 4015.35,
+  "weather_impact_assessment": "Optimal",
+  "soil_suitability_rating": "High Fertility",
+  "confidence_score": 0.92,
   "model_version": "xgboost_v1.0"
 }
 ```
