@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from datetime import datetime
 
 class PredictionRequest(BaseModel):
     crop_type: str
@@ -12,6 +13,11 @@ class PredictionRequest(BaseModel):
     potassium_kg_ha: float = Field(..., ge=0)
 
 class PredictionResponse(BaseModel):
+    id: int
     predicted_yield_kg_ha: float
     soil_suitability_score: float
     model_version: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

@@ -9,9 +9,9 @@ TARGET_COLUMN = "yield_kg_ha"
 
 def build_features(df: pd.DataFrame) -> pd.DataFrame:
     """Single source of truth for feature engineering.
-    MUST be called identically at train time and inference time,
-    or you get train/serve skew."""
+    Must be called identically at train time and inference time."""
     df = df.copy()
     df["crop_type_encoded"] = df["crop_type"].astype("category").cat.codes
     df["region_encoded"] = df["region"].astype("category").cat.codes
-    return df[FEATURE_COLUMNS + [TARGET_COLUMN]] if TARGET_COLUMN in df else df[FEATURE_COLUMNS]
+    cols = FEATURE_COLUMNS + [TARGET_COLUMN] if TARGET_COLUMN in df else FEATURE_COLUMNS
+    return df[cols]

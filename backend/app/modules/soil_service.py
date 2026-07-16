@@ -5,7 +5,6 @@ CROP_SOIL_PROFILES = {
 }
 
 def suitability_score(crop: str, ph: float, n: float, p: float, k: float) -> float:
-    """Returns 0-1 score: how close soil conditions are to that crop's ideal profile."""
     profile = CROP_SOIL_PROFILES.get(crop)
     if not profile:
         return 0.5  # unknown crop — neutral score, don't fabricate confidence
@@ -19,5 +18,4 @@ def suitability_score(crop: str, ph: float, n: float, p: float, k: float) -> flo
     n_score = nutrient_score(n, profile["n_ideal"])
     p_score = nutrient_score(p, profile["p_ideal"])
     k_score = nutrient_score(k, profile["k_ideal"])
-
     return round((ph_score + n_score + p_score + k_score) / 4, 3)
