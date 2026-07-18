@@ -15,14 +15,6 @@ interface Profile {
   crops: string[];
 }
 
-// Mock baseline yields per crop (kg/ha) — placeholder until Milestone-2's real model is wired in.
-const MOCK_YIELD: Record<string, number> = {
-  Rice: 4120,
-  Cotton: 1850,
-  Wheat: 3260,
-  Maize: 5480,
-};
-
 export default function DashboardPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -64,22 +56,10 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      <section className="statGrid">
-        {(profile?.crops?.length ? profile.crops : ["Rice"]).map((crop) => (
-          <div key={crop} className="statCard">
-            <span className="statLabel">Predicted Yield — {crop}</span>
-            <span className="statValue">{(MOCK_YIELD[crop] ?? 4000).toLocaleString()} kg/ha</span>
-            <span className="statNote">Based on regional historical averages</span>
-          </div>
-        ))}
-      </section>
-
-      <section className="noticeCard">
-        <span className="noticeIcon">🚧</span>
-        <div>
-          <strong>Live yield trends and recommendations are coming in Milestone-2.</strong>
-          <p>These figures are placeholders until the ML prediction service is connected.</p>
-        </div>
+      <section className="predictCta">
+        <h3>Ready to see your yield prediction?</h3>
+        <p>Enter your soil and crop details to get a live, personalized forecast.</p>
+        <a href="/predict" className="ctaButton">Get a Live Prediction →</a>
       </section>
 
       <style jsx>{`
@@ -102,61 +82,37 @@ export default function DashboardPage() {
           color: #5f6368;
           margin: 0;
         }
-        .statGrid {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 1.25rem;
-          margin-bottom: 2rem;
-        }
-        .statCard {
-          background: #ffffff;
+        .predictCta {
+          background: #e8f5e9;
           border-radius: 16px;
           box-shadow: 0 4px 16px rgba(26, 26, 26, 0.06);
-          padding: 1.5rem;
-          flex: 1;
-          min-width: 220px;
-          display: flex;
-          flex-direction: column;
-          gap: 0.4rem;
-          transition: transform 0.15s ease, box-shadow 0.15s ease;
+          padding: 2.5rem 2rem;
+          text-align: center;
         }
-        .statCard:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 10px 24px rgba(27, 94, 32, 0.12);
-        }
-        .statLabel {
-          font-size: 0.85rem;
-          font-weight: 600;
-          color: #5f6368;
-        }
-        .statValue {
-          font-size: 1.6rem;
+        .predictCta h3 {
+          margin: 0 0 0.5rem;
+          font-size: 1.3rem;
           font-weight: 800;
           color: #1b5e20;
         }
-        .statNote {
-          font-size: 0.78rem;
-          color: #999;
-        }
-        .noticeCard {
-          display: flex;
-          gap: 1rem;
-          align-items: flex-start;
-          background: #e8f5e9;
-          border-radius: 14px;
-          padding: 1.25rem 1.5rem;
-        }
-        .noticeIcon { font-size: 1.5rem; }
-        .noticeCard strong {
-          display: block;
-          color: #1b5e20;
-          font-size: 0.95rem;
-          margin-bottom: 0.25rem;
-        }
-        .noticeCard p {
-          margin: 0;
-          font-size: 0.85rem;
+        .predictCta p {
+          margin: 0 0 1.25rem;
+          font-size: 0.9rem;
           color: #4a5a4b;
+        }
+        .ctaButton {
+          display: inline-block;
+          background: #15803d;
+          color: white;
+          padding: 0.75rem 1.75rem;
+          border-radius: 10px;
+          font-weight: 700;
+          text-decoration: none;
+          transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .ctaButton:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(27, 94, 32, 0.25);
         }
       `}</style>
     </main>
