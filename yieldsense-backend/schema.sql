@@ -32,3 +32,24 @@ CREATE TABLE IF NOT EXISTS crops (
 
 CREATE INDEX IF NOT EXISTS idx_farms_user_id ON farms(user_id);
 CREATE INDEX IF NOT EXISTS idx_crops_farm_id ON crops(farm_id);
+
+CREATE TABLE IF NOT EXISTS prediction_runs (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    farm_id INT REFERENCES farms(id) ON DELETE CASCADE,
+    crop_name VARCHAR(100) NOT NULL,
+
+    predicted_yield_kg_ha NUMERIC(12,3) NOT NULL,
+    base_model_yield_kg_ha NUMERIC(12,3) NOT NULL,
+    soil_adjustment_factor NUMERIC(8,4) NOT NULL,
+    model_r2_score NUMERIC(8,4) NOT NULL,
+
+    weather_used JSONB NOT NULL,
+    note TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_prediction_runs_farm_id ON prediction_runs(farm_id);
+CREATE INDEX IF NOT EXISTS idx_prediction_runs_user_id ON prediction_runs(user_id);
+CREATE INDEX IF NOT EXISTS idx_prediction_runs_created_at ON prediction_runs(created_at);
+

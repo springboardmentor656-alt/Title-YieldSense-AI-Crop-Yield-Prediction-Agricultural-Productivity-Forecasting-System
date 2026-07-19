@@ -11,7 +11,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from database import init_db
-from routers import auth, farms, predict
+from routers import auth, farms, predict, soil
 
 app = FastAPI(
     title="YieldSense AI Core",
@@ -32,6 +32,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(farms.router)
 app.include_router(predict.router)
+app.include_router(soil.router)
 
 
 @app.on_event("startup")

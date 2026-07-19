@@ -48,6 +48,101 @@ export interface PredictResponse {
   note: string;
 }
 
+// --- Reports / Compare / History ---
+
+export type RiskLevel = "Low" | "Moderate" | "High";
+
+export interface WeatherAnalytics {
+  heat_stress_risk: RiskLevel;
+  rainfall_risk: RiskLevel;
+  summary: string;
+}
+
+export interface SoilAnalytics {
+  soil_adjustment_factor: number;
+  nitrogen_score?: number | null;
+  phosphorus_score?: number | null;
+  potassium_score?: number | null;
+  ph_score?: number | null;
+  summary: string;
+}
+
+export interface YieldReportRequest {
+  farm_id: number;
+  crop_name: string;
+}
+
+export interface YieldReportResponse {
+  run_type: "single";
+  farm_id: number;
+  crop_name: string;
+  predicted_yield_kg_ha: number;
+  base_model_yield_kg_ha: number;
+  soil_adjustment_factor: number;
+  model_r2_score: number;
+  weather_used: WeatherUsed;
+  weather_analytics: WeatherAnalytics;
+  soil_analytics: SoilAnalytics;
+  narrative: string;
+  note: string;
+}
+
+export interface YieldCompareRequest {
+  farm_id: number;
+  crops: string[];
+}
+
+export interface CropComparisonItem {
+  crop_name: string;
+  predicted_yield_kg_ha: number;
+  base_model_yield_kg_ha: number;
+  soil_adjustment_factor: number;
+  weather_used: WeatherUsed;
+}
+
+export interface YieldComparisonResponse {
+  run_type: "compare";
+  farm_id: number;
+  crops: CropComparisonItem[];
+  ranked_by_predicted_yield_kg_ha: string[];
+}
+
+export interface PredictionHistoryItem {
+  id: number;
+  farm_id: number;
+  crop_name: string;
+  predicted_yield_kg_ha: number;
+  base_model_yield_kg_ha: number;
+  soil_adjustment_factor: number;
+  weather_used: WeatherUsed;
+  model_r2_score: number;
+  created_at: string;
+}
+
+export interface PredictionHistoryResponse {
+  farm_id: number;
+  items: PredictionHistoryItem[];
+}
+
+// --- Soil analysis (standalone) ---
+
+export interface SoilAnalysisRequest {
+  soil_ph?: number;
+  soil_n?: number;
+  soil_p?: number;
+  soil_k?: number;
+}
+
+export interface SoilAnalysisResponse {
+  soil_adjustment_factor: number;
+  nitrogen_score?: number | null;
+  phosphorus_score?: number | null;
+  potassium_score?: number | null;
+  ph_score?: number | null;
+  remediation_steps: string[];
+  note: string;
+}
+
 class ApiError extends Error {
   status: number;
   constructor(status: number, message: string) {
@@ -115,6 +210,33 @@ export const api = {
 
   predict: (payload: PredictRequest) =>
     request<PredictResponse>("/api/v1/predict", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  // Single-crop report: prediction + weather analytics + soil analytics + narrative.
+  getYieldReport: (payload: YieldReportRequest) =>
+    request<YieldReportResponse>("/api/v1/predict/report", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  // Multi-crop comparison, ranked by predicted yield.
+  compareCrops: (payload: YieldCompareRequest) =>
+    request<YieldComparisonResponse>("/api/v1/predict/compare", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  // Last 25 persisted prediction runs for a farm.
+  getPredictionHistory: (farmId: number) =>
+    request<PredictionHistoryResponse>(
+      `/api/v1/predict/history?farm_id=${encodeURIComponent(farmId)}`
+    ),
+
+  // Standalone soil scoring + remediation suggestions (no farm/crop required).
+  analyzeSoil: (payload: SoilAnalysisRequest) =>
+    request<SoilAnalysisResponse>("/api/v1/soil/analysis", {
       method: "POST",
       body: JSON.stringify(payload),
     }),
