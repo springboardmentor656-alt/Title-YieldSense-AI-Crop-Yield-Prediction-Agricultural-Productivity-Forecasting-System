@@ -28,8 +28,6 @@ potassium:""
 
 });
 
-
-
 const change=(e:any)=>{
 
 setData({
@@ -42,50 +40,24 @@ setData({
 };
 
 
+const save = async () => {
+    const res = await fetch("http://127.0.0.1:8000/farm", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    });
 
+    const result = await res.json();
 
-const save=async()=>{
-
-
-const res=await fetch(
-"http://127.0.0.1:8000/farm",
-{
-
-method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify(data)
-
-}
-
-);
-
-
-
-if(res.ok){
-
-alert("Farm details saved successfully");
-
-router.push("/dashboard");
-
-}
-
-else{
-
-alert("Farm save failed");
-
-}
-
-
+    if (res.ok) {
+        alert(result.message);
+        router.push("/dashboard");
+    } else {
+        alert(result.detail || "Farm save failed");
+    }
 };
-
-
-
-
-
 
 return(
 
@@ -95,38 +67,21 @@ return(
 
 <h2>🌱 YieldSense AI</h2>
 
-<h1>
-Register Farm & Crop Information
-</h1>
-
-
+<h1>Register Farm & Crop Information</h1>
 
 <div className="farm-container">
 
-
-
-
-
 {/* FARM SECTION */}
-
-
 <div className="farm-card">
-
 
 <h2>🚜 Farm Information</h2>
 
-
-
 <div className="grid">
 
-
-
-<input
-name="farm_name"
+<input name="farm_name"
 placeholder="Farm Name"
 onChange={change}
 />
-
 
 <input
 name="location"
@@ -134,15 +89,11 @@ placeholder="Location"
 onChange={change}
 />
 
-
-
 <input
 name="latitude"
 placeholder="Latitude"
 onChange={change}
 />
-
-
 
 <input
 name="longitude"
@@ -150,15 +101,11 @@ placeholder="Longitude"
 onChange={change}
 />
 
-
-
 <input
 name="area"
 placeholder="Area (hectares)"
 onChange={change}
 />
-
-
 
 <input
 name="soil_type"
@@ -166,30 +113,17 @@ placeholder="Soil Type"
 onChange={change}
 />
 
-
 </div>
 
-
 </div>
-
-
-
-
-
-
 
 {/* CROP SECTION */}
 
-
-
 <div className="farm-card">
-
 
 <h2>🌾 Crop & Soil Details</h2>
 
-
 <div className="grid">
-
 
 <input
 name="crop_type"
@@ -197,15 +131,11 @@ placeholder="Crop Type"
 onChange={change}
 />
 
-
-
 <input
 name="season"
 placeholder="Season"
 onChange={change}
 />
-
-
 
 <input
 name="soil_ph"
@@ -213,15 +143,11 @@ placeholder="Soil PH"
 onChange={change}
 />
 
-
-
 <input
 name="nitrogen"
 placeholder="Nitrogen"
 onChange={change}
 />
-
-
 
 <input
 name="phosphorus"
@@ -229,26 +155,17 @@ placeholder="Phosphorus"
 onChange={change}
 />
 
-
-
 <input
 name="potassium"
 placeholder="Potassium"
 onChange={change}
 />
 
+</div>
 
 </div>
 
-
 </div>
-
-
-
-
-</div>
-
-
 
 <button
 className="save-btn"
@@ -258,9 +175,6 @@ onClick={save}
 Save Farm Details
 
 </button>
-
-
-
 
 </div>
 

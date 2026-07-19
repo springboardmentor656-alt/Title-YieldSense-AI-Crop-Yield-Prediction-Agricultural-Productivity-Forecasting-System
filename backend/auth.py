@@ -22,15 +22,17 @@ class User(BaseModel):
 
 
 
+# REGISTER
+
 @router.post("/register")
-def register(user:User):
+def register(user: User):
 
     conn = get_conn()
     cur = conn.cursor()
 
 
     cur.execute(
-        "SELECT * FROM users WHERE email=%s",
+        "SELECT email FROM users WHERE email=%s",
         (user.email,)
     )
 
@@ -39,22 +41,22 @@ def register(user:User):
 
         raise HTTPException(
             status_code=400,
-            detail="User already exists"
+            detail="Email already registered"
         )
 
 
     cur.execute(
         """
-        INSERT INTO users(email,password_hash,role)
-        VALUES(%s,%s,%s)
+        INSERT INTO users(name,email,password_hash,role)
+        VALUES(%s,%s,%s,%s)
         """,
 
         (
-        user.email,
-        hash_password(user.password),
-        user.role
+            user.name,
+            user.email,
+            hash_password(user.password),
+            user.role
         )
-
     )
 
 
@@ -62,14 +64,16 @@ def register(user:User):
 
 
     return {
-        "message":"User registered successfully"
+        "message":"Account created successfully"
     }
 
 
 
 
+# LOGIN
+
 @router.post("/login")
-def login(user:User):
+def login(user: User):
 
     conn = get_conn()
     cur = conn.cursor()
@@ -77,20 +81,19 @@ def login(user:User):
 
     cur.execute(
         """
-        SELECT password_hash,role
+        SELECT id,email,password_hash,role
         FROM users
         WHERE email=%s
         """,
 
         (user.email,)
-
     )
 
 
-    result = cur.fetchone()
+    db_user = cur.fetchone()
 
 
-    if result is None:
+    if db_user is None:
 
         raise HTTPException(
             status_code=401,
@@ -100,7 +103,7 @@ def login(user:User):
 
     if verify_password(
         user.password,
-        result[0]
+        db_user[2]
     ) == False:
 
         raise HTTPException(
@@ -109,14 +112,14 @@ def login(user:User):
         )
 
 
-
     token = create_token(
-        {
-        "email":user.email,
-        "role":result[1]
-        }
-    )
 
+        {
+        "email": db_user[1],
+        "role": db_user[3]
+        }
+
+    )
 
 
     return {
@@ -124,6 +127,8 @@ def login(user:User):
         "message":"Login success",
 
         "access_token":token,
+
+        "role":db_user[3],
 
         "token_type":"bearer"
 

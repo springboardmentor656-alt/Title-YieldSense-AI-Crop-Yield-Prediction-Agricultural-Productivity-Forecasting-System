@@ -1,19 +1,47 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import "./sidebar.css";
 
-export default function Sidebar(){
+export default function Sidebar() {
 
-return(
+  const pathname = usePathname();
 
-<aside className="sidebar">
+  const menu = [
+    { name: "Dashboard", icon: "🏠", path: "/dashboard" },
+    { name: "Farm Profile", icon: "🚜", path: "/farm-profile" },
+    { name: "Soil Analysis", icon: "🌱", path: "/dashboard/soil" },
+    { name: "Weather", icon: "☁️", path: "/dashboard/weather" },
+    { name: "AI Prediction", icon: "🤖", path: "/dashboard/predict" },
+    { name: "Analytics", icon: "📊", path: "/dashboard/analytics" },
+    { name: "Recommendation", icon: "💡", path: "/dashboard/recommendation" },
+  ];
 
-<h2>🌱 YieldSense</h2>
+  return (
+    <aside className="sidebar">
 
-<Link href="/dashboard">Dashboard</Link>
+      <h2 className="logo">🌾 YieldSense AI</h2>
 
-<Link href="/farm-profile">Farm Details</Link>
+      <div className="menu">
 
-</aside>
+        {menu.map((item) => (
+          <Link
+            key={item.path}
+            href={item.path}
+            className={pathname === item.path ? "menuItem active" : "menuItem"}
+          >
+            <span>{item.icon}</span>
+            {item.name}
+          </Link>
+        ))}
 
-)
+      </div>
 
+      <Link href="/login" className="logout">
+        🚪 Logout
+      </Link>
+
+    </aside>
+  );
 }

@@ -17,6 +17,7 @@ password:"",
 role:"Farmer"
 });
 
+
 const change=(e:any)=>{
 
 setData({
@@ -25,6 +26,7 @@ setData({
 });
 
 };
+
 
 const submit = async()=>{
 

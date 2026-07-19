@@ -26,3 +26,31 @@ Generate Prediction
 ↓
 
 Display Dashboard Results
+
+
+
+
+
+
+
+# Milestone 2
+
+Frontend
+
+↓
+
+Temperature
+Rainfall
+Pesticides
+
+↓
+
+FastAPI
+
+↓
+
+yield_model.pkl
+
+↓
+
+Predicted Yield
