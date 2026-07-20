@@ -1,29 +1,9 @@
-# Title-YieldSense-AI-Crop-Yield-Prediction-Agricultural-Productivity-Forecasting-System# YieldSense AI
+YieldSense AI
 
-AI-powered Crop Yield Prediction & Agricultural Productivity Forecasting System.
+AI-powered Crop Yield Prediction & Agricultural Productivity Forecasting System — Infosys Internship Project.
 
-## Milestone 1 Features
+## Milestone 2
 
-- User Authentication
-- Farm Profile Management
-- Soil Test Data Entry
-- Weather Integration (OpenWeatherMap)
-- Rule-Based Recommendation Engine
-- Dashboard
-
-## Technology Stack
-
-### Frontend
-- React (Vite)
-- Tailwind CSS
-
-### Backend
-- Flask
-- SQLAlchemy
-- Flask-JWT-Extended
-
-### Database
-- PostgreSQL
-
-### External API
-- OpenWeatherMap
+- Added FastAPI backend
+- Configured Alembic migrations
+- Implemented database models
