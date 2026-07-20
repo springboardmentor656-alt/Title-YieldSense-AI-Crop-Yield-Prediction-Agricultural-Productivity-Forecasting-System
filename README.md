@@ -2,9 +2,6 @@ Build a production-ready full-stack web application named:
 
 YieldSense AI: Crop Yield Prediction & Agricultural Productivity Forecasting System
 
-IMPORTANT:
-Implement ONLY Milestone 1 (Week 1 & Week 2). Do NOT implement any machine learning, crop yield prediction, weather analytics, soil intelligence, recommendation engine, risk assessment, forecasting, or advanced analytics. Add placeholders for these features with "Coming in Milestone 2".
-
 Tech Stack:
 Frontend:
 - Next.js (React)
