@@ -86,7 +86,16 @@ export default function PredictPage() {
         {error && <p className="error">{error}</p>}
       </form>
 
-      {result && (
+      {loading && (
+        <div className="result-card skeleton">
+          <div className="skel-line skel-label" />
+          <div className="skel-line skel-value" />
+          <div className="skel-line skel-sub" />
+          <div className="skel-line skel-sub short" />
+        </div>
+      )}
+
+      {!loading && result && (
         <div className="result-card">
           <p className="label">Predicted Yield — {cropType[0].toUpperCase() + cropType.slice(1)}</p>
           <p className="value">{result.predicted_yield_kg_ha.toLocaleString()} kg/ha</p>
@@ -110,6 +119,26 @@ export default function PredictPage() {
         .label { font-size: 14px; color: #4b5563; font-weight: 600; }
         .value { font-size: 32px; font-weight: 800; color: #15803d; margin: 4px 0; }
         .sub { font-size: 13px; color: #6b7280; }
+        .skeleton {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        .skel-line {
+          border-radius: 6px;
+          background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.4s ease-in-out infinite;
+        }
+        .skel-label { width: 45%; height: 14px; }
+        .skel-value { width: 65%; height: 32px; margin: 4px 0; }
+        .skel-sub { width: 55%; height: 13px; }
+        .skel-sub.short { width: 35%; }
+
+        @keyframes shimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
       `}</style>
     </div>
   );

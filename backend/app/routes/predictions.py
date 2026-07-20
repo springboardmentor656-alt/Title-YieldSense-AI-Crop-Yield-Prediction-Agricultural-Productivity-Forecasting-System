@@ -1,18 +1,34 @@
-from fastapi import APIRouter, HTTPException, Depends
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException
 
 from app.schemas.prediction import PredictionRequest, PredictionResponse
 from app.ml.predict import predict_yield, MODEL_VERSION
 from app.modules.soil_service import suitability_score
-from app.models.prediction import Prediction
-from app.db.session import get_db
+from app.modules.geocoding_service import get_coordinates
+from app.modules.weather_service import WeatherService
 
 router = APIRouter(prefix="/api/v1/predictions", tags=["predictions"])
 
+
 @router.post("", response_model=PredictionResponse)
-def create_prediction(payload: PredictionRequest, db: Session = Depends(get_db)):
+async def create_prediction(payload: PredictionRequest):
     try:
-        yield_kg_ha = predict_yield(payload.model_dump())
+        lat, lon = await get_coordinates(payload.region)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
+    try:
+        weather_service = WeatherService()
+        weather = await weather_service.get_current_conditions(lat, lon)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Weather lookup failed: {e}")
+
+    try:
+        model_input = {
+            "crop_type": payload.crop_type,
+            "rainfall_mm": weather["rainfall_mm"],
+            "avg_temp_c": weather["avg_temp_c"],
+        }
+        yield_kg_ha = predict_yield(model_input)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction failed: {e}")
 
@@ -21,25 +37,8 @@ def create_prediction(payload: PredictionRequest, db: Session = Depends(get_db))
         payload.nitrogen_kg_ha, payload.phosphorus_kg_ha, payload.potassium_kg_ha,
     )
 
-    record = Prediction(
-        **payload.model_dump(),
+    return PredictionResponse(
         predicted_yield_kg_ha=round(yield_kg_ha, 1),
         soil_suitability_score=soil_score,
         model_version=MODEL_VERSION,
-    )
-    db.add(record)
-    db.commit()
-    db.refresh(record)
-
-    return record
-
-@router.get("/history", response_model=list[PredictionResponse])
-def list_predictions(db: Session = Depends(get_db), limit: int = 20):
-    """Simple history endpoint — handy for the 'saved to database' requirement
-    and an easy thing to demo to your mentor."""
-    return (
-        db.query(Prediction)
-        .order_by(Prediction.created_at.desc())
-        .limit(limit)
-        .all()
     )

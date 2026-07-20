@@ -1,3 +1,8 @@
+from dotenv import load_dotenv
+load_dotenv()
+
+from fastapi import FastAPI
+# ...rest of your existing imports and code stay exactly as they are
 """
 YieldSense AI — Backend Entry Point
 File: backend/main.py
@@ -9,7 +14,7 @@ CORS for the Next.js frontend during local development.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import auth, onboarding
+from app.routes import auth, onboarding, predictions
 
 app = FastAPI(
     title="YieldSense AI API",
@@ -36,6 +41,7 @@ app.add_middleware(
 # --- Routers --------------------------------------------------------------
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(onboarding.router, prefix="/api/v1/onboarding", tags=["Onboarding"])
+app.include_router(predictions.router, tags=["Predictions"])
 
 
 @app.get("/health", tags=["System"])
