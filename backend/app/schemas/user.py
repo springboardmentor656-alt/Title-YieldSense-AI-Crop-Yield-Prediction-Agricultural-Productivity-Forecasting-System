@@ -16,3 +16,12 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class UpdateRoleRequest(BaseModel):
+
+    role: str
+
+
+class UpdateStatusRequest(BaseModel):
+
+    is_active: bool        

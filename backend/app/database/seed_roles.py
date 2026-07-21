@@ -6,19 +6,28 @@ from app.models.role import Role
 def seed_roles(db: Session):
 
     roles = [
-        {
-            "name": "Admin",
-            "description": "System Administrator"
-        },
-        {
-            "name": "Farmer",
-            "description": "Farmer User"
-        },
-        {
-            "name": "Researcher",
-            "description": "Agricultural Research"
-        },
-    ]
+    {
+        "name": "Administrator",
+        "description": "System Administrator"
+    },
+    {
+        "name": "Farmer",
+        "description": "Farm Owner"
+    },
+    {
+        "name": "Agriculture Department",
+        "description": "Government Agriculture Department"
+    },
+    {
+        "name": "Agri Consultant",
+        "description": "Agricultural Consultant"
+    },
+    {
+        "name": "Researcher",
+        "description": "Agricultural Research"
+    },
+]
+
 
     for role in roles:
 

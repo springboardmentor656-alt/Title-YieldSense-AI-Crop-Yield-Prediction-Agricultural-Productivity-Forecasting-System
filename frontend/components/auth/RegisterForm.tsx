@@ -133,15 +133,15 @@ export default function RegisterForm() {
                     </label>
 
                     <Select
-
                         defaultValue="Farmer"
-
-                        onValueChange={(value) =>
-
-                            setValue("role", value)
-
-                        }
-
+                        onValueChange={(value) => {
+                            if (value) {
+                                setValue("role", value, {
+                                    shouldValidate: true,
+                                    shouldDirty: true,
+                                });
+                            }
+                        }}
                     >
 
                         <SelectTrigger>
@@ -151,21 +151,26 @@ export default function RegisterForm() {
                         </SelectTrigger>
 
                         <SelectContent>
-
                             <SelectItem value="Farmer">
-
                                 Farmer
+                            </SelectItem>
 
+                            <SelectItem value="Agriculture Department">
+                                Agriculture Department
+                            </SelectItem>
+
+                            <SelectItem value="Agri Consultant">
+                                Agri Consultant
                             </SelectItem>
 
                             <SelectItem value="Researcher">
-
                                 Researcher
-
                             </SelectItem>
 
+                            <SelectItem value="Administrator">
+                                Administrator
+                            </SelectItem>
                         </SelectContent>
-
                     </Select>
 
                 </div>

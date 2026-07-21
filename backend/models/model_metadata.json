@@ -1,0 +1,46 @@
+{
+  "model_name": "XGBRegressor",
+  "features": [
+    "rainfall",
+    "temperature",
+    "item"
+  ],
+  "numeric_features": [
+    "rainfall",
+    "temperature"
+  ],
+  "categorical_features": [
+    "item"
+  ],
+  "crop_categories": [
+    "Cassava",
+    "Maize",
+    "Plantains and others",
+    "Potatoes",
+    "Rice, paddy",
+    "Sorghum",
+    "Soybeans",
+    "Sweet potatoes",
+    "Wheat",
+    "Yams"
+  ],
+  "target": "yield",
+  "training_date": "2026-07-20T11:56:01.718755+00:00",
+  "metrics": {
+    "mae": 11728.941199426778,
+    "rmse": 22272.519474660625,
+    "r2": 0.931557297706604
+  },
+  "model_comparison": {
+    "RandomForestRegressor": {
+      "mae": 12566.688202905376,
+      "rmse": 24973.176937938024,
+      "r2": 0.9139529605514296
+    },
+    "XGBRegressor": {
+      "mae": 11728.941199426778,
+      "rmse": 22272.519474660625,
+      "r2": 0.931557297706604
+    }
+  }
+}

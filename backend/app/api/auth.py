@@ -1,8 +1,6 @@
 from fastapi import APIRouter
 from fastapi import Depends
-
 from sqlalchemy.orm import Session
-
 from app.database.session import get_db
 from app.schemas.auth import LoginRequest
 from app.schemas.auth import RegisterRequest

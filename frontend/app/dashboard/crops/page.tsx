@@ -1,163 +1,200 @@
 "use client";
 
+import { useState } from "react";
+
+import { Plus, Sprout, Trash2 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import FarmPicker from "@/components/farm/FarmPicker";
+import { useFarm } from "@/hooks/useFarm";
+import { useCrop } from "@/hooks/useCrop";
 
 export default function CropsPage() {
+    const { farms, loading: farmsLoading } = useFarm();
+    const [farmId, setFarmId] = useState<number | null>(null);
+
+    const { crops, loading, addCrop, removeCrop } = useCrop(
+        farmId ?? undefined
+    );
+
+    const [cropName, setCropName] = useState("");
+    const [hectares, setHectares] = useState("");
+    const [submitting, setSubmitting] = useState(false);
+
+    async function handleAdd(e: React.FormEvent) {
+        e.preventDefault();
+
+        if (!cropName.trim()) {
+            return;
+        }
+
+        setSubmitting(true);
+
+        try {
+            await addCrop(
+                cropName.trim(),
+                hectares ? Number(hectares) : undefined
+            );
+            setCropName("");
+            setHectares("");
+        } finally {
+            setSubmitting(false);
+        }
+    }
+
+    const totalHectares = crops.reduce(
+        (sum, crop) => sum + (crop.hectares_planted ?? 0),
+        0
+    );
+
     return (
         <div className="space-y-8">
-
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-4xl font-bold">
-                        Crop Management
-                    </h1>
-                    <p className="text-gray-500 mt-2">
-                        Manage all crops cultivated across your farms.
-                    </p>
-                </div>
-
-                <Button>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Crop
-                </Button>
+            <div>
+                <h1 className="text-4xl font-bold">Crop Management</h1>
+                <p className="text-gray-500 mt-2">
+                    Assign and track crops planted on each farm.
+                </p>
             </div>
 
-            {/* Statistics */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-                <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="bg-white rounded-xl shadow p-6">
+                {farmsLoading ? (
+                    <p className="text-gray-500">Loading farms...</p>
+                ) : farms.length === 0 ? (
                     <p className="text-gray-500">
-                        Total Crops
+                        Add a farm first to manage crops.
                     </p>
-
-                    <h2 className="text-3xl font-bold mt-2">
-                        12
-                    </h2>
-                </div>
-
-                <div className="bg-white rounded-xl shadow-md p-6">
-                    <p className="text-gray-500">
-                        Active Farms
-                    </p>
-
-                    <h2 className="text-3xl font-bold mt-2">
-                        5
-                    </h2>
-                </div>
-
-                <div className="bg-white rounded-xl shadow-md p-6">
-                    <p className="text-gray-500">
-                        Average Yield
-                    </p>
-
-                    <h2 className="text-3xl font-bold mt-2">
-                        6.8 t/ha
-                    </h2>
-                </div>
-
+                ) : (
+                    <FarmPicker
+                        farms={farms}
+                        value={farmId}
+                        onChange={setFarmId}
+                    />
+                )}
             </div>
 
-            {/* Crop List */}
-            <div className="bg-white rounded-xl shadow-md">
+            {farmId && (
+                <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="bg-white rounded-xl shadow-md p-6">
+                            <p className="text-gray-500">Crops on This Farm</p>
+                            <h2 className="text-3xl font-bold mt-2">
+                                {crops.length}
+                            </h2>
+                        </div>
 
-                <div className="border-b p-5">
-                    <h2 className="text-2xl font-semibold">
-                        Crop List
-                    </h2>
-                </div>
+                        <div className="bg-white rounded-xl shadow-md p-6">
+                            <p className="text-gray-500">Total Hectares Planted</p>
+                            <h2 className="text-3xl font-bold mt-2">
+                                {totalHectares.toFixed(2)} ha
+                            </h2>
+                        </div>
+                    </div>
 
-                <div className="overflow-x-auto">
+                    <form
+                        onSubmit={handleAdd}
+                        className="bg-white rounded-xl shadow-md p-6 flex flex-col md:flex-row gap-4 items-end"
+                    >
+                        <div className="flex-1 w-full">
+                            <label className="text-sm text-gray-500">
+                                Crop Name
+                            </label>
+                            <input
+                                type="text"
+                                value={cropName}
+                                onChange={(e) => setCropName(e.target.value)}
+                                placeholder="e.g. Rice"
+                                className="border rounded-lg px-4 py-2 w-full mt-1"
+                                required
+                            />
+                        </div>
 
-                    <table className="w-full">
+                        <div className="w-full md:w-48">
+                            <label className="text-sm text-gray-500">
+                                Hectares Planted
+                            </label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                value={hectares}
+                                onChange={(e) => setHectares(e.target.value)}
+                                placeholder="Optional"
+                                className="border rounded-lg px-4 py-2 w-full mt-1"
+                            />
+                        </div>
 
-                        <thead className="bg-gray-100">
+                        <Button type="submit" disabled={submitting}>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add Crop
+                        </Button>
+                    </form>
 
-                            <tr>
+                    <div className="bg-white rounded-xl shadow-md">
+                        <div className="border-b p-5">
+                            <h2 className="text-2xl font-semibold">
+                                Crop List
+                            </h2>
+                        </div>
 
-                                <th className="text-left p-4">
-                                    Crop
-                                </th>
+                        <div className="overflow-x-auto">
+                            {loading ? (
+                                <p className="text-gray-500 p-5">
+                                    Loading crops...
+                                </p>
+                            ) : crops.length === 0 ? (
+                                <p className="text-gray-500 p-5">
+                                    No crops added for this farm yet.
+                                </p>
+                            ) : (
+                                <table className="w-full">
+                                    <thead className="bg-gray-100">
+                                        <tr>
+                                            <th className="text-left p-4">
+                                                Crop
+                                            </th>
+                                            <th className="text-left p-4">
+                                                Hectares Planted
+                                            </th>
+                                            <th className="text-left p-4" />
+                                        </tr>
+                                    </thead>
 
-                                <th className="text-left p-4">
-                                    Farm
-                                </th>
-
-                                <th className="text-left p-4">
-                                    Area
-                                </th>
-
-                                <th className="text-left p-4">
-                                    Status
-                                </th>
-
-                                <th className="text-left p-4">
-                                    Predicted Yield
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-                        <tbody>
-
-                            <tr className="border-t">
-
-                                <td className="p-4">
-                                    Rice
-                                </td>
-
-                                <td className="p-4">
-                                    Farm A
-                                </td>
-
-                                <td className="p-4">
-                                    5 Acres
-                                </td>
-
-                                <td className="p-4 text-green-600 font-medium">
-                                    Growing
-                                </td>
-
-                                <td className="p-4">
-                                    6.5 t/ha
-                                </td>
-
-                            </tr>
-
-                            <tr className="border-t">
-
-                                <td className="p-4">
-                                    Wheat
-                                </td>
-
-                                <td className="p-4">
-                                    Farm B
-                                </td>
-
-                                <td className="p-4">
-                                    3 Acres
-                                </td>
-
-                                <td className="p-4 text-yellow-600 font-medium">
-                                    Harvest Soon
-                                </td>
-
-                                <td className="p-4">
-                                    4.8 t/ha
-                                </td>
-
-                            </tr>
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </div>
-
+                                    <tbody>
+                                        {crops.map((crop) => (
+                                            <tr
+                                                key={crop.id}
+                                                className="border-t"
+                                            >
+                                                <td className="p-4 flex items-center gap-2">
+                                                    <Sprout className="text-green-700 h-4 w-4" />
+                                                    {crop.crop_name}
+                                                </td>
+                                                <td className="p-4">
+                                                    {crop.hectares_planted ??
+                                                        "N/A"}
+                                                </td>
+                                                <td className="p-4 text-right">
+                                                    <button
+                                                        onClick={() =>
+                                                            removeCrop(
+                                                                crop.id
+                                                            )
+                                                        }
+                                                        className="text-red-600 hover:text-red-800"
+                                                        aria-label="Delete crop"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
     );
 }

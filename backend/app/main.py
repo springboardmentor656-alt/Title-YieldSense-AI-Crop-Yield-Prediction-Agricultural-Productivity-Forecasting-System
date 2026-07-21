@@ -1,9 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
+from app.api import users
 from app.api.router import api_router
 from app.config.settings import settings
 from app.middleware.request_logger import RequestLoggerMiddleware
+from app.middleware.rate_limiter import RateLimiterMiddleware
 from contextlib import asynccontextmanager
 
 from app.core.events import startup, shutdown
@@ -40,12 +41,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(RequestLoggerMiddleware)
+app.add_middleware(RateLimiterMiddleware)
 # ----------------------------
 # Include API Routes
 # ----------------------------
 
 app.include_router(api_router)
-
 # ----------------------------
 # Root Endpoint
 # ----------------------------

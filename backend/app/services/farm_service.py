@@ -94,7 +94,7 @@ class FarmService:
 
 ):
 
-     if user["role"]=="Admin":
+     if user["role"]=="Administrator":
 
         farm=self.repo.get_by_id(farm_id)
 
@@ -130,7 +130,7 @@ class FarmService:
 
     ):
 
-     if user["role"]=="Admin":
+     if user["role"]=="Administrator":
 
         farm=self.repo.get_by_id(farm_id)
 
@@ -173,7 +173,7 @@ class FarmService:
 
      ):
 
-     if user["role"] == "Admin":
+     if user["role"] == "Administrator":
 
         farm = self.repo.get_by_id(farm_id)
 

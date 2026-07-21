@@ -1,0 +1,62 @@
+# Local containerized dev stack for YieldSense AI.
+#
+# Usage:
+#   1. Copy backend/.env.example to backend/.env and fill in real values
+#      (DB_PASSWORD below must match backend/.env's DB_PASSWORD, and
+#      DB_HOST in backend/.env must be "postgres" - the service name below -
+#      not "localhost", since the backend talks to postgres over the
+#      compose network).
+#   2. docker compose up --build
+#
+# No `version:` key - not needed on modern Docker Compose (v2+).
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-yieldsense_db}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-yieldsense_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Real secrets/config live in backend/.env (gitignored), never in this
+    # file. DB_HOST inside that file must be "postgres" when run via
+    # compose, since containers reach each other by service name.
+    env_file:
+      - backend/.env
+    environment:
+      PORT: 8000
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:

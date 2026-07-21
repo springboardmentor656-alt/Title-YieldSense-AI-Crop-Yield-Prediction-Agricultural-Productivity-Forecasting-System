@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - Srilalitha
+  pull_request:
+    branches:
+      - main
+      - Srilalitha
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+
+    # app/main.py runs Base.metadata.create_all(bind=engine) at import
+    # time, and the test suite imports app.main directly (TestClient),
+    # so a real Postgres instance is required just to collect the tests
+    # - not optional here.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: yieldsense_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      HOST: 127.0.0.1
+      PORT: 8000
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: yieldsense_test
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      SECRET_KEY: ci-test-secret-key-not-for-production
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 480
+      WEATHER_API_KEY: ci-placeholder-key
+      NASA_API_KEY: ci-placeholder-key
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Run pytest
+        working-directory: backend
+        # Must be `python -m pytest` (not bare `pytest`): the app package
+        # is only importable when the backend/ dir is on sys.path, which
+        # `python -m` adds automatically for the cwd. Verified locally -
+        # bare `pytest` fails with "ModuleNotFoundError: No module named
+        # 'app'" on tests/test_auth.py's `from app.main import app`.
+        run: python -m pytest -v
+
+  frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Lint
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Build
+        working-directory: frontend
+        run: npm run build

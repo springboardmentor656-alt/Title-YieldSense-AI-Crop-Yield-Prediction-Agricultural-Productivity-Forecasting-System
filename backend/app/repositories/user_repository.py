@@ -34,3 +34,19 @@ class UserRepository:
         self.db.refresh(user)
 
         return user
+    def get_all(self):
+
+        return (
+            self.db.query(User)
+            .options(joinedload(User.role))
+            .all()
+        )
+
+    def update(self):
+
+        self.db.commit()
+
+    def delete(self, user: User):
+
+        self.db.delete(user)
+        self.db.commit()

@@ -36,3 +36,24 @@ class WeatherRepository:
             .first()
 
         )
+
+    def get_by_farm(self, farm_id, limit=None):
+
+        query = (
+
+            self.db.query(WeatherRecord)
+
+            .filter(
+                WeatherRecord.farm_id == farm_id
+            )
+
+            .order_by(
+                WeatherRecord.recorded_at.desc()
+            )
+
+        )
+
+        if limit is not None:
+            query = query.limit(limit)
+
+        return query.all()

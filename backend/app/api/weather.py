@@ -1,9 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-
 from app.database.session import get_db
 from app.auth.oauth2 import verify_token
-
 from app.services.weather_service import WeatherService
 
 router = APIRouter(

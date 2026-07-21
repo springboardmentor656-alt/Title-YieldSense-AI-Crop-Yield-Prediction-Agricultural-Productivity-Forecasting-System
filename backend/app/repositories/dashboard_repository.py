@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.models.crop import Crop
 from app.models.farm import Farm
 from app.models.prediction import Prediction
+from app.models.prediction_history import PredictionHistory
 from app.models.weather import WeatherRecord
 
 
@@ -68,5 +69,55 @@ class DashboardRepository:
             )
 
             .first()
+
+        )
+
+    def prediction_summary(self, user_id: int):
+
+        return (
+
+            self.db.query(
+
+                func.avg(PredictionHistory.prediction),
+
+                func.max(PredictionHistory.prediction),
+
+                func.min(PredictionHistory.prediction),
+
+                func.count(PredictionHistory.id),
+
+            )
+
+            .filter(PredictionHistory.user_id == user_id)
+
+            .first()
+
+        )
+
+    def monthly_prediction_trend(self, user_id: int):
+
+        return (
+
+            self.db.query(
+
+                func.date_trunc(
+                    "month", PredictionHistory.created_at
+                ).label("month"),
+
+                func.avg(PredictionHistory.prediction).label(
+                    "average_yield"
+                ),
+
+                func.count(PredictionHistory.id).label("count"),
+
+            )
+
+            .filter(PredictionHistory.user_id == user_id)
+
+            .group_by("month")
+
+            .order_by("month")
+
+            .all()
 
         )
