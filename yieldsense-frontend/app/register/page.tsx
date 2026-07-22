@@ -3,47 +3,50 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function LoginPage() {
+export default function RegisterPage() {
+
   const router = useRouter();
 
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  async function login() {
-    try {
-      const response = await fetch("http://127.0.0.1:8000/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
+  async function register() {
 
-      const data = await response.json();
+    const response = await fetch("http://127.0.0.1:8000/register", {
 
-      console.log(data);
+      method: "POST",
 
-      if (response.ok) {
-        // Save user information
-        localStorage.setItem("user", data.user);
-        localStorage.setItem("role", data.role);
+      headers: {
+        "Content-Type": "application/json",
+      },
 
-        alert(data.message);
+      body: JSON.stringify({
+        name,
+        email,
+        password,
+      }),
 
-        router.push("/dashboard");
-      } else {
-        alert(data.detail || "Invalid Email or Password");
-      }
-    } catch (error) {
-      console.error(error);
-      alert("Unable to connect to backend.");
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+
+      alert("Registration Successful!");
+
+      router.push("/login");
+
+    } else {
+
+      alert(data.detail || "Registration Failed");
+
     }
+
   }
 
   return (
+
     <div
       style={{
         display: "flex",
@@ -53,15 +56,17 @@ export default function LoginPage() {
         background: "#E8F5E9",
       }}
     >
+
       <div
         style={{
           background: "#fff",
+          width: "420px",
           padding: "40px",
           borderRadius: "20px",
-          width: "420px",
           boxShadow: "0 5px 20px rgba(0,0,0,.2)",
         }}
       >
+
         <h1
           style={{
             textAlign: "center",
@@ -69,11 +74,22 @@ export default function LoginPage() {
             marginBottom: "30px",
           }}
         >
-          🌾 Login
+          🌾 Register
         </h1>
 
         <input
-          type="email"
+          placeholder="Full Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "15px",
+            marginBottom: "20px",
+            borderRadius: "10px",
+          }}
+        />
+
+        <input
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -82,8 +98,6 @@ export default function LoginPage() {
             padding: "15px",
             marginBottom: "20px",
             borderRadius: "10px",
-            border: "1px solid #ccc",
-            fontSize: "16px",
           }}
         />
 
@@ -97,13 +111,11 @@ export default function LoginPage() {
             padding: "15px",
             marginBottom: "20px",
             borderRadius: "10px",
-            border: "1px solid #ccc",
-            fontSize: "16px",
           }}
         />
 
         <button
-          onClick={login}
+          onClick={register}
           style={{
             width: "100%",
             padding: "15px",
@@ -111,13 +123,16 @@ export default function LoginPage() {
             color: "#fff",
             border: "none",
             borderRadius: "10px",
-            fontSize: "18px",
             cursor: "pointer",
+            fontSize: "18px",
           }}
         >
-          Login
+          Register
         </button>
+
       </div>
+
     </div>
+
   );
 }
