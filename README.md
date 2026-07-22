@@ -1,53 +1,26 @@
-# 🌾 YieldSense AI: Crop Yield Prediction & Agricultural Productivity Forecasting System
+# YieldSense AI: Crop Yield Prediction & Agricultural Productivity Forecasting System
 
-YieldSense AI is a machine learning platform designed to help farmers and agricultural organizations estimate future crop production using historical farming data, weather conditions, and soil characteristics.
+**Developer**: Tirutopu Srivardhan  
+**Milestone Status**: Milestone 1 & 2 Complete
 
----
-
-## 📋 Project Status
-
-| Milestone | Status | Key Deliverables |
-| :--- | :--- | :--- |
-| **Milestone 1: Foundation & Core Setup** | ✅ Complete | Decoupled Next.js & FastAPI setup, PostgreSQL database schema, JWT role-based authentication, and user dashboard wireframes. |
-| **Milestone 2: Yield Prediction & Analysis** | ✅ Complete | XGBoost machine learning training pipeline, `/api/v1/predict-yield` API endpoint, and real-time frontend forecast integration. |
+YieldSense AI is an AI-powered crop yield prediction platform designed to help farmers and agricultural organizations estimate future crop production using historical farming data, weather conditions, and soil characteristics.
 
 ---
 
-## 🌾 Milestone 1 Summary
+## 📋 Project Milestones Status
 
-### Backend Setup & Auth
-* **Architecture**: Decoupled Python FastAPI server and relational PostgreSQL tables (`users`, `farms`, `crops`).
-* **Authentication**: Stateless JSON Web Tokens (JWT) using `PyJWT` and bcrypt password hashing.
-* **Data Processing**: Pipeline script (`preprocess.py`) to clean, impute missing values, and filter anomalous noise in agricultural data.
+### 🌾 Milestone 1: Foundation & Core Setup (Complete)
+- **Environments Scaffolded**: Decoupled Python FastAPI backend and Next.js (React) frontend.
+- **Relational PostgreSQL Schema**: Created tables for `users` (auth), `farms` (metadata, coordinates, soil pH), and `crops` (planted share).
+- **Authentication**: Stateless JSON Web Tokens (JWT) using `PyJWT` and bcrypt password hashing.
+- **Data Preprocessing**: Implemented standard tabular preprocessing (`preprocess.py`) to clean, handle missing features, and filter outliers from raw agricultural sheets.
+- **Modern User Dashboards**: Designed premium glassmorphism layouts matching structural roles (Farmer, Admin, Consultant, Researcher, Department).
 
-### Frontend Dashboards
-* **Aesthetics**: Premium glassmorphism design with responsive dark themes.
-* **Role Routing**: Dynamic landing page and login routing based on user profiles:
-  * **Farmer**: Displays yield estimations and farm profiles.
-  * **Administrator**: Displays user registries, database table schemas, and terminal logs.
-  * **Agri Consultant**: Displays client lists and soil advisory recommendation portals.
-  * **Researcher**: Displays datasets metadata and model regression metrics.
-  * **Agriculture Department**: Displays regional yield stats and financial support ledgers.
-
----
-
-## 🤖 Milestone 2 Summary
-
-### XGBoost Machine Learning Pipeline
-* **Script**: `backend/train_model.py` splits the dataset 80/20 and trains an `XGBRegressor` on temperature, rainfall, and pH to predict crop yield ($kg/ha$).
-* **Evaluation Metrics**:
-  * **Mean Absolute Error (MAE)**: `429.02 kg/ha`
-  * **Root Mean Square Error (RMSE)**: `558.22 kg/ha`
-* **Feature Importance**: Analyzes feature impact weights:
-  * **Annual Rainfall**: `41.45%`
-  * **Soil pH**: `35.16%`
-  * **Avg Temperature**: `23.39%`
-* **Model Serialization**: Saves weights locally to `crop_yield_model.pkl` (configured via `.gitignore` to be excluded from commits).
-
-### API Inference Endpoint
-* **Path**: `/api/v1/predict-yield` (POST)
-* **Features**: Loads the `.pkl` binary in under 10ms, runs inference on user inputs, and classifies weather stress and soil acidity.
-
-### Frontend Integration
-* **Component**: Interactive forecasting form on the Farmer Dashboard.
-* **Connectivity**: Wired to call the local backend and dynamically render yield results and ratings in real-time.
+### 🤖 Milestone 2: Yield Prediction & Analysis (Complete)
+- **Tabular ML Model**: Trained an **XGBoost Regressor** (`XGBRegressor`) on 200 cleaned data records mapping input features (`avg_temp`, `average_rain_fall_mm_per_year`, `ph`) to the target crop yield.
+- **Model Metrics Logged**: Prints performance error metrics on training completion:
+  - **Mean Absolute Error (MAE)**: `429.02 kg/ha`
+  - **Root Mean Square Error (RMSE)**: `558.22 kg/ha`
+  - **Feature Importance Analysis**: Analyzes variables mathematically (`rainfall`: ~41%, `ph`: ~35%, `avg_temp`: ~23%).
+- **Predict Endpoint**: Exposed `/api/v1/predict-yield` POST route loaded from serialized model weights (`crop_yield_model.pkl`).
+- **Interactive UI Forms**: Fully wired the Farmer Dashboard form to perform asynchronous forecast queries, dynamically rendering estimations and assessments in real-time.
