@@ -1,13 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getPrediction, PredictionResponse } from "../../services/predictionApi";
 
 const CROPS = ["wheat", "rice", "maize"];
 
 export default function PredictPage() {
   const [cropType, setCropType] = useState("wheat");
-  const [region, setRegion] = useState("Central Delhi, Delhi");
+  const [region, setRegion] = useState("");
+
+useEffect(() => {
+  const raw = localStorage.getItem("ys_profile");
+
+  if (!raw) return;
+
+  try {
+    const profile = JSON.parse(raw);
+
+    if (profile?.district && profile?.state) {
+      setRegion(`${profile.district}, ${profile.state}`);
+    }
+  } catch (error) {
+    console.error("Failed to load profile:", error);
+    // Leave region empty so the user can enter it manually.
+  }
+}, []);
   const [soilPh, setSoilPh] = useState("6.5");
   const [nitrogen, setNitrogen] = useState("120");
   const [phosphorus, setPhosphorus] = useState("60");
