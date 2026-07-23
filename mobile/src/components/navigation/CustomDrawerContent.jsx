@@ -57,16 +57,23 @@ export default function CustomDrawerContent(props) {
     );
   };
 
+  const roleLabel =
+    user?.role === "admin"
+      ? "Administrator"
+      : user?.role === "farmer"
+        ? "Farmer"
+        : "User";
+
   return (
     <View style={styles.container}>
       <DrawerContentScrollView
         {...props}
         contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
-        {/* Brand */}
         <View style={styles.brandSection}>
           <View style={styles.logoContainer}>
-            <Leaf size={27} color={colors.surface} />
+            <Leaf size={25} color={colors.surface} />
           </View>
 
           <View style={styles.brandText}>
@@ -80,53 +87,51 @@ export default function CustomDrawerContent(props) {
           </View>
         </View>
 
-        {/* User summary */}
-        <View style={styles.userCard}>
-          <View style={styles.avatar}>
-            <UserRound
-              size={26}
-              color={colors.primary}
-            />
-          </View>
-
-          <View style={styles.userDetails}>
-            <Text
-              style={styles.userName}
-              numberOfLines={1}
-            >
-              {user?.full_name || "YieldSense User"}
-            </Text>
-
-            <Text
-              style={styles.userEmail}
-              numberOfLines={1}
-            >
-              {user?.email || ""}
-            </Text>
-
-            <View style={styles.roleRow}>
-              <ShieldCheck
-                size={14}
+        <View style={styles.content}>
+          <View style={styles.userCard}>
+            <View style={styles.avatar}>
+              <UserRound
+                size={25}
                 color={colors.primary}
               />
+            </View>
 
-              <Text style={styles.roleText}>
-                {user?.role || "User"}
+            <View style={styles.userDetails}>
+              <Text
+                style={styles.userName}
+                numberOfLines={1}
+              >
+                {user?.full_name || "YieldSense User"}
               </Text>
+
+              <Text
+                style={styles.userEmail}
+                numberOfLines={1}
+              >
+                {user?.email || ""}
+              </Text>
+
+              <View style={styles.roleBadge}>
+                <ShieldCheck
+                  size={13}
+                  color={colors.primaryDark}
+                />
+
+                <Text style={styles.roleText}>
+                  {roleLabel}
+                </Text>
+              </View>
             </View>
           </View>
-        </View>
 
-        <Text style={styles.menuLabel}>
-          MENU
-        </Text>
+          <Text style={styles.menuLabel}>Navigation</Text>
 
-        <View style={styles.drawerItems}>
-          <DrawerItemList {...props} />
+          <View style={styles.drawerItems}>
+            <DrawerItemList {...props} />
+          </View>
         </View>
       </DrawerContentScrollView>
 
-      {/* Logout */}
       <View style={styles.footer}>
         <Pressable
           onPress={handleLogout}
@@ -135,10 +140,12 @@ export default function CustomDrawerContent(props) {
             pressed && styles.pressed,
           ]}
         >
-          <LogOut
-            size={21}
-            color={colors.danger}
-          />
+          <View style={styles.logoutIcon}>
+            <LogOut
+              size={20}
+              color={colors.danger}
+            />
+          </View>
 
           <Text style={styles.logoutText}>
             Logout
@@ -156,24 +163,26 @@ const styles = StyleSheet.create({
   },
 
   scrollContent: {
+    flexGrow: 1,
     paddingTop: 0,
   },
 
   brandSection: {
+    minHeight: 116,
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: colors.primaryDark,
     paddingHorizontal: 20,
-    paddingTop: 34,
-    paddingBottom: 22,
+    paddingTop: 28,
+    paddingBottom: 20,
   },
 
   logoContainer: {
-    width: 50,
-    height: 50,
+    width: 48,
+    height: 48,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 16,
+    borderRadius: 15,
     backgroundColor: colors.primary,
   },
 
@@ -183,34 +192,41 @@ const styles = StyleSheet.create({
   },
 
   brandName: {
-    fontSize: 19,
+    fontSize: 20,
     fontWeight: "800",
     color: colors.surface,
   },
 
   brandSubtitle: {
     marginTop: 3,
-    fontSize: 11,
+    fontSize: 12,
     color: "#BBF7D0",
+  },
+
+  content: {
+    paddingHorizontal: 14,
+    paddingTop: 16,
   },
 
   userCard: {
     flexDirection: "row",
     alignItems: "center",
-    marginHorizontal: 16,
-    marginTop: 18,
-    borderRadius: 16,
-    backgroundColor: colors.primaryLight,
+    borderWidth: 1,
+    borderColor: "#D1FAE5",
+    borderRadius: 17,
+    backgroundColor: "#F0FDF4",
     padding: 14,
   },
 
   avatar: {
-    width: 47,
-    height: 47,
+    width: 48,
+    height: 48,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 15,
     backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: "#DCFCE7",
   },
 
   userDetails: {
@@ -225,56 +241,75 @@ const styles = StyleSheet.create({
   },
 
   userEmail: {
-    marginTop: 2,
+    marginTop: 3,
     fontSize: 11,
     color: colors.textSecondary,
   },
 
-  roleRow: {
+  roleBadge: {
+    alignSelf: "flex-start",
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 5,
-    gap: 4,
+    gap: 5,
+    marginTop: 7,
+    borderRadius: 999,
+    backgroundColor: "#DCFCE7",
+    paddingHorizontal: 9,
+    paddingVertical: 4,
   },
 
   roleText: {
     fontSize: 11,
-    fontWeight: "700",
-    textTransform: "capitalize",
+    fontWeight: "800",
     color: colors.primaryDark,
   },
 
   menuLabel: {
-    marginHorizontal: 22,
-    marginTop: 25,
-    marginBottom: 7,
+    marginTop: 24,
+    marginBottom: 8,
+    paddingHorizontal: 8,
     fontSize: 11,
     fontWeight: "800",
-    letterSpacing: 1,
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
     color: colors.textSecondary,
   },
 
   drawerItems: {
-    paddingHorizontal: 5,
+    marginHorizontal: -4,
   },
 
   footer: {
     borderTopWidth: 1,
     borderTopColor: "#E5E7EB",
-    padding: 16,
+    backgroundColor: colors.surface,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 18,
   },
 
   logoutButton: {
-    minHeight: 50,
+    minHeight: 52,
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 13,
-    backgroundColor: "#FEF2F2",
-    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: "#FECACA",
+    borderRadius: 14,
+    backgroundColor: "#FFF7F7",
+    paddingHorizontal: 14,
+  },
+
+  logoutIcon: {
+    width: 34,
+    height: 34,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 10,
+    backgroundColor: "#FEE2E2",
   },
 
   logoutText: {
-    marginLeft: 13,
+    marginLeft: 12,
     fontSize: 15,
     fontWeight: "800",
     color: colors.danger,

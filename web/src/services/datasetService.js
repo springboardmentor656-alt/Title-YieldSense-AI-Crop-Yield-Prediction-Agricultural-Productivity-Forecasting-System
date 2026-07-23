@@ -91,4 +91,9 @@ export const datasetService = {
 
     return response.data;
   },
+    async getFarmOptions() {
+      const response = await datasetApi.get("/farm-options");
+
+      return response.data;
+    },
 };

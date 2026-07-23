@@ -5,7 +5,11 @@ import {
   Text,
   View,
 } from "react-native";
-import { Link, router, useLocalSearchParams } from "expo-router";
+import {
+  Link,
+  router,
+  useLocalSearchParams,
+} from "expo-router";
 import { Mail } from "lucide-react-native";
 
 import ScreenContainer from "../../src/components/common/ScreenContainer";
@@ -42,25 +46,35 @@ export default function SendOtpScreen() {
     try {
       setLoading(true);
 
-      const result = await authService.sendOtp(normalizedEmail);
-
-      Alert.alert(
-        "OTP generated",
-        result.otp_code
-          ? `Development OTP: ${result.otp_code}`
-          : "The verification code has been sent."
+      const result = await authService.sendOtp(
+        normalizedEmail
       );
 
-      router.push({
-        pathname: "/(auth)/verify-otp",
-        params: {
-          email: normalizedEmail,
-        },
-      });
+      Alert.alert(
+        "OTP sent",
+        result.message ||
+          "A verification code was sent to your email.",
+        [
+          {
+            text: "Enter OTP",
+            onPress: () =>
+              router.replace({
+                pathname: "/(auth)/verify-otp",
+                params: {
+                  email: normalizedEmail,
+                  startTimer: "true",
+                },
+              }),
+          },
+        ]
+      );
     } catch (error) {
       Alert.alert(
         "Unable to send OTP",
-        getErrorMessage(error, "OTP generation failed.")
+        getErrorMessage(
+          error,
+          "The verification OTP could not be sent."
+        )
       );
     } finally {
       setLoading(false);
@@ -71,7 +85,7 @@ export default function SendOtpScreen() {
     <ScreenContainer contentStyle={commonStyles.authScreen}>
       <AuthCard
         title="Verify Your Email"
-        subtitle="Generate a six-digit verification code for your account."
+        subtitle="Send a new six-digit verification code to your email."
       >
         <View style={commonStyles.form}>
           <AppInput
@@ -80,9 +94,19 @@ export default function SendOtpScreen() {
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
+            autoCapitalize="none"
             autoComplete="email"
-            leftIcon={<Mail size={20} color={colors.textSecondary} />}
+            leftIcon={
+              <Mail
+                size={20}
+                color={colors.textSecondary}
+              />
+            }
           />
+
+          <Text style={commonStyles.helperText}>
+            The verification code remains valid for 10 minutes.
+          </Text>
 
           <AppButton
             title="Send OTP"

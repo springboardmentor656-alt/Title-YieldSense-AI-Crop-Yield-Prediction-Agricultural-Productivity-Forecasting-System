@@ -95,3 +95,14 @@ class WeatherSummaryResponse(BaseModel):
     average_temperature_c: Optional[float]
     average_rainfall_mm: Optional[float]
     average_humidity_percent: Optional[float]
+
+class DatasetOptionResponse(BaseModel):
+    value: str
+    label: str
+
+
+class FarmReferenceOptionsResponse(BaseModel):
+    states: List[DatasetOptionResponse]
+    crops: List[DatasetOptionResponse]
+    seasons: List[DatasetOptionResponse]
+    irrigation_types: List[DatasetOptionResponse]

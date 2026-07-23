@@ -13,8 +13,10 @@ import {
   RefreshCw,
   ShieldCheck,
   Sprout,
+  Tractor,
   UserRound,
 } from "lucide-react-native";
+import { useRouter } from "expo-router";
 
 import ScreenContainer from "../../src/components/common/ScreenContainer";
 import LoadingScreen from "../../src/components/common/LoadingScreen";
@@ -27,6 +29,7 @@ import { getErrorMessage } from "../../src/utils/errorMessage";
 
 export default function DashboardScreen() {
   const { user } = useAuth();
+  const router = useRouter();
 
   const [summary, setSummary] = useState({
     historicalRecords: 0,
@@ -241,7 +244,76 @@ export default function DashboardScreen() {
           }
         />
       </View>
+      {/* Farm Management */}
+<View style={styles.sectionHeader}>
+  <Text style={styles.sectionTitle}>
+    Farm Management
+  </Text>
 
+  <Text style={styles.sectionDescription}>
+    {user?.role === "admin"
+      ? "Review and manage farms across all registered users."
+      : "Create, view, and manage farms linked to your account."}
+  </Text>
+</View>
+
+<View style={styles.farmManagementContainer}>
+  {user?.role === "admin" ? (
+    <Pressable
+      onPress={() =>
+        router.push("/(protected)/admin-farms")
+      }
+      style={({ pressed }) => [
+        styles.farmManagementCard,
+        pressed && styles.pressedButton,
+      ]}
+    >
+      <View style={styles.farmManagementIcon}>
+        <ShieldCheck
+          size={26}
+          color={colors.primary}
+        />
+      </View>
+
+      <View style={styles.farmManagementText}>
+        <Text style={styles.farmManagementTitle}>
+          All Farms
+        </Text>
+
+        <Text style={styles.farmManagementDescription}>
+          View farm owners, filter records, and manage farm status.
+        </Text>
+      </View>
+    </Pressable>
+  ) : (
+    <Pressable
+      onPress={() =>
+        router.push("/(protected)/farms")
+      }
+      style={({ pressed }) => [
+        styles.farmManagementCard,
+        pressed && styles.pressedButton,
+      ]}
+    >
+      <View style={styles.farmManagementIcon}>
+        <Tractor
+          size={26}
+          color={colors.primary}
+        />
+      </View>
+
+      <View style={styles.farmManagementText}>
+        <Text style={styles.farmManagementTitle}>
+          My Farms
+        </Text>
+
+        <Text style={styles.farmManagementDescription}>
+          Create, update, deactivate, and manage your farm records.
+        </Text>
+      </View>
+    </Pressable>
+  )}
+</View>
       {/* Scope information */}
       <View style={styles.scopeCard}>
         <Text style={styles.scopeTitle}>
@@ -277,8 +349,8 @@ export default function DashboardScreen() {
         </View>
 
         <Text style={styles.scopeNote}>
-          Use the drawer menu to open Historical Yield,
-          Soil Data, Weather Data, or Profile.
+          Use the drawer menu to open Farm Management,
+          Historical Yield, Soil Data, Weather Data, or Profile.
         </Text>
       </View>
     </ScreenContainer>
@@ -433,6 +505,55 @@ const styles = StyleSheet.create({
     gap: 12,
   },
 
+  farmManagementContainer: {
+    marginTop: 2,
+    },
+
+    farmManagementCard: {
+    minHeight: 104,
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#D1FAE5",
+    borderRadius: 18,
+    backgroundColor: colors.surface,
+    padding: 18,
+    shadowColor: "#000000",
+    shadowOffset: {
+        width: 0,
+        height: 3,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    },
+
+    farmManagementIcon: {
+    width: 52,
+    height: 52,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 16,
+    backgroundColor: colors.primaryLight,
+    },
+
+    farmManagementText: {
+    flex: 1,
+    marginLeft: 15,
+    },
+
+    farmManagementTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: colors.text,
+    },
+
+    farmManagementDescription: {
+    marginTop: 5,
+    fontSize: 13,
+    lineHeight: 19,
+    color: colors.textSecondary,
+    },
   scopeCard: {
     marginTop: 20,
     marginBottom: 12,

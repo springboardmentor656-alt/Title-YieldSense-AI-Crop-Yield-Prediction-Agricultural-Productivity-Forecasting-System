@@ -24,6 +24,7 @@ from app.schemas.dataset import (
     HistoricalYieldSummaryResponse,
     SoilSummaryResponse,
     WeatherSummaryResponse,
+    FarmReferenceOptionsResponse,
 )
 from app.models.agriculture import (
     HistoricalCropYield,
@@ -42,7 +43,26 @@ router = APIRouter(
     prefix="/api/datasets",
     tags=["Dataset Management"],
 )
+IRRIGATION_TYPES = [
+    "Rainfed",
+    "Canal",
+    "Drip",
+    "Sprinkler",
+    "Borewell",
+    "Well",
+    "Tank",
+    "Other",
+]
 
+
+def build_options(values: list[str]) -> list[dict[str, str]]:
+    return [
+        {
+            "value": value,
+            "label": value,
+        }
+        for value in values
+    ]
 
 def validate_csv_upload(file: UploadFile) -> None:
     filename = file.filename or ""
@@ -53,6 +73,69 @@ def validate_csv_upload(file: UploadFile) -> None:
             detail="Only CSV files are supported.",
         )
 
+@router.get(
+    "/farm-options",
+    response_model=FarmReferenceOptionsResponse,
+)
+def get_farm_reference_options(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    state_rows = (
+        db.query(StateSoilReference.state)
+        .filter(StateSoilReference.state.isnot(None))
+        .distinct()
+        .all()
+    )
+
+    crop_rows = (
+        db.query(HistoricalCropYield.crop)
+        .filter(HistoricalCropYield.crop.isnot(None))
+        .distinct()
+        .all()
+    )
+
+    season_rows = (
+        db.query(HistoricalCropYield.season)
+        .filter(HistoricalCropYield.season.isnot(None))
+        .distinct()
+        .all()
+    )
+
+    states = sorted(
+        {
+            row[0].strip()
+            for row in state_rows
+            if row[0] and row[0].strip()
+        },
+        key=str.casefold,
+    )
+
+    crops = sorted(
+        {
+            row[0].strip()
+            for row in crop_rows
+            if row[0] and row[0].strip()
+        },
+        key=str.casefold,
+    )
+
+    seasons = sorted(
+        {
+            row[0].strip()
+            for row in season_rows
+            if row[0] and row[0].strip()
+        },
+        key=str.casefold,
+    )
+    return {
+        "states": build_options(states),
+        "crops": build_options(crops),
+        "seasons": build_options(seasons),
+        "irrigation_types": build_options(
+            IRRIGATION_TYPES
+        ),
+    }
 
 @router.post(
     "/historical-yield/import",

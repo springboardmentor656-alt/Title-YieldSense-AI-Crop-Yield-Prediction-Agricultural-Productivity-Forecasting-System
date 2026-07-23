@@ -1,11 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   Pressable,
+  StyleSheet,
   Text,
   View,
 } from "react-native";
-import { Link, router, useLocalSearchParams } from "expo-router";
+import {
+  Link,
+  router,
+  useLocalSearchParams,
+} from "expo-router";
 import {
   KeyRound,
   LockKeyhole,
@@ -26,25 +31,71 @@ import {
 } from "../../src/utils/validation";
 import { getErrorMessage } from "../../src/utils/errorMessage";
 
+const DEFAULT_COOLDOWN_SECONDS = 30;
+
+function getRetryAfterSeconds(error) {
+  const headerValue =
+    error?.response?.headers?.["retry-after"] ??
+    error?.response?.headers?.["Retry-After"];
+
+  const retryAfter = Number(headerValue);
+
+  if (Number.isFinite(retryAfter) && retryAfter > 0) {
+    return Math.ceil(retryAfter);
+  }
+
+  const detail = error?.response?.data?.detail;
+
+  if (typeof detail === "string") {
+    const match = detail.match(
+      /wait\s+(\d+)\s+seconds?/i
+    );
+
+    if (match) {
+      return Number(match[1]);
+    }
+  }
+
+  return DEFAULT_COOLDOWN_SECONDS;
+}
+
 export default function ResetPasswordScreen() {
   const params = useLocalSearchParams();
 
   const initialEmail =
     typeof params.email === "string" ? params.email : "";
 
-  const initialResetToken =
-    typeof params.reset_token === "string"
-      ? params.reset_token
-      : "";
+  const shouldStartTimer =
+    params.startTimer === "true";
 
   const [form, setForm] = useState({
     email: initialEmail,
-    reset_token: initialResetToken,
+    otp_code: "",
     new_password: "",
     confirm_password: "",
   });
 
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+
+  const [secondsRemaining, setSecondsRemaining] =
+    useState(
+      shouldStartTimer ? DEFAULT_COOLDOWN_SECONDS : 0
+    );
+
+  useEffect(() => {
+    if (secondsRemaining <= 0) {
+      return undefined;
+    }
+
+    const timerId = setInterval(() => {
+      setSecondsRemaining((current) =>
+        current > 0 ? current - 1 : 0
+      );
+    }, 1000);
+
+    return () => clearInterval(timerId);
+  }, [secondsRemaining]);
 
   const updateField = (field, value) => {
     setForm((current) => ({
@@ -54,16 +105,24 @@ export default function ResetPasswordScreen() {
   };
 
   const handleResetPassword = async () => {
-    const normalizedEmail = form.email.trim().toLowerCase();
-    const normalizedToken = form.reset_token.trim();
+    const normalizedEmail =
+      form.email.trim().toLowerCase();
+
+    const normalizedOtp = form.otp_code.trim();
 
     if (!isValidEmail(normalizedEmail)) {
-      Alert.alert("Invalid email", "Enter a valid email address.");
+      Alert.alert(
+        "Invalid email",
+        "Enter a valid email address."
+      );
       return;
     }
 
-    if (!normalizedToken) {
-      Alert.alert("Missing token", "Enter the password reset token.");
+    if (!/^\d{6}$/.test(normalizedOtp)) {
+      Alert.alert(
+        "Invalid OTP",
+        "Enter the complete six-digit reset OTP."
+      );
       return;
     }
 
@@ -86,29 +145,85 @@ export default function ResetPasswordScreen() {
     try {
       setLoading(true);
 
-      await authService.resetPassword({
-        email: normalizedEmail,
-        reset_token: normalizedToken,
-        new_password: form.new_password,
-      });
+      const result =
+        await authService.resetPassword({
+          email: normalizedEmail,
+          otp_code: normalizedOtp,
+          new_password: form.new_password,
+        });
 
       Alert.alert(
         "Password updated",
-        "Your password has been reset successfully.",
+        result.message ||
+          "Your password was reset successfully.",
         [
           {
             text: "Login",
-            onPress: () => router.replace("/(auth)/login"),
+            onPress: () =>
+              router.replace("/(auth)/login"),
           },
         ]
       );
     } catch (error) {
       Alert.alert(
         "Reset failed",
-        getErrorMessage(error, "Unable to reset your password.")
+        getErrorMessage(
+          error,
+          "Unable to reset your password."
+        )
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (secondsRemaining > 0 || resending) {
+      return;
+    }
+
+    const normalizedEmail =
+      form.email.trim().toLowerCase();
+
+    if (!isValidEmail(normalizedEmail)) {
+      Alert.alert(
+        "Invalid email",
+        "Enter a valid registered email address."
+      );
+      return;
+    }
+
+    try {
+      setResending(true);
+
+      const result =
+        await authService.forgotPassword(
+          normalizedEmail
+        );
+
+      setSecondsRemaining(DEFAULT_COOLDOWN_SECONDS);
+
+      Alert.alert(
+        "Reset OTP sent",
+        result.message ||
+          "A new password-reset OTP was sent."
+      );
+    } catch (error) {
+      if (error?.response?.status === 429) {
+        setSecondsRemaining(
+          getRetryAfterSeconds(error)
+        );
+      }
+
+      Alert.alert(
+        "Unable to resend OTP",
+        getErrorMessage(
+          error,
+          "A new password-reset OTP could not be sent."
+        )
+      );
+    } finally {
+      setResending(false);
     }
   };
 
@@ -116,37 +231,62 @@ export default function ResetPasswordScreen() {
     <ScreenContainer contentStyle={commonStyles.authScreen}>
       <AuthCard
         title="Create New Password"
-        subtitle="Enter your reset token and choose a secure new password."
+        subtitle="Enter the emailed OTP and choose a secure password."
       >
         <View style={commonStyles.form}>
           <AppInput
             label="Email address"
             placeholder="farmer@example.com"
             value={form.email}
-            onChangeText={(value) => updateField("email", value)}
+            onChangeText={(value) =>
+              updateField("email", value)
+            }
             keyboardType="email-address"
+            autoCapitalize="none"
             autoComplete="email"
-            leftIcon={<Mail size={20} color={colors.textSecondary} />}
+            leftIcon={
+              <Mail
+                size={20}
+                color={colors.textSecondary}
+              />
+            }
           />
 
           <AppInput
-            label="Reset token"
-            placeholder="Enter reset token"
-            value={form.reset_token}
-            onChangeText={(value) => updateField("reset_token", value)}
-            autoCapitalize="none"
-            leftIcon={<KeyRound size={20} color={colors.textSecondary} />}
+            label="Reset OTP"
+            placeholder="Enter six-digit OTP"
+            value={form.otp_code}
+            onChangeText={(value) =>
+              updateField(
+                "otp_code",
+                value.replace(/\D/g, "").slice(0, 6)
+              )
+            }
+            keyboardType="number-pad"
+            maxLength={6}
+            autoComplete="one-time-code"
+            leftIcon={
+              <KeyRound
+                size={20}
+                color={colors.textSecondary}
+              />
+            }
           />
 
           <AppInput
             label="New password"
             placeholder="Minimum 8 characters"
             value={form.new_password}
-            onChangeText={(value) => updateField("new_password", value)}
+            onChangeText={(value) =>
+              updateField("new_password", value)
+            }
             secureTextEntry
             autoComplete="new-password"
             leftIcon={
-              <LockKeyhole size={20} color={colors.textSecondary} />
+              <LockKeyhole
+                size={20}
+                color={colors.textSecondary}
+              />
             }
           />
 
@@ -160,7 +300,10 @@ export default function ResetPasswordScreen() {
             secureTextEntry
             autoComplete="new-password"
             leftIcon={
-              <LockKeyhole size={20} color={colors.textSecondary} />
+              <LockKeyhole
+                size={20}
+                color={colors.textSecondary}
+              />
             }
           />
 
@@ -169,6 +312,34 @@ export default function ResetPasswordScreen() {
             onPress={handleResetPassword}
             loading={loading}
           />
+
+          <View style={styles.resendContainer}>
+            {secondsRemaining > 0 ? (
+              <Text style={styles.timerText}>
+                Resend reset OTP in{" "}
+                <Text style={styles.timerValue}>
+                  {secondsRemaining}s
+                </Text>
+              </Text>
+            ) : (
+              <Pressable
+                onPress={handleResendOtp}
+                disabled={resending}
+                hitSlop={10}
+              >
+                <Text
+                  style={[
+                    commonStyles.linkText,
+                    resending && styles.disabledText,
+                  ]}
+                >
+                  {resending
+                    ? "Sending new OTP..."
+                    : "Didn't receive it? Resend OTP"}
+                </Text>
+              </Pressable>
+            )}
+          </View>
 
           <View style={commonStyles.centeredRow}>
             <Link href="/(auth)/login" asChild>
@@ -184,3 +355,24 @@ export default function ResetPasswordScreen() {
     </ScreenContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  resendContainer: {
+    alignItems: "center",
+    paddingVertical: 4,
+  },
+
+  timerText: {
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
+
+  timerValue: {
+    fontWeight: "800",
+    color: colors.primary,
+  },
+
+  disabledText: {
+    opacity: 0.5,
+  },
+});

@@ -60,4 +60,12 @@ export const datasetService = {
 
     return response.data;
   },
+
+  async getFarmOptions() {
+    const response = await apiClient.get(
+      "/datasets/farm-options"
+    );
+
+    return response.data;
+  },
 };

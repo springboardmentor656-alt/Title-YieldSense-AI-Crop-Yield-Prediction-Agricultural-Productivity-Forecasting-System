@@ -1,15 +1,22 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import toast from "react-hot-toast";
 
-import authApi from "../../api/authApi";
-import { saveToken } from "../../utils/token";
+import { useAuth } from "../../hooks/useAuth";
 import AuthLayout from "../../layouts/AuthLayout";
 import AuthCard from "../../components/auth/AuthCard";
 import Button from "../../components/common/Button";
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const { login } = useAuth();
+
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
@@ -17,21 +24,54 @@ function Login() {
     password: "",
   });
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+    setForm((current) => ({
+      ...current,
+      [name]: value,
+    }));
   };
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleLogin = async (event) => {
+    event.preventDefault();
 
     try {
-      const response = await authApi.post("/login", form);
-      saveToken(response.data.access_token);
+      setLoading(true);
+
+      const currentUser = await login({
+        email: form.email.trim().toLowerCase(),
+        password: form.password,
+      });
+
       toast.success("Login successful");
-      navigate("/dashboard");
+
+      const requestedPath = location.state?.from;
+
+      if (requestedPath) {
+        navigate(requestedPath, {
+          replace: true,
+        });
+
+        return;
+      }
+
+      if (currentUser.role === "admin") {
+        navigate("/dashboard", {
+          replace: true,
+        });
+
+        return;
+      }
+
+      navigate("/dashboard", {
+        replace: true,
+      });
     } catch (error) {
-      toast.error(error.response?.data?.detail || "Login failed");
+      toast.error(
+        error.response?.data?.detail ||
+          "Login failed"
+      );
     } finally {
       setLoading(false);
     }
@@ -43,13 +83,17 @@ function Login() {
         title="Welcome Back"
         subtitle="Login to continue to YieldSense AI"
       >
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form
+          onSubmit={handleLogin}
+          className="space-y-4"
+        >
           <input
             name="email"
             type="email"
             placeholder="Email address"
             value={form.email}
             onChange={handleChange}
+            autoComplete="email"
             required
             className="w-full rounded-lg border border-gray-300 px-4 py-2 outline-none focus:border-green-600"
           />
@@ -60,21 +104,31 @@ function Login() {
             placeholder="Password"
             value={form.password}
             onChange={handleChange}
+            autoComplete="current-password"
             required
             className="w-full rounded-lg border border-gray-300 px-4 py-2 outline-none focus:border-green-600"
           />
 
-          <Button type="submit" disabled={loading}>
+          <Button
+            type="submit"
+            disabled={loading}
+          >
             {loading ? "Logging in..." : "Login"}
           </Button>
         </form>
 
         <div className="mt-4 flex justify-between text-sm">
-          <Link to="/forgot-password" className="text-green-700">
+          <Link
+            to="/forgot-password"
+            className="text-green-700"
+          >
             Forgot Password?
           </Link>
 
-          <Link to="/register" className="text-green-700">
+          <Link
+            to="/register"
+            className="text-green-700"
+          >
             Create Account
           </Link>
         </div>

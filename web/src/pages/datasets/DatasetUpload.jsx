@@ -1,30 +1,16 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ShieldAlert } from "lucide-react";
 import toast from "react-hot-toast";
-
-import authApi from "../../api/authApi";
+import { useAuth } from "../../hooks/useAuth";
 import { datasetService } from "../../services/datasetService";
 import DatasetUploadCard from "../../components/datasets/DatasetUploadCard";
 import ImportResult from "../../components/datasets/ImportResult";
 import DashboardLayout from "../../layouts/dashboard/DashboardLayout";
 
 function DatasetUpload() {
-  const [user, setUser] = useState(null);
+  const { user, isAdmin } = useAuth();
   const [loadingType, setLoadingType] = useState(null);
   const [result, setResult] = useState(null);
-
-  useEffect(() => {
-    const loadCurrentUser = async () => {
-      try {
-        const response = await authApi.get("/me");
-        setUser(response.data);
-      } catch {
-        toast.error("Unable to load account details");
-      }
-    };
-
-    loadCurrentUser();
-  }, []);
 
   const uploadDataset = async (type, file) => {
     try {
@@ -53,8 +39,6 @@ function DatasetUpload() {
       setLoadingType(null);
     }
   };
-
-  const isAdmin = user?.role === "admin";
 
   return (
     <DashboardLayout>

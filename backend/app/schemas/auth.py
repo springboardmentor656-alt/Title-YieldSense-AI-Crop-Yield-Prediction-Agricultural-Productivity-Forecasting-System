@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 
 
@@ -7,7 +7,6 @@ class RegisterRequest(BaseModel):
     email: EmailStr
     phone: Optional[str] = None
     password: str
-    role: str = "farmer"
 
 
 class LoginRequest(BaseModel):
@@ -26,8 +25,17 @@ class ForgotPasswordRequest(BaseModel):
 
 class ResetPasswordRequest(BaseModel):
     email: EmailStr
-    reset_token: str
-    new_password: str
+
+    otp_code: str = Field(
+        min_length=6,
+        max_length=6,
+        pattern=r"^\d{6}$",
+    )
+
+    new_password: str = Field(
+        min_length=8,
+        max_length=128,
+    )
 
 
 class UpdateProfileRequest(BaseModel):
@@ -64,10 +72,24 @@ class UserProfileResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class MessageResponse(BaseModel):
+    message: str
+
+
+class RegisterResponse(BaseModel):
+    message: str
+    email: EmailStr
+
+
 class SendOTPRequest(BaseModel):
     email: EmailStr
 
 
 class VerifyOTPRequest(BaseModel):
     email: EmailStr
-    otp_code: str
+
+    otp_code: str = Field(
+        min_length=6,
+        max_length=6,
+        pattern=r"^\d{6}$",
+    )

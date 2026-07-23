@@ -25,24 +25,12 @@ import { commonStyles } from "../../src/styles/commonStyles";
 import { validateRegistration } from "../../src/utils/validation";
 import { getErrorMessage } from "../../src/utils/errorMessage";
 
-const roles = [
-  {
-    label: "Farmer",
-    value: "farmer",
-  },
-  {
-    label: "Admin",
-    value: "admin",
-  },
-];
-
 export default function RegisterScreen() {
   const [form, setForm] = useState({
     full_name: "",
     email: "",
     phone: "",
     password: "",
-    role: "farmer",
   });
 
   const [loading, setLoading] = useState(false);
@@ -55,34 +43,53 @@ export default function RegisterScreen() {
   };
 
   const handleRegister = async () => {
-    const validationError = validateRegistration(form);
+    const validationError = validateRegistration({
+      ...form,
+      role: "farmer",
+    });
 
     if (validationError) {
       Alert.alert("Check your details", validationError);
       return;
     }
 
+    const normalizedEmail = form.email.trim().toLowerCase();
+
     try {
       setLoading(true);
 
-      await authService.register({
+      const result = await authService.register({
         full_name: form.full_name.trim(),
-        email: form.email.trim().toLowerCase(),
+        email: normalizedEmail,
         phone: form.phone.trim() || null,
         password: form.password,
-        role: form.role,
       });
 
-      router.push({
-        pathname: "/(auth)/send-otp",
-        params: {
-          email: form.email.trim().toLowerCase(),
-        },
-      });
+      Alert.alert(
+        "Account created",
+        result.message ||
+          "A verification OTP was sent to your email.",
+        [
+          {
+            text: "Verify Email",
+            onPress: () =>
+              router.replace({
+                pathname: "/(auth)/verify-otp",
+                params: {
+                  email: result.email || normalizedEmail,
+                  startTimer: "true",
+                },
+              }),
+          },
+        ]
+      );
     } catch (error) {
       Alert.alert(
         "Registration failed",
-        getErrorMessage(error, "Unable to create your account.")
+        getErrorMessage(
+          error,
+          "Unable to create your account."
+        )
       );
     } finally {
       setLoading(false);
@@ -93,89 +100,84 @@ export default function RegisterScreen() {
     <ScreenContainer contentStyle={styles.screenContent}>
       <AuthCard
         title="Create Account"
-        subtitle="Create your YieldSense AI account and verify your email."
+        subtitle="Create your farmer account and verify your email."
       >
         <View style={commonStyles.form}>
           <AppInput
             label="Full name"
             placeholder="Enter your full name"
             value={form.full_name}
-            onChangeText={(value) => updateField("full_name", value)}
+            onChangeText={(value) =>
+              updateField("full_name", value)
+            }
             autoCapitalize="words"
             autoComplete="name"
-            leftIcon={<UserRound size={20} color={colors.textSecondary} />}
+            leftIcon={
+              <UserRound
+                size={20}
+                color={colors.textSecondary}
+              />
+            }
           />
 
           <AppInput
             label="Email address"
             placeholder="farmer@example.com"
             value={form.email}
-            onChangeText={(value) => updateField("email", value)}
+            onChangeText={(value) =>
+              updateField("email", value)
+            }
             keyboardType="email-address"
+            autoCapitalize="none"
             autoComplete="email"
-            leftIcon={<Mail size={20} color={colors.textSecondary} />}
+            leftIcon={
+              <Mail
+                size={20}
+                color={colors.textSecondary}
+              />
+            }
           />
 
           <AppInput
             label="Phone number"
             placeholder="Enter phone number"
             value={form.phone}
-            onChangeText={(value) => updateField("phone", value)}
+            onChangeText={(value) =>
+              updateField("phone", value)
+            }
             keyboardType="phone-pad"
             autoComplete="tel"
             maxLength={15}
-            leftIcon={<Phone size={20} color={colors.textSecondary} />}
+            leftIcon={
+              <Phone
+                size={20}
+                color={colors.textSecondary}
+              />
+            }
           />
 
           <AppInput
             label="Password"
             placeholder="Minimum 8 characters"
             value={form.password}
-            onChangeText={(value) => updateField("password", value)}
+            onChangeText={(value) =>
+              updateField("password", value)
+            }
             secureTextEntry
             autoComplete="new-password"
             leftIcon={
-              <LockKeyhole size={20} color={colors.textSecondary} />
+              <LockKeyhole
+                size={20}
+                color={colors.textSecondary}
+              />
             }
           />
 
-          <View>
-            <Text style={styles.roleLabel}>Account role</Text>
-
-            <View style={styles.roleRow}>
-              {roles.map((role) => {
-                const selected = form.role === role.value;
-
-                return (
-                  <Pressable
-                    key={role.value}
-                    onPress={() => updateField("role", role.value)}
-                    style={[
-                      styles.roleOption,
-                      selected && styles.selectedRoleOption,
-                    ]}
-                  >
-                    <View
-                      style={[
-                        styles.radioOuter,
-                        selected && styles.selectedRadioOuter,
-                      ]}
-                    >
-                      {selected ? <View style={styles.radioInner} /> : null}
-                    </View>
-
-                    <Text
-                      style={[
-                        styles.roleText,
-                        selected && styles.selectedRoleText,
-                      ]}
-                    >
-                      {role.label}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
+          <View style={styles.infoBox}>
+            <Text style={styles.infoText}>
+              Public registration creates a farmer account. A
+              six-digit verification code will be sent to your email.
+            </Text>
           </View>
 
           <AppButton
@@ -191,7 +193,9 @@ export default function RegisterScreen() {
 
             <Link href="/(auth)/login" asChild>
               <Pressable hitSlop={10}>
-                <Text style={commonStyles.linkText}>Login</Text>
+                <Text style={commonStyles.linkText}>
+                  Login
+                </Text>
               </Pressable>
             </Link>
           </View>
@@ -208,64 +212,15 @@ const styles = StyleSheet.create({
     paddingVertical: 30,
   },
 
-  roleLabel: {
-    marginBottom: 8,
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.text,
-  },
-
-  roleRow: {
-    flexDirection: "row",
-    gap: 12,
-  },
-
-  roleOption: {
-    flex: 1,
-    minHeight: 50,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 9,
-    borderWidth: 1,
-    borderColor: colors.border,
+  infoBox: {
     borderRadius: 12,
-    backgroundColor: colors.surface,
-  },
-
-  selectedRoleOption: {
-    borderColor: colors.primary,
     backgroundColor: colors.primaryLight,
+    padding: 14,
   },
 
-  radioOuter: {
-    width: 18,
-    height: 18,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    borderRadius: 9,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  selectedRadioOuter: {
-    borderColor: colors.primary,
-  },
-
-  radioInner: {
-    width: 9,
-    height: 9,
-    borderRadius: 5,
-    backgroundColor: colors.primary,
-  },
-
-  roleText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.textSecondary,
-  },
-
-  selectedRoleText: {
+  infoText: {
+    fontSize: 13,
+    lineHeight: 20,
     color: colors.primaryDark,
   },
 });

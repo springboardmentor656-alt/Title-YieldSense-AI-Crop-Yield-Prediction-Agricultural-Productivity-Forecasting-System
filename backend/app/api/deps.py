@@ -29,18 +29,30 @@ def get_current_user(
             settings.SECRET_KEY,
             algorithms=[settings.ALGORITHM]
         )
-        email: str = payload.get("sub")
+        email = payload.get("sub")
 
-        if email is None:
+        if not email or not isinstance(email, str):
             raise credentials_exception
+
+        email = email.strip().lower()
 
     except JWTError:
         raise credentials_exception
 
-    user = db.query(User).filter(User.email == email).first()
+    user = (
+        db.query(User)
+        .filter(User.email == email)
+        .first()
+    )
 
     if user is None:
         raise credentials_exception
+    
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is inactive",
+    )
 
     return user
 

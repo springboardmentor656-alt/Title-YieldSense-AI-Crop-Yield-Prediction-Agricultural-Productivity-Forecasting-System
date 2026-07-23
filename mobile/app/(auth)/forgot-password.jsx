@@ -24,7 +24,8 @@ export default function ForgotPasswordScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleForgotPassword = async () => {
-    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedEmail =
+      email.trim().toLowerCase();
 
     if (!isValidEmail(normalizedEmail)) {
       Alert.alert(
@@ -37,22 +38,24 @@ export default function ForgotPasswordScreen() {
     try {
       setLoading(true);
 
-      const result = await authService.forgotPassword(normalizedEmail);
+      const result =
+        await authService.forgotPassword(
+          normalizedEmail
+        );
 
       Alert.alert(
-        "Reset token generated",
-        result.reset_token
-          ? `Development reset token: ${result.reset_token}`
-          : "A reset token has been generated for your account.",
+        "Reset OTP sent",
+        result.message ||
+          "A password-reset OTP was sent to your email.",
         [
           {
             text: "Continue",
             onPress: () =>
-              router.push({
+              router.replace({
                 pathname: "/(auth)/reset-password",
                 params: {
                   email: normalizedEmail,
-                  reset_token: result.reset_token ?? "",
+                  startTimer: "true",
                 },
               }),
           },
@@ -61,7 +64,10 @@ export default function ForgotPasswordScreen() {
     } catch (error) {
       Alert.alert(
         "Request failed",
-        getErrorMessage(error, "Unable to generate a reset token.")
+        getErrorMessage(
+          error,
+          "Unable to send the password-reset OTP."
+        )
       );
     } finally {
       setLoading(false);
@@ -72,7 +78,7 @@ export default function ForgotPasswordScreen() {
     <ScreenContainer contentStyle={commonStyles.authScreen}>
       <AuthCard
         title="Forgot Password"
-        subtitle="Enter your registered email to generate a password reset token."
+        subtitle="Receive a secure password-reset OTP by email."
       >
         <View style={commonStyles.form}>
           <AppInput
@@ -81,12 +87,22 @@ export default function ForgotPasswordScreen() {
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
+            autoCapitalize="none"
             autoComplete="email"
-            leftIcon={<Mail size={20} color={colors.textSecondary} />}
+            leftIcon={
+              <Mail
+                size={20}
+                color={colors.textSecondary}
+              />
+            }
           />
 
+          <Text style={commonStyles.helperText}>
+            The six-digit reset code remains valid for 10 minutes.
+          </Text>
+
           <AppButton
-            title="Generate Reset Token"
+            title="Send Reset OTP"
             onPress={handleForgotPassword}
             loading={loading}
           />
@@ -98,7 +114,9 @@ export default function ForgotPasswordScreen() {
 
             <Link href="/(auth)/login" asChild>
               <Pressable hitSlop={10}>
-                <Text style={commonStyles.linkText}>Back to login</Text>
+                <Text style={commonStyles.linkText}>
+                  Back to login
+                </Text>
               </Pressable>
             </Link>
           </View>

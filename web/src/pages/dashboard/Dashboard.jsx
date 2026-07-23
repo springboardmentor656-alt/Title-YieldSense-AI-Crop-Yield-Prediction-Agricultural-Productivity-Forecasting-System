@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 import {
   CloudRain,
   Database,
@@ -11,16 +12,12 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 
-import authApi from "../../api/authApi";
 import { datasetService } from "../../services/datasetService";
 import DashboardLayout from "../../layouts/dashboard/DashboardLayout";
 import SummaryCard from "../../components/datasets/SummaryCard";
-import { removeToken } from "../../utils/token";
 
 function Dashboard() {
-  const navigate = useNavigate();
-
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const [yieldSummary, setYieldSummary] = useState(null);
   const [soilSummary, setSoilSummary] = useState(null);
   const [weatherSummary, setWeatherSummary] = useState(null);
@@ -32,28 +29,19 @@ function Dashboard() {
         setLoading(true);
 
         const [
-          userResponse,
           yieldResult,
           soilResult,
           weatherResult,
         ] = await Promise.all([
-          authApi.get("/me"),
           datasetService.getHistoricalYieldSummary(),
           datasetService.getSoilSummary(),
           datasetService.getWeatherSummary(),
         ]);
 
-        setUser(userResponse.data);
         setYieldSummary(yieldResult);
         setSoilSummary(soilResult);
         setWeatherSummary(weatherResult);
       } catch (error) {
-        if (error.response?.status === 401) {
-          removeToken();
-          navigate("/login");
-          return;
-        }
-
         toast.error(
           error.response?.data?.detail ||
             "Unable to load dashboard information"
@@ -64,7 +52,7 @@ function Dashboard() {
     };
 
     loadDashboard();
-  }, [navigate]);
+  }, []);
 
   const isAdmin = user?.role === "admin";
 

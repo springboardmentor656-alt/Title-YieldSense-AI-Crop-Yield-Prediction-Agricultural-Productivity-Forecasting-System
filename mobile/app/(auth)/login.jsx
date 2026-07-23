@@ -59,7 +59,7 @@ export default function LoginScreen() {
         password: form.password,
       });
 
-      router.replace("/dashboard");
+      router.replace("/(protected)/dashboard");
     } catch (error) {
       Alert.alert(
         "Login failed",
