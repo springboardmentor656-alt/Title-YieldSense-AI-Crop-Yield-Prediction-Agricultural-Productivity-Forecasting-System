@@ -72,7 +72,7 @@ export default function AuthForm({ type }: { type: string }) {
       localStorage.setItem("role", result.role);
       localStorage.setItem("token", result.access_token);
       localStorage.setItem("name", result.name);
-
+      
       alert("Login Successful");
 
       router.push("/farm-profile");

@@ -17,7 +17,7 @@ export default function ClientLayout({
     pathname.startsWith("/farm-profile");
 
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    const token = localStorage.getItem("token");
 
     // Public pages
     if (
@@ -29,9 +29,9 @@ export default function ClientLayout({
     }
 
     // Redirect to login if not logged in
-    if (!isLoggedIn) {
-      router.replace("/login");
-    }
+    if (!token) {
+    router.replace("/login");
+}
   }, [pathname, router]);
 
   return (

@@ -24,38 +24,53 @@ ChartJS.register(
 );
 
 export default function AnalyticsPage() {
-
   const [data, setData] = useState<any>(null);
+  const [farm, setFarm] = useState<any>(null);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/dashboard")
-      .then((res) => res.json())
-      .then((data) => setData(data));
+    async function loadData() {
+      try {
+        const [dashboardRes, farmRes] = await Promise.all([
+          fetch("http://127.0.0.1:8000/dashboard"),
+          fetch("http://127.0.0.1:8000/farm"),
+        ]);
+
+        const dashboardData = await dashboardRes.json();
+        const farmData = await farmRes.json();
+
+        setData(dashboardData);
+        setFarm(farmData);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    loadData();
   }, []);
 
-  if (!data) return <h2>Loading...</h2>;
+  if (!data || !farm) return <h2>Loading...</h2>;
 
   const p = data.latest_prediction;
 
   const chartData = {
-  labels: ["Temperature (°C)", "Humidity (%)", "Rainfall (mm)"],
-  datasets: [
-    {
-      label: "Weather Analytics",
-      data: [
-        p?.temperature ?? 0,
-        p?.humidity ?? 0,
-        p?.rainfall ?? 0,
-      ],
-      backgroundColor: [
-        "#4CAF50",
-        "#2196F3",
-        "#FFC107",
-      ],
-      borderRadius: 8,
-    },
-  ],
-};
+    labels: ["Temperature (°C)", "Humidity (%)", "Rainfall (mm)"],
+    datasets: [
+      {
+        label: "Weather Analytics",
+        data: [
+          p?.temperature ?? 0,
+          p?.humidity ?? 0,
+          p?.rainfall ?? 0,
+        ],
+        backgroundColor: [
+          "#4CAF50",
+          "#2196F3",
+          "#FFC107",
+        ],
+        borderRadius: 8,
+      },
+    ],
+  };
 
   return (
     <div className="page">
@@ -78,7 +93,7 @@ export default function AnalyticsPage() {
 
         <div className="dash-card">
           <h2>Seasonal Performance</h2>
-          <h3>Rabi</h3>
+          <h3>{farm?.season ?? "--"}</h3>
           <p>Current Farming Season</p>
         </div>
 
@@ -118,6 +133,10 @@ export default function AnalyticsPage() {
         <p>🌾 Predicted Yield : {p?.estimated_yield} kg/ha</p>
 
         <p>📈 Yield Potential : {p?.yield_potential}</p>
+
+        <p>🌱 Crop : {farm?.crop_type}</p>
+
+        <p>📅 Season : {farm?.season}</p>
 
         <p>🌡 Temperature : {p?.temperature}°C</p>
 

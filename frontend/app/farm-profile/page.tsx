@@ -63,7 +63,8 @@ const save = async () => {
 
         if (res.ok) {
             alert(result.message);
-        } else {
+                router.push("/dashboard/predict");
+            } else {
             alert(JSON.stringify(result, null, 2));
         }
 };
