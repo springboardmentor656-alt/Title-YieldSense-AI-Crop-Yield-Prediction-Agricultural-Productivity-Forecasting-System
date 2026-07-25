@@ -78,58 +78,44 @@ def login(user: User):
     conn = get_conn()
     cur = conn.cursor()
 
-
     cur.execute(
         """
-        SELECT id,email,password_hash,role
+        SELECT id,name,email,password_hash,role
         FROM users
         WHERE email=%s
         """,
-
         (user.email,)
     )
 
-
     db_user = cur.fetchone()
 
-
     if db_user is None:
-
         raise HTTPException(
             status_code=401,
-            detail="User not found"
+            detail="Invalid email or password"
         )
 
-
-    if verify_password(
-        user.password,
-        db_user[2]
-    ) == False:
-
+    if not verify_password(user.password, db_user[3]):
         raise HTTPException(
             status_code=401,
-            detail="Wrong password"
+            detail="Invalid email or password"
         )
-
 
     token = create_token(
-
         {
-        "email": db_user[1],
-        "role": db_user[3]
+            "id": db_user[0],
+            "name": db_user[1],
+            "email": db_user[2],
+            "role": db_user[4],
         }
-
     )
 
-
     return {
-
-        "message":"Login success",
-
-        "access_token":token,
-
-        "role":db_user[3],
-
-        "token_type":"bearer"
-
+        "message": "Login Successful",
+        "id": db_user[0],
+        "name": db_user[1],
+        "email": db_user[2],
+        "role": db_user[4],
+        "access_token": token,
+        "token_type": "bearer"
     }

@@ -1,34 +1,46 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import Sidebar from "./Sidebar";
 
 export default function ClientLayout({
-    children,
-}:{
-    children:React.ReactNode;
-}){
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const pathname = usePathname();
+  const router = useRouter();
 
-    const pathname=usePathname();
+  const showSidebar =
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/farm-profile");
 
-    const showSidebar=
-        pathname.startsWith("/dashboard") ||
-        pathname.startsWith("/farm-profile");
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
 
-    return(
+    // Public pages
+    if (
+      pathname === "/login" ||
+      pathname === "/register" ||
+      pathname === "/"
+    ) {
+      return;
+    }
 
-        <>
+    // Redirect to login if not logged in
+    if (!isLoggedIn) {
+      router.replace("/login");
+    }
+  }, [pathname, router]);
 
-        {showSidebar && <Sidebar/>}
+  return (
+    <>
+      {showSidebar && <Sidebar />}
 
-        <main className={showSidebar?"mainContent":""}>
-
-            {children}
-
-        </main>
-
-        </>
-
-    );
-
+      <main className={showSidebar ? "mainContent" : ""}>
+        {children}
+      </main>
+    </>
+  );
 }

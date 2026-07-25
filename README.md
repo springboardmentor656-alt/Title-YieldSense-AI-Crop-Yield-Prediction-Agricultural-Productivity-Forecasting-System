@@ -1,125 +1,243 @@
-# 🌱 YieldSense AI  
-### Crop Yield Prediction & Agricultural Productivity Forecasting System
+# 🌾 YieldSense AI
 
+An AI-powered Crop Yield Prediction and Agricultural Decision Support System built using **Next.js, FastAPI, PostgreSQL, and XGBoost**. The application helps farmers predict crop yield using soil parameters, weather conditions, and machine learning while providing actionable farming recommendations and analytics.
 
-## 📌 Overview
+---
 
-YieldSense AI is an AI-powered agriculture platform designed to predict crop yield and improve farming decisions using data analytics and machine learning.
+## 🚀 Features
 
-The system analyzes farm information, soil parameters, weather data, and historical datasets to provide yield insights and recommendations.
+### 🔐 Authentication
+- User Registration
+- Secure Login
+- JWT-based Authentication
+- Password Hashing
 
+### 🚜 Farm Management
+- Register Farm Details
+- Store Crop & Soil Information
+- Manage Farm Records
 
-## ✨ Features
+### 🤖 AI Yield Prediction
+- XGBoost Machine Learning Model
+- Crop Yield Prediction (kg/ha)
+- Yield Potential Classification
+- Risk Level Assessment
 
-- 🔐 JWT Based Authentication
-- 👨‍🌾 Farmer/Admin Role Management
-- 🚜 Farm Data Management
-- 🌱 Soil Parameter Analysis
-- ☁️ Weather Data Integration
-- 🤖 AI Crop Yield Prediction
-- 📊 Analytics Dashboard
-- 💡 Smart Recommendation System
+### 🌱 Soil Analysis
+- Soil Health Assessment
+- pH Analysis
+- Nitrogen, Phosphorus & Potassium Analysis
+- Fertilizer Recommendations
+- Irrigation Suggestions
+- Crop Suitability Analysis
 
+### ☁️ Weather Analysis
+- Live Weather Data using Open-Meteo API
+- Temperature
+- Humidity
+- Rainfall
+- Wind Speed
+- Pressure
+- Weather Condition Analysis
 
-## 🛠️ Tech Stack
+### 📊 Analytics Dashboard
+- Yield Prediction Reports
+- Productivity Analytics
+- Seasonal Performance
+- Farm Comparison Reports
+- Interactive Charts
+- Agricultural Insights Summary
 
-**Frontend**
+### 💡 AI Recommendations
+- Crop Planning Suggestions
+- Farming Recommendations
+- Resource Optimization Advice
+- Risk Mitigation Guidance
+
+---
+
+# 🏗️ System Architecture
+
+```
+                +----------------+
+                |   Next.js UI   |
+                +--------+-------+
+                         |
+                  REST API Calls
+                         |
+                +--------v-------+
+                |    FastAPI     |
+                +--------+-------+
+                         |
+         +---------------+----------------+
+         |                                |
++--------v--------+              +---------v---------+
+| PostgreSQL DB   |              | XGBoost ML Model |
++-----------------+              +------------------+
+                         |
+                Open-Meteo Weather API
+```
+
+---
+
+# 🛠️ Tech Stack
+
+## Frontend
 - Next.js
 - React
-- Tailwind CSS
+- TypeScript
+- CSS
 
-**Backend**
+## Backend
 - FastAPI
+- Python
 - JWT Authentication
 
-**Database**
+## Database
 - PostgreSQL
 
-**Machine Learning**
-- Python
+## Machine Learning
+- XGBoost
+- Scikit-learn
 - Pandas
-- Scikit-Learn
+- NumPy
+- Joblib
 
+## APIs
+- Open-Meteo Weather API
 
-```text
-YIELDSENSE AI
+---
+
+# 📂 Project Structure
+
+```
+YieldSense-AI/
 │
-├── backend
-│   │
-│   ├── app.py
-│   ├── database.py
-│   ├── auth.py
-│   ├── auth_handler.py
+├── frontend/
+│   ├── app/
+│   ├── components/
+│   └── styles/
+│
+├── backend/
+│   ├── routes/
+│   ├── dataset/
+│   ├── train_model.py
 │   ├── preprocessing.py
-│   ├── requirements.txt
-│   │
-│   └── routes
-│       ├── dashboard.py
-│       └── farm.py
-│
-│
-├── dataset
-│   │
-│   ├── raw
-│   └── processed
-│
-│
-├── docs
-│   │
-│   ├── architecture.md
-│   ├── workflow.md
-│   ├── setup.md
-│   ├── dataset_info.md
-│   ├── project_requirements.md
-│   ├── ui_screens.md
-│   └── schema.sql
-│
-│
-├── frontend
-│   │
-│   ├── app
-│   │   ├── dashboard
-|   |   ├── farm-profile
-│   │   ├── login
-│   │   ├── register
-│   │   └── globals.css
-│   │
-│   ├── components
-│   │   ├── AuthForm.tsx
-│   │   ├── FarmBox.tsx
-│   │   ├── Sidebar.tsx
-│   │   └── Card.tsx
-│   │
-│   └── package.json
-│
+│   ├── yield_model.pkl
+│   ├── crop_encoder.pkl
+│   └── app.py
 │
 └── README.md
 ```
 
+---
 
-## 📂 Modules
+# ⚙️ Installation
 
-- Authentication System
-- Farm Profile Management
-- Dataset Processing
-- Prediction Workflow
-- Dashboard Analytics
+## Clone Repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/YieldSense-AI.git
+```
+
+```bash
+cd YieldSense-AI
+```
+
+---
+
+## Backend Setup
+
+```bash
+cd backend
+```
+
+Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+Run FastAPI
+
+```bash
+uvicorn app:app --reload
+```
+
+Backend
+
+```
+http://127.0.0.1:8000
+```
+
+Swagger API
+
+```
+http://127.0.0.1:8000/docs
+```
+
+---
+
+## Frontend Setup
+
+```bash
+cd frontend
+```
+
+Install packages
+
+```bash
+npm install
+```
+
+Run application
+
+```bash
+npm run dev
+```
+
+Frontend
+
+```
+http://localhost:3000
+```
+
+---
+
+# 🤖 Machine Learning
+
+Model Used
+
+- XGBoost Regressor
+
+Input Features
+
+- Crop Type
+- Rainfall
+- Pesticides
+- Average Temperature
+
+Output
+
+- Estimated Crop Yield (kg/ha)
+
+Model Evaluation
+
+- MAE (Mean Absolute Error)
+- RMSE (Root Mean Squared Error)
+- R² Score
+
+---
+
+# 📸 Application Modules
+
+- User Registration & Login
+- Farm Profile
+- AI Prediction
+- Dashboard
+- Soil Analysis
+- Weather Analysis
+- Analytics Dashboard
+- AI Recommendations
 
 
-## 📌 Milestone 1 Completed
-
-✔ Project Structure Setup  
-✔ Frontend UI Development  
-✔ FastAPI Backend APIs  
-✔ JWT Authentication  
-✔ PostgreSQL Integration  
-✔ Kaggle Dataset Collection
-✔ Initial Data Preprocessing Pipeline
-
-
-## 🚀 Future Enhancements
-
-- ML Model Training
-- Weather API Integration
-- Yield Forecast Visualization
-- Crop & Fertilizer Recommendations

@@ -2,67 +2,93 @@ from fastapi import APIRouter
 
 router = APIRouter()
 
-def soil_status(soil_type, crop_type, soil_ph, nitrogen, phosphorus, potassium):
 
-    # ---------- Soil Health ----------
+def soil_status(
+    soil_type,
+    crop_type,
+    soil_ph,
+    nitrogen,
+    phosphorus,
+    potassium
+):
+
+    # ---------------- Soil Health ---------------- #
+
     if 6.0 <= soil_ph <= 7.5:
         soil_health = "Good"
         ph_status = "Optimal"
 
-    elif soil_ph < 6.0:
+    elif 5.5 <= soil_ph < 6.0:
+        soil_health = "Moderate"
+        ph_status = "Slightly Acidic"
+
+    elif 7.5 < soil_ph <= 8.0:
+        soil_health = "Moderate"
+        ph_status = "Slightly Alkaline"
+
+    elif soil_ph < 5.5:
         soil_health = "Poor"
         ph_status = "Acidic"
 
     else:
-        soil_health = "Moderate"
-        ph_status = "Alkaline"
+        soil_health = "Poor"
+        ph_status = "Highly Alkaline"
 
-    # ---------- Nitrogen ----------
-    if nitrogen < 50:
+    # ---------------- Nitrogen ---------------- #
+
+    if nitrogen < 40:
         nitrogen_status = "Low"
-    elif nitrogen < 100:
+    elif nitrogen <= 80:
         nitrogen_status = "Medium"
     else:
         nitrogen_status = "High"
 
-    # ---------- Phosphorus ----------
-    if phosphorus < 30:
+    # ---------------- Phosphorus ---------------- #
+
+    if phosphorus < 20:
         phosphorus_status = "Low"
-    elif phosphorus < 60:
+    elif phosphorus <= 45:
         phosphorus_status = "Medium"
     else:
         phosphorus_status = "High"
 
-    # ---------- Potassium ----------
-    if potassium < 100:
+    # ---------------- Potassium ---------------- #
+
+    if potassium < 40:
         potassium_status = "Low"
-    elif potassium < 200:
+    elif potassium <= 80:
         potassium_status = "Medium"
     else:
         potassium_status = "High"
 
-    # ---------- Fertilizer Recommendation ----------
-    fertilizer = []
+    # ---------------- Fertilizer ---------------- #
+
+    fertilizers = []
 
     if nitrogen_status == "Low":
-        fertilizer.append("Nitrogen")
+        fertilizers.append("Nitrogen")
 
     if phosphorus_status == "Low":
-        fertilizer.append("Phosphorus")
+        fertilizers.append("Phosphorus")
 
     if potassium_status == "Low":
-        fertilizer.append("Potassium")
+        fertilizers.append("Potassium")
 
-    if fertilizer:
-        fertilizer_recommendation = (
-            "Apply " + ", ".join(fertilizer) + " fertilizer."
-        )
+    if len(fertilizers) == 0:
+        fertilizer = "Balanced NPK fertilizer is sufficient."
+
+    elif len(fertilizers) == 1:
+        fertilizer = f"Apply {fertilizers[0]} fertilizer."
+
     else:
-        fertilizer_recommendation = (
-            "Balanced NPK fertilizer is sufficient."
+        fertilizer = (
+            "Apply "
+            + ", ".join(fertilizers)
+            + " fertilizers."
         )
 
-    # ---------- Irrigation ----------
+    # ---------------- Irrigation ---------------- #
+
     if soil_ph < 5.5:
         irrigation = "Increase irrigation"
 
@@ -72,12 +98,24 @@ def soil_status(soil_type, crop_type, soil_ph, nitrogen, phosphorus, potassium):
     else:
         irrigation = "Moderate irrigation"
 
-    # ---------- Crop Suitability ----------
+    # ---------------- Crop Suitability ---------------- #
+
     if soil_health == "Good":
-        crop_suitability = f"{crop_type} is suitable for this soil."
-    else:
+
         crop_suitability = (
-            f"Improve soil conditions before cultivating {crop_type}."
+            f"{crop_type} is suitable for this soil."
+        )
+
+    elif soil_health == "Moderate":
+
+        crop_suitability = (
+            f"{crop_type} can be cultivated with proper soil management."
+        )
+
+    else:
+
+        crop_suitability = (
+            f"Soil improvement is recommended before cultivating {crop_type}."
         )
 
     return {
@@ -92,7 +130,7 @@ def soil_status(soil_type, crop_type, soil_ph, nitrogen, phosphorus, potassium):
 
         "potassium_status": potassium_status,
 
-        "fertilizer": fertilizer_recommendation,
+        "fertilizer": fertilizer,
 
         "irrigation": irrigation,
 

@@ -46,17 +46,26 @@ const save = async () => {
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+       body: JSON.stringify({
+    ...data,
+    latitude: parseFloat(data.latitude),
+    longitude: parseFloat(data.longitude),
+    area: parseFloat(data.area),
+    soil_ph: parseFloat(data.soil_ph),
+    nitrogen: parseFloat(data.nitrogen),
+    phosphorus: parseFloat(data.phosphorus),
+    potassium: parseFloat(data.potassium),
+}),
     });
+        const result = await res.json();
 
-    const result = await res.json();
+        console.log(result);
 
-    if (res.ok) {
-        alert(result.message);
-        router.push("/dashboard");
-    } else {
-        alert(result.detail || "Farm save failed");
-    }
+        if (res.ok) {
+            alert(result.message);
+        } else {
+            alert(JSON.stringify(result, null, 2));
+        }
 };
 
 return(
@@ -103,7 +112,7 @@ onChange={change}
 
 <input
 name="area"
-placeholder="Area (hectares)"
+placeholder="Area (acres) - Enter only number"
 onChange={change}
 />
 

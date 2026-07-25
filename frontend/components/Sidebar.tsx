@@ -1,22 +1,32 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import "./sidebar.css";
 
 export default function Sidebar() {
-
   const pathname = usePathname();
+  const router = useRouter();
 
   const menu = [
     { name: "Dashboard", icon: "🏠", path: "/dashboard" },
     { name: "Farm Profile", icon: "🚜", path: "/farm-profile" },
+    { name: "AI Prediction", icon: "🤖", path: "/dashboard/predict" },
     { name: "Soil Analysis", icon: "🌱", path: "/dashboard/soil" },
     { name: "Weather", icon: "☁️", path: "/dashboard/weather" },
-    { name: "AI Prediction", icon: "🤖", path: "/dashboard/predict" },
     { name: "Analytics", icon: "📊", path: "/dashboard/analytics" },
     { name: "Recommendation", icon: "💡", path: "/dashboard/recommendation" },
   ];
+
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("email");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    sessionStorage.clear();
+
+    router.replace("/login");
+  };
 
   return (
     <aside className="sidebar">
@@ -24,7 +34,6 @@ export default function Sidebar() {
       <h2 className="logo">🌾 YieldSense AI</h2>
 
       <div className="menu">
-
         {menu.map((item) => (
           <Link
             key={item.path}
@@ -35,12 +44,11 @@ export default function Sidebar() {
             {item.name}
           </Link>
         ))}
-
       </div>
 
-      <Link href="/login" className="logout">
+      <button className="logout" onClick={handleLogout}>
         🚪 Logout
-      </Link>
+      </button>
 
     </aside>
   );

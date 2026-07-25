@@ -75,9 +75,6 @@ confidence = round(max(0, r2) * 100, 2)
 
 joblib.dump(confidence, "model_confidence.pkl")
 
-print("MAE :", round(mae, 2))
-print("RMSE:", round(rmse, 2))
-
 # ---------------- Save ---------------- #
 
 joblib.dump(model, "yield_model.pkl")

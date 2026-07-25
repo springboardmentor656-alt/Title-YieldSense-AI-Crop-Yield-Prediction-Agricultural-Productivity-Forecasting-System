@@ -7,40 +7,20 @@ import joblib
 import os
 from datetime import datetime
 
-from routes.weather import weather_status
+from routes.weather import weather_status, get_weather
 from routes.soil import soil_status
 
 router = APIRouter()
 
-encoder = joblib.load("crop_encoder.pkl")
-
-print(encoder.classes_)
-
 MODEL_PATH = "yield_model.pkl"
 ENCODER_PATH = "crop_encoder.pkl"
 
+model = joblib.load(MODEL_PATH) if os.path.exists(MODEL_PATH) else None
+encoder = joblib.load(ENCODER_PATH) if os.path.exists(ENCODER_PATH) else None
 
-if os.path.exists(MODEL_PATH):
-    model = joblib.load(MODEL_PATH)
-else:
-    model = None
 
-if os.path.exists(ENCODER_PATH):
-    encoder = joblib.load(ENCODER_PATH)
-else:
-    encoder = None
-
-CONFIDENCE_PATH = "model_confidence.pkl"
-
-if os.path.exists(CONFIDENCE_PATH):
-    confidence = joblib.load(CONFIDENCE_PATH)
-else:
-    confidence = None
-    
 class Prediction(BaseModel):
     crop: str
-    avg_temp: float
-    rainfall: float
     pesticides: float
 
 
@@ -48,42 +28,27 @@ class Prediction(BaseModel):
 def predict(data: Prediction):
 
     if model is None:
-        raise HTTPException(
-            status_code=500,
-            detail="Model not found"
-        )
+        raise HTTPException(status_code=500, detail="Model not found")
 
     if encoder is None:
-        raise HTTPException(
-            status_code=500,
-            detail="Crop encoder not found"
-        )
+        raise HTTPException(status_code=500, detail="Crop encoder not found")
 
-    # Encode crop
+    print("Crop received from frontend:", data.crop)
     crop_value = encoder.transform([data.crop])[0]
 
-    # AI Prediction
-    values = np.array([[
-        crop_value,
-        data.rainfall,
-        data.pesticides,
-        data.avg_temp
-    ]])
-
-    predicted_yield = float(model.predict(values)[0])
-
-    # Get soil details for selected crop
     conn = get_conn()
     cur = conn.cursor()
 
     cur.execute("""
         SELECT
-        crop_type,
-        soil_type,
-        soil_ph,
-        nitrogen,
-        phosphorus,
-        potassium
+            crop_type,
+            soil_type,
+            soil_ph,
+            nitrogen,
+            phosphorus,
+            potassium,
+            latitude,
+            longitude
         FROM farms
         WHERE crop_type=%s
         ORDER BY id DESC
@@ -97,11 +62,14 @@ def predict(data: Prediction):
 
     if row:
         crop_type = row[0]
+        print("Crop fetched from DB:", crop_type)   
         soil_type = row[1]
         soil_ph = row[2]
         nitrogen = row[3]
         phosphorus = row[4]
         potassium = row[5]
+        latitude = float(row[6])
+        longitude = float(row[7])
     else:
         crop_type = data.crop
         soil_type = "Unknown"
@@ -109,10 +77,27 @@ def predict(data: Prediction):
         nitrogen = 50
         phosphorus = 40
         potassium = 40
+        latitude = 12.2958
+        longitude = 76.6394
+
+    weather_data = get_weather(latitude, longitude)
+
+    temperature = weather_data["temperature"]
+    humidity = weather_data["humidity"]
+    rainfall = weather_data["rainfall"]
+
+    values = np.array([[
+        crop_value,
+        rainfall,
+        data.pesticides,
+        temperature
+    ]])
+
+    predicted_yield = float(model.predict(values)[0])
 
     weather = weather_status(
-        data.avg_temp,
-        data.rainfall
+        temperature,
+        rainfall
     )
 
     soil = soil_status(
@@ -124,6 +109,17 @@ def predict(data: Prediction):
         potassium
     )
 
+    # Better irrigation recommendation using rainfall
+
+    if rainfall < 5:
+        soil["irrigation"] = "Increase irrigation"
+
+    elif rainfall < 20:
+        soil["irrigation"] = "Moderate irrigation"
+
+    else:
+        soil["irrigation"] = "Rainfall is sufficient"
+
     if predicted_yield >= 5000:
         yield_potential = "High"
     elif predicted_yield >= 3000:
@@ -131,24 +127,63 @@ def predict(data: Prediction):
     else:
         yield_potential = "Low"
 
-    if weather == "Poor":
+    if weather == "Heat Stress":
         risk = "High"
     elif weather == "Moderate":
         risk = "Medium"
     else:
         risk = "Low"
 
-    
+    conn = get_conn()
+    cur = conn.cursor()
+
+    cur.execute("""
+        INSERT INTO predictions(
+            crop,
+            estimated_yield,
+            yield_potential,
+            risk_level,
+            temperature,
+            rainfall,
+            humidity,
+            weather_status,
+            fertilizer,
+            irrigation,
+            crop_suitability,
+            recommendation
+        )
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+    """, (
+        crop_type,
+        round(predicted_yield, 2),
+        yield_potential,
+        risk,
+        temperature,
+        rainfall,
+        humidity,
+        weather,
+        soil["fertilizer"],
+        soil["irrigation"],
+        soil["crop_suitability"],
+        f"{crop_type} Cultivation"
+    ))
+
+    conn.commit()
+    cur.close()
+    conn.close()
 
     return {
-
         "crop": crop_type,
 
         "estimated_yield": round(predicted_yield, 2),
 
         "yield_potential": yield_potential,
 
-        "confidence": confidence,
+        "temperature": temperature,
+
+        "rainfall": rainfall,
+
+        "humidity": humidity,
 
         "weather_status": weather,
 
@@ -169,6 +204,8 @@ def predict(data: Prediction):
         "irrigation": soil["irrigation"],
 
         "crop_suitability": soil["crop_suitability"],
+
+        "recommendation": f"{crop_type} Cultivation",
 
         "prediction_time": datetime.now().strftime("%d-%m-%Y %H:%M")
     }
