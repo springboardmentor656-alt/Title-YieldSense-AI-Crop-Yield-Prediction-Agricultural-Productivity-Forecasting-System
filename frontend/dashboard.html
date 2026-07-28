@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>YieldSense Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="navbar">
+
+    <div class="logo">
+        🌾 <span>YieldSense AI</span>
+    </div>
+
+    <ul class="nav-links">
+
+        <li><a href="dashboard.html">Dashboard</a></li>
+
+        <li><a href="#">Prediction</a></li>
+
+        <li><a href="history.html">History</a></li>
+
+        <li><a href="#">Analytics</a></li>
+
+        <li><a href="#">Profile</a></li>
+
+    </ul>
+
+    <div class="user-section">
+
+        <span id="username"></span>
+
+        <button onclick="logout()">
+            Logout
+        </button>
+
+    </div>
+
+</nav>
+    <div class="hero">
+        <div class="welcome-card">
+
+    <div>
+
+        <h2 id="welcomeMessage">
+            Welcome Back
+        </h2>
+
+        <p id="welcomeRole"></p>
+
+    </div>
+
+    <div class="welcome-status">
+
+        <h3>🌾 AI Status</h3>
+
+        <p>System Ready</p>
+
+    </div>
+
+</div>
+        <h1>🌾 YieldSense AI Dashboard</h1>
+
+        <p class="subtitle">
+            Smart Crop Yield Prediction & Agricultural Analytics Platform
+        </p>
+    </div>
+
+    <div class="status-bar">
+        <div class="stats-container">
+
+    <div class="stat-card">
+        <h3>Total Predictions</h3>
+        <h2 id="totalPredictions">0</h2>
+    </div>
+
+    <div class="stat-card">
+        <h3>Average Yield</h3>
+        <h2 id="averageYield">0 kg</h2>
+    </div>
+
+    <div class="stat-card">
+        <h3>Current Risk</h3>
+        <h2 id="currentRisk">Low</h2>
+    </div>
+
+    <div class="stat-card">
+        <h3>Best Crop</h3>
+        <h2 id="bestCrop">--</h2>
+    </div>
+
+</div>
+        🟢 AI Engine Online | Real-Time Crop Analytics Active
+    </div>
+
+    <div class="form-card">
+
+        <h2>Crop Yield Prediction</h2>
+<label>🌍 Area (Country)</label>
+
+<input
+    type="text"
+    id="area"
+    placeholder="e.g. India"
+    required
+>
+
+<br><br>
+
+<label>📅 Year</label>
+
+<input
+    type="number"
+    id="year"
+    placeholder="e.g. 2023"
+    required
+>
+
+<br><br>
+        <!-- Crop Type -->
+        <div class="input-group">
+            <label for="cropType">🌾 Crop Type</label>
+
+            <select id="cropType" onchange="toggleOtherCrop()">
+                <option value="">Select Crop</option>
+                <option value="Wheat">Wheat</option>
+                <option value="Rice">Rice</option>
+                <option value="Maize">Maize</option>
+                <option value="Cotton">Cotton</option>
+                <option value="Sugarcane">Sugarcane</option>
+                <option value="Barley">Barley</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <input
+                type="text"
+                id="otherCrop"
+                placeholder="Enter Crop Name"
+                style="display:none; margin-top:10px;"
+            >
+        </div>
+
+        <!-- Rainfall -->
+        <label>🌧 Annual Rainfall (mm/year)</label>
+        <input
+            type="number"
+            id="rainfall"
+            placeholder="e.g. 1200"
+        >
+
+        <!-- Pesticides -->
+        <label>🧪 Pesticides Used (tonnes)</label>
+        <input
+            type="number"
+            id="pesticides"
+            placeholder="e.g. 150"
+        >
+
+        <!-- Temperature -->
+        <label>🌡 Average Temperature (°C)</label>
+        <input
+            type="number"
+            id="temp"
+            placeholder="e.g. 25"
+        >
+
+        <!-- Soil PH -->
+        <label>🌱 Soil pH</label>
+        <input
+            type="number"
+            id="ph"
+            step="0.1"
+            min="0"
+            max="14"
+            placeholder="e.g. 6.8"
+        >
+
+        <button onclick="predictYield()">
+            🚀 Predict Yield
+        </button>
+
+    </div>
+<div id="loader" class="ai-loader">
+
+    <h2>🤖 AI Engine Processing...</h2>
+
+    <p>🌦️ Analyzing Weather...</p>
+
+    <p>🌱 Checking Soil...</p>
+
+    <p>🧠 Running Machine Learning Model...</p>
+
+    <p>📈 Generating Prediction...</p>
+
+</div>
+    <div class="dashboard">
+
+        <div class="card">
+            <h2>🌾 Estimated Yield</h2>
+            <div class="value" id="yield">Waiting...</div>
+        </div>
+
+        <div class="card">
+            <h2>☀ Weather Status</h2>
+            <p id="weather">Waiting...</p>
+        </div>
+
+        <div class="card">
+            <h2>🌱 Soil Analysis</h2>
+            <p id="soil">Waiting...</p>
+        </div>
+
+        <div class="card">
+            <h2>⚠ Risk Level</h2>
+            <p id="risk">Waiting...</p>
+        </div>
+
+        <div class="card">
+            <h2>💡 Recommendation</h2>
+            <p id="recommendation">Waiting...</p>
+        </div>
+
+        <div class="card">
+            <h2>📈 Productivity Report</h2>
+            <p id="report">Waiting...</p>
+        </div>
+
+        <div class="card">
+            <h2>🤖 AI Farmer Advisory</h2>
+            <p id="cropAdvice">
+                Waiting for crop analysis...
+            </p>
+        </div>
+
+        <div class="card">
+            <h2>📅 Seasonal Report</h2>
+            <p>
+                Current season conditions are favorable for crop growth.
+                Rainfall and temperature are within recommended limits.
+            </p>
+        </div>
+
+        <div class="card">
+            <h2>🤖 AI Summary</h2>
+
+            <p id="summary">
+                Waiting for prediction...
+            </p>
+        </div>
+
+        <div class="card visualizations" style="text-align:center;">
+
+            <h2>📊  Live Yield Analytics </h2>
+            <canvas id = "yieldChart" heights="120"></canvas>
+
+
+
+        </div>
+
+    </div>
+
+    <div class="footer">
+        YieldSense AI © 2026
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+     <script src="app.js"></script>
+
+</body>
+</html>

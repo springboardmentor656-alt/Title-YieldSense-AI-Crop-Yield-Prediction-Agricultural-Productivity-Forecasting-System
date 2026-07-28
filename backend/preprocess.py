@@ -1,45 +1,93 @@
 import pandas as pd
 import os
+import joblib
+from sklearn.preprocessing import LabelEncoder
 
-# File paths
+# ==========================
+# File Paths
+# ==========================
+
 INPUT_FILE = "datasets/raw/crop_yield_raw.csv"
 OUTPUT_FILE = "datasets/processed/crop_yield_cleaned.csv"
 
-print("Loading dataset...")
+print("🌾 YieldSense AI Data Preprocessing Started...\n")
 
-# Read dataset
+# ==========================
+# Load Dataset
+# ==========================
+
 df = pd.read_csv(INPUT_FILE)
+
+# Remove unwanted column
 if "Unnamed: 0" in df.columns:
     df.drop("Unnamed: 0", axis=1, inplace=True)
 
-print("\nDataset Shape:")
-print(df.shape)
+print("✅ Dataset Loaded Successfully")
+print("Rows :", df.shape[0])
+print("Columns :", df.shape[1])
 
-print("\nColumns:")
-print(df.columns)
+# ==========================
+# Remove Duplicates
+# ==========================
 
-print("\nMissing Values:")
-print(df.isnull().sum())
+df.drop_duplicates(inplace=True)
 
-print("\nDuplicate Rows:")
-print(df.duplicated().sum())
+# ==========================
+# Fill Missing Values
+# ==========================
 
-# Remove duplicate rows
-df = df.drop_duplicates()
-print("\nDataset Shape After Removing Duplicates:")
-print(df.shape)
-
-# Fill missing numerical values with mean
 numeric_columns = df.select_dtypes(include=["int64", "float64"]).columns
 
-for col in numeric_columns:
-    df[col] = df[col].fillna(df[col].mean())
+for column in numeric_columns:
+    df[column].fillna(df[column].mean(), inplace=True)
 
-# Create processed folder if it doesn't exist
+# ==========================
+# Encode Area
+# ==========================
+
+area_encoder = LabelEncoder()
+
+df["Area"] = area_encoder.fit_transform(df["Area"])
+
+# ==========================
+# Encode Crop
+# ==========================
+
+item_encoder = LabelEncoder()
+
+df["Item"] = item_encoder.fit_transform(df["Item"])
+
+# ==========================
+# Save Encoders
+# ==========================
+
+os.makedirs("models", exist_ok=True)
+
+joblib.dump(area_encoder, "models/area_encoder.pkl")
+
+joblib.dump(item_encoder, "models/item_encoder.pkl")
+
+# ==========================
+# Save Dataset
+# ==========================
+
 os.makedirs("datasets/processed", exist_ok=True)
 
-# Save cleaned dataset
-df.to_csv(OUTPUT_FILE, index=False)
+df.to_csv(
+    OUTPUT_FILE,
+    index=False
+)
 
-print("\nCleaned dataset saved successfully!")
-print(f"Location: {OUTPUT_FILE}")
+print("\n✅ Data Preprocessing Completed Successfully!")
+
+print("\nFiles Generated")
+
+print("--------------------------")
+
+print("✔ crop_yield_cleaned.csv")
+
+print("✔ area_encoder.pkl")
+
+print("✔ item_encoder.pkl")
+
+print("--------------------------")
