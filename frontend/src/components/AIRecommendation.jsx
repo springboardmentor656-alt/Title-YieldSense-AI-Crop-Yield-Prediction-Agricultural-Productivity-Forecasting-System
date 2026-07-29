@@ -1,6 +1,18 @@
+import { useEffect, useState } from "react";
 import "../styles/AIRecommendation.css";
 
 function AIRecommendation() {
+
+  const [recommendedCrop, setRecommendedCrop] = useState("Rice");
+
+  useEffect(() => {
+    const crop = localStorage.getItem("recommendedCrop");
+
+    if (crop) {
+      setRecommendedCrop(crop);
+    }
+  }, []);
+
   return (
     <div className="ai-card">
 
@@ -8,10 +20,11 @@ function AIRecommendation() {
 
       <div className="best-crop">
         <h3>🌾 Best Crop</h3>
-        <h1>Rice</h1>
+        <h1>{recommendedCrop}</h1>
       </div>
 
       <div className="ai-info">
+
         <div className="info-row">
           <span>🎯 Confidence</span>
           <strong>95%</strong>

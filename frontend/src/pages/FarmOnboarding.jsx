@@ -15,6 +15,8 @@ import { useNavigate } from "react-router-dom";
 
 import { createFarm } from "../services/farmService";
 
+import { predictCrop } from "../services/predictionService";
+
 function FarmOnboarding() {
   const navigate = useNavigate();
 
@@ -43,22 +45,41 @@ const handleSubmit = async (e) => {
 
   try {
     await createFarm({
-      farm_name: formData.farm_name,
-      location: formData.location,
-      latitude: Number(formData.latitude),
-      longitude: Number(formData.longitude),
-      ph: Number(formData.ph),
-      nitrogen: Number(formData.nitrogen),
-      phosphorus: Number(formData.phosphorus),
-      potassium: Number(formData.potassium),
-      rainfall: Number(formData.rainfall),
-      humidity: Number(formData.humidity),
-      temperature: Number(formData.temperature),
-    });
+  farm_name: formData.farm_name,
+  location: formData.location,
+  latitude: Number(formData.latitude),
+  longitude: Number(formData.longitude),
+  ph: Number(formData.ph),
+  nitrogen: Number(formData.nitrogen),
+  phosphorus: Number(formData.phosphorus),
+  potassium: Number(formData.potassium),
+  rainfall: Number(formData.rainfall),
+  humidity: Number(formData.humidity),
+  temperature: Number(formData.temperature),
+});
 
-    alert("Farm Details Saved Successfully 🌾");
+// AI Prediction
+const prediction = await predictCrop({
+  N: Number(formData.nitrogen),
+  P: Number(formData.phosphorus),
+  K: Number(formData.potassium),
+  temperature: Number(formData.temperature),
+  humidity: Number(formData.humidity),
+  ph: Number(formData.ph),
+  rainfall: Number(formData.rainfall),
+});
 
-    navigate("/dashboard");
+localStorage.setItem(
+  "recommendedCrop",
+  prediction.recommended_crop
+);
+
+alert(
+  `🌾 Farm Saved Successfully!\n\nRecommended Crop: ${prediction.recommended_crop}`
+);
+
+navigate("/dashboard");
+   
 
   } catch (error) {
     console.log(error);

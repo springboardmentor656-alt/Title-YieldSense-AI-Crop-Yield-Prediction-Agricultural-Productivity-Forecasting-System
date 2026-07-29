@@ -9,6 +9,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routers.predict import router as predict_router
 from app.routers.auth import router as auth_router
 from app.routers.farm import router as farm_router
+from app.routers import weather
+from app.routers import soil
+from app.routers import analytics
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -34,6 +37,12 @@ app.include_router(predict_router)
 app.include_router(auth_router)
 
 app.include_router(farm_router)
+
+app.include_router(weather.router)
+
+app.include_router(soil.router)
+
+app.include_router(analytics.router)
 
 @app.get("/")
 def home():
