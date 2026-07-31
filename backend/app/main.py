@@ -12,6 +12,7 @@ from app.api.routes import (
     predictions,
     soil_analysis,
     weather_analysis,
+    reports,
 )
 from app.core.logging_config import configure_logging
 from app.middleware.request_logging import (
@@ -78,6 +79,7 @@ app.include_router(predictions.router)
 app.include_router(weather_analysis.router)
 app.include_router(soil_analysis.router)
 app.include_router(analytics.router)
+app.include_router(reports.router)
 app.include_router(
     crop_recommendation_router,
     prefix="/api",

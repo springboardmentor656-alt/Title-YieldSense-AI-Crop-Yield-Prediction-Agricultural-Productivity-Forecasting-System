@@ -110,7 +110,7 @@ export default function DashboardScreen() {
           </Text>
 
           <Text style={styles.pageSubtitle}>
-            Agricultural data collection overview
+            Smart crop yield prediction and agricultural insights
           </Text>
         </View>
 
@@ -191,7 +191,8 @@ export default function DashboardScreen() {
         </Text>
 
         <Text style={styles.sectionDescription}>
-          Current reference data stored in PostgreSQL.
+          Explore the agricultural datasets powering predictions,
+          recommendations, and analytical insights.
         </Text>
       </View>
 
@@ -314,45 +315,6 @@ export default function DashboardScreen() {
     </Pressable>
   )}
 </View>
-      {/* Scope information */}
-      <View style={styles.scopeCard}>
-        <Text style={styles.scopeTitle}>
-          Weeks 1–2 Progress
-        </Text>
-
-        <View style={styles.scopeItem}>
-          <View style={styles.scopeDot} />
-          <Text style={styles.scopeText}>
-            Authentication and role-based access completed
-          </Text>
-        </View>
-
-        <View style={styles.scopeItem}>
-          <View style={styles.scopeDot} />
-          <Text style={styles.scopeText}>
-            Historical yield dataset imported
-          </Text>
-        </View>
-
-        <View style={styles.scopeItem}>
-          <View style={styles.scopeDot} />
-          <Text style={styles.scopeText}>
-            Soil reference dataset imported
-          </Text>
-        </View>
-
-        <View style={styles.scopeItem}>
-          <View style={styles.scopeDot} />
-          <Text style={styles.scopeText}>
-            Weather reference dataset imported
-          </Text>
-        </View>
-
-        <Text style={styles.scopeNote}>
-          Use the drawer menu to open Farm Management,
-          Historical Yield, Soil Data, Weather Data, or Profile.
-        </Text>
-      </View>
     </ScreenContainer>
   );
 }
@@ -554,58 +516,4 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     color: colors.textSecondary,
     },
-  scopeCard: {
-    marginTop: 20,
-    marginBottom: 12,
-    borderRadius: 18,
-    backgroundColor: colors.surface,
-    padding: 20,
-    shadowColor: "#000000",
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-
-  scopeTitle: {
-    marginBottom: 16,
-    fontSize: 19,
-    fontWeight: "800",
-    color: colors.text,
-  },
-
-  scopeItem: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 12,
-  },
-
-  scopeDot: {
-    width: 9,
-    height: 9,
-    marginTop: 6,
-    marginRight: 11,
-    borderRadius: 5,
-    backgroundColor: colors.primary,
-  },
-
-  scopeText: {
-    flex: 1,
-    fontSize: 14,
-    lineHeight: 21,
-    color: colors.text,
-  },
-
-  scopeNote: {
-    marginTop: 8,
-    borderRadius: 12,
-    backgroundColor: colors.primaryLight,
-    padding: 13,
-    fontSize: 13,
-    lineHeight: 20,
-    color: colors.primaryDark,
-  },
 });

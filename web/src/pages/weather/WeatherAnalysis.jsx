@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import WeatherTrendCharts from "../../components/weather/WeatherTrendCharts";
+import DashboardLayout from "../../layouts/dashboard/DashboardLayout";
 
 import {
   getWeatherAnalysis,
@@ -192,22 +193,24 @@ function WeatherAnalysis() {
 
   if (optionsLoading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <LoaderCircle
-            className="h-9 w-9 animate-spin text-emerald-600"
-          />
+      <DashboardLayout>
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <LoaderCircle
+              className="h-9 w-9 animate-spin text-emerald-600"
+            />
 
-          <p className="text-sm font-medium text-slate-600">
-            Loading weather analysis...
-          </p>
+            <p className="text-sm font-medium text-slate-600">
+              Loading weather analysis...
+            </p>
+          </div>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
-
   return (
+  <DashboardLayout>
     <div className="space-y-6 pb-8">
       <section className="overflow-hidden rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-sky-50 p-6 shadow-sm sm:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -416,6 +419,7 @@ function WeatherAnalysis() {
         </>
       )}
     </div>
+    </DashboardLayout>
   );
 }
 

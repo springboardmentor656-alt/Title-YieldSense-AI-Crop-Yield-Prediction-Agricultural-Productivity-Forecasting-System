@@ -17,6 +17,9 @@ import {
   BrainCircuit,
   ChevronLeft,
   ChevronRight,
+  Download,
+  FileSpreadsheet,
+  FileText,
   History,
   Plus,
 } from "lucide-react-native";
@@ -47,6 +50,9 @@ export default function PredictionHistoryScreen() {
 
   const [refreshing, setRefreshing] =
     useState(false);
+
+  const [exportingFormat, setExportingFormat] =
+    useState("");
 
   const loadPredictions = useCallback(
     async ({ refresh = false } = {}) => {
@@ -88,6 +94,33 @@ export default function PredictionHistoryScreen() {
   useEffect(() => {
     loadPredictions();
   }, [loadPredictions]);
+
+  const handleExport = async (format) => {
+    try {
+      setExportingFormat(format);
+
+      if (format === "csv") {
+        await predictionService.exportPredictionsCsv();
+      } else {
+        await predictionService.exportPredictionsPdf();
+      }
+
+      Alert.alert(
+        "Success",
+        `${format.toUpperCase()} report exported successfully.`
+      );
+    } catch (error) {
+      Alert.alert(
+        "Export Failed",
+        getErrorMessage(
+          error,
+          `Unable to export ${format.toUpperCase()} report.`
+        )
+      );
+    } finally {
+      setExportingFormat("");
+    }
+  };
 
   return (
     <ScreenContainer
@@ -164,6 +197,69 @@ export default function PredictionHistoryScreen() {
           size={28}
           color={colors.textSecondary}
         />
+      </View>
+
+      <View style={styles.exportRow}>
+        <Pressable
+          disabled={
+            loading ||
+            exportingFormat !== "" ||
+            predictions.length === 0
+          }
+          onPress={() => handleExport("csv")}
+          style={({ pressed }) => [
+            styles.exportButton,
+            pressed && styles.pressed,
+            (loading ||
+              exportingFormat !== "" ||
+              predictions.length === 0) &&
+              styles.disabledButton,
+          ]}
+        >
+          <FileSpreadsheet
+            size={18}
+            color={colors.primary}
+          />
+
+          <Text style={styles.exportButtonText}>
+            {exportingFormat === "csv"
+              ? "Exporting..."
+              : "CSV"}
+          </Text>
+        </Pressable>
+
+        <Pressable
+          disabled={
+            loading ||
+            exportingFormat !== "" ||
+            predictions.length === 0
+          }
+          onPress={() => handleExport("pdf")}
+          style={({ pressed }) => [
+            styles.exportButton,
+            pressed && styles.pressed,
+            (loading ||
+              exportingFormat !== "" ||
+              predictions.length === 0) &&
+              styles.disabledButton,
+          ]}
+        >
+          <FileText
+            size={18}
+            color="#DC2626"
+          />
+
+          <Text
+            style={[
+              styles.exportButtonText,
+              { color: "#DC2626" },
+            ]}
+          >
+            {exportingFormat === "pdf"
+              ? "Exporting..."
+              : "PDF"}
+          </Text>
+        </Pressable>
       </View>
 
       <View style={styles.records}>
@@ -460,5 +556,36 @@ const styles = StyleSheet.create({
 
   pressed: {
     opacity: 0.7,
+  },
+
+  exportRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 14,
+  },
+
+  exportButton: {
+    flex: 1,
+    minHeight: 50,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 12,
+  },
+
+  exportButtonText: {
+    marginLeft: 8,
+    fontSize: 13,
+    fontWeight: "800",
+    color: colors.primary,
+  },
+
+  pdfExportText: {
+    color: "#DC2626",
   },
 });

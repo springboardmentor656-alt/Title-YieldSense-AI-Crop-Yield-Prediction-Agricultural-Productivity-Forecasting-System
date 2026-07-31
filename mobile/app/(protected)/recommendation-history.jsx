@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import {
   ArrowLeft,
+  FileSpreadsheet,
+  FileText,
   History,
   Sprout,
 } from "lucide-react-native";
@@ -43,13 +45,21 @@ function extractRecommendations(response) {
   return [];
 }
 
+const PAGE_SIZE = 5;
+
 export default function RecommendationHistoryScreen() {
-  const [recommendations, setRecommendations] =
-    useState([]);
+  const [recommendations, setRecommendations] = useState([]);
+
+  const [skip, setSkip] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] =
     useState(false);
+  
+  const [exportingFormat, setExportingFormat] =
+    useState("");
 
   const loadHistory = useCallback(
     async ({ showLoader = true } = {}) => {
@@ -59,21 +69,24 @@ export default function RecommendationHistoryScreen() {
         }
 
         const response =
-          await recommendationService.getRecommendationHistory();
+          await recommendationService.getRecommendationHistory({
+            skip: 0,
+            limit: PAGE_SIZE,
+          });
 
-        setRecommendations(
-          extractRecommendations(response)
-        );
+        const items = extractRecommendations(response);
+        const total = response?.total ?? items.length;
+
+        setRecommendations(items);
+        setSkip(items.length);
+        setHasMore(items.length < total);
       } catch (error) {
         const message =
           error.response?.data?.detail ||
           error.message ||
           "Unable to load recommendation history.";
 
-        Alert.alert(
-          "History Loading Failed",
-          message
-        );
+        Alert.alert("History Loading Failed", message);
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -96,7 +109,100 @@ export default function RecommendationHistoryScreen() {
     });
   };
 
-  if (loading) {
+  const loadMoreHistory = useCallback(async () => {
+    if (
+      loading ||
+      refreshing ||
+      loadingMore ||
+      !hasMore
+    ) {
+      return;
+    }
+
+    try {
+      setLoadingMore(true);
+
+      const response =
+        await recommendationService.getRecommendationHistory({
+          skip,
+          limit: PAGE_SIZE,
+        });
+
+      const newItems = extractRecommendations(response);
+      const total =
+        response?.total ??
+        recommendations.length + newItems.length;
+
+      setRecommendations((currentItems) => {
+        const existingIds = new Set(
+          currentItems.map((item) => item.id)
+        );
+
+        const uniqueNewItems = newItems.filter(
+          (item) => !existingIds.has(item.id)
+        );
+
+        return [...currentItems, ...uniqueNewItems];
+      });
+
+      const nextSkip = skip + newItems.length;
+
+      setSkip(nextSkip);
+      setHasMore(
+        newItems.length === PAGE_SIZE &&
+          nextSkip < total
+      );
+    } catch (error) {
+      const message =
+        error.response?.data?.detail ||
+        error.message ||
+        "Unable to load more recommendations.";
+
+      Alert.alert("Loading Failed", message);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [
+    hasMore,
+    loading,
+    loadingMore,
+    recommendations.length,
+    refreshing,
+    skip,
+  ]);
+
+  const handleExport = async (format) => {
+    try {
+      setExportingFormat(format);
+
+      if (format === "csv") {
+        await recommendationService
+          .exportRecommendationsCsv();
+      } else {
+        await recommendationService
+          .exportRecommendationsPdf();
+      }
+
+      Alert.alert(
+        "Export Successful",
+        `${format.toUpperCase()} recommendation report exported successfully.`
+      );
+    } catch (error) {
+      const message =
+        error.response?.data?.detail ||
+        error.message ||
+        `Unable to export the ${format.toUpperCase()} report.`;
+
+      Alert.alert(
+        "Export Failed",
+        message
+      );
+    } finally {
+      setExportingFormat("");
+    }
+  };
+
+    if (loading) {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator
@@ -117,6 +223,8 @@ export default function RecommendationHistoryScreen() {
         data={recommendations}
         keyExtractor={(item) => String(item.id)}
         showsVerticalScrollIndicator={false}
+        onEndReached={loadMoreHistory}
+        onEndReachedThreshold={0.3}
         contentContainerStyle={[
           styles.content,
           recommendations.length === 0 &&
@@ -169,6 +277,60 @@ export default function RecommendationHistoryScreen() {
                 New Recommendation
               </Text>
             </Pressable>
+
+            <View style={styles.exportRow}>
+            <Pressable
+              disabled={
+                exportingFormat !== "" ||
+                recommendations.length === 0
+              }
+              onPress={() => handleExport("csv")}
+              style={({ pressed }) => [
+                styles.exportButton,
+                pressed && styles.pressed,
+                (exportingFormat !== "" ||
+                  recommendations.length === 0) &&
+                  styles.disabledButton,
+              ]}
+            >
+              <FileSpreadsheet
+                size={18}
+                color={colors.primaryDark}
+              />
+
+              <Text style={styles.exportCsvText}>
+                {exportingFormat === "csv"
+                  ? "Exporting..."
+                  : "Export CSV"}
+              </Text>
+            </Pressable>
+
+            <Pressable
+              disabled={
+                exportingFormat !== "" ||
+                recommendations.length === 0
+              }
+              onPress={() => handleExport("pdf")}
+              style={({ pressed }) => [
+                styles.exportButton,
+                pressed && styles.pressed,
+                (exportingFormat !== "" ||
+                  recommendations.length === 0) &&
+                  styles.disabledButton,
+              ]}
+            >
+              <FileText
+                size={18}
+                color="#DC2626"
+              />
+
+              <Text style={styles.exportPdfText}>
+                {exportingFormat === "pdf"
+                  ? "Exporting..."
+                  : "Export PDF"}
+              </Text>
+            </Pressable>
+          </View>
           </View>
         }
         renderItem={({ item }) => (
@@ -185,6 +347,21 @@ export default function RecommendationHistoryScreen() {
             }
           />
         )}
+
+        ListFooterComponent={
+          loadingMore ? (
+            <View style={styles.footerLoader}>
+              <ActivityIndicator
+                size="small"
+                color={colors.primaryDark}
+              />
+
+              <Text style={styles.footerLoaderText}>
+                Loading more recommendations...
+              </Text>
+            </View>
+          ) : null
+        }
         ListEmptyComponent={
           <View style={styles.emptyCard}>
             <View style={styles.emptyIcon}>
@@ -364,5 +541,59 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "800",
     color: "#ffffff",
+  },
+
+  exportRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 16,
+  },
+
+  exportButton: {
+    flex: 1,
+    minHeight: 48,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 13,
+    backgroundColor: colors.surface,
+    paddingHorizontal: 10,
+  },
+
+  exportCsvText: {
+    marginLeft: 7,
+    fontSize: 13,
+    fontWeight: "800",
+    color: colors.primaryDark,
+  },
+
+  exportPdfText: {
+    marginLeft: 7,
+    fontSize: 13,
+    fontWeight: "800",
+    color: "#DC2626",
+  },
+
+  disabledButton: {
+    opacity: 0.4,
+  },
+
+  pressed: {
+    opacity: 0.7,
+  },
+
+  footerLoader: {
+    paddingVertical: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  footerLoaderText: {
+    marginTop: 8,
+    fontSize: 13,
+    fontWeight: "600",
+    color: colors.textSecondary,
   },
 });

@@ -12,6 +12,9 @@ import {
   Package,
   Plus,
   Sprout,
+  Download,
+  FileSpreadsheet,
+  FileText,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -60,6 +63,9 @@ function PredictionHistory() {
   const [loading, setLoading] = useState(true);
   const [optionsLoading, setOptionsLoading] =
     useState(true);
+  
+  const [exportingFormat, setExportingFormat] =
+    useState("");
 
   const loadOptions = useCallback(async () => {
     try {
@@ -185,15 +191,67 @@ function PredictionHistory() {
     );
   };
 
-  const clearFilters = () => {
-    setFilters(initialFilters);
-    setAppliedFilters({});
-    setPage(1);
+  const getReportFilters = () => {
+    const reportFilters = {};
 
-    toast.success(
-      "Prediction filters cleared"
-    );
+    if (appliedFilters.farm_id) {
+      reportFilters.farm_id =
+        appliedFilters.farm_id;
+    }
+
+    if (appliedFilters.crop) {
+      reportFilters.crop =
+        appliedFilters.crop;
+    }
+
+    if (appliedFilters.season) {
+      reportFilters.season =
+        appliedFilters.season;
+    }
+
+    return reportFilters;
   };
+
+  const handleExport = async (format) => {
+    try {
+      setExportingFormat(format);
+
+      const reportFilters = getReportFilters();
+
+      if (format === "csv") {
+        await predictionService.exportPredictionsCsv(
+          reportFilters
+        );
+      } else {
+        await predictionService.exportPredictionsPdf(
+          reportFilters
+        );
+      }
+
+      toast.success(
+        `Prediction ${format.toUpperCase()} report downloaded`
+      );
+    } catch (error) {
+      toast.error(
+        getApiErrorMessage(
+          error,
+          `Unable to export prediction ${format.toUpperCase()} report.`
+        )
+      );
+    } finally {
+      setExportingFormat("");
+    }
+  };
+
+    const clearFilters = () => {
+      setFilters(initialFilters);
+      setAppliedFilters({});
+      setPage(1);
+
+      toast.success(
+        "Prediction filters cleared"
+      );
+    };
 
   return (
     <DashboardLayout>
@@ -214,13 +272,63 @@ function PredictionHistory() {
           </p>
         </div>
 
-        <Link
-          to="/prediction"
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-700 px-5 py-3 font-semibold text-white transition hover:bg-green-800"
-        >
-          <Plus size={19} />
-          New Prediction
-        </Link>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <button
+            type="button"
+            onClick={() => handleExport("csv")}
+            disabled={
+              loading ||
+              exportingFormat !== "" ||
+              pagination.total === 0
+            }
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-green-700 bg-white px-4 py-3 font-semibold text-green-700 transition hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {exportingFormat === "csv" ? (
+              <Download
+                size={18}
+                className="animate-bounce"
+              />
+            ) : (
+              <FileSpreadsheet size={18} />
+            )}
+
+            {exportingFormat === "csv"
+              ? "Exporting..."
+              : "Export CSV"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleExport("pdf")}
+            disabled={
+              loading ||
+              exportingFormat !== "" ||
+              pagination.total === 0
+            }
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-600 bg-white px-4 py-3 font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {exportingFormat === "pdf" ? (
+              <Download
+                size={18}
+                className="animate-bounce"
+              />
+            ) : (
+              <FileText size={18} />
+            )}
+
+            {exportingFormat === "pdf"
+              ? "Exporting..."
+              : "Export PDF"}
+          </button>
+
+          <Link
+            to="/prediction"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-700 px-5 py-3 font-semibold text-white transition hover:bg-green-800"
+          >
+            <Plus size={19} />
+            New Prediction
+          </Link>
+        </div>
       </div>
 
       <div className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

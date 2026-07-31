@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 
+import DashboardLayout from "../../layouts/dashboard/DashboardLayout";
+
 import {
   getSoilAnalysis,
   getSoilAnalysisOptions,
@@ -119,8 +121,8 @@ export default function SoilAnalysis() {
 
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl space-y-6">
+    <DashboardLayout>
+      <div className="space-y-6 pb-8">
         <SoilAnalysisHeader />
 
         <SoilFilterCard
@@ -192,7 +194,7 @@ export default function SoilAnalysis() {
           </>
         ) : null}
       </div>
-    </main>
+    </DashboardLayout>
   );
 }
 

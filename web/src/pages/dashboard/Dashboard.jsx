@@ -70,7 +70,8 @@ function Dashboard() {
             </h1>
 
             <p className="mt-2 text-gray-600">
-              Manage historical crop yield, soil, and weather datasets.
+              Monitor farms, generate crop yield predictions, review recommendations,
+              and explore agricultural insights.
             </p>
           </div>
 
@@ -153,12 +154,13 @@ function Dashboard() {
 
         <div className="mt-8">
           <h2 className="text-xl font-bold text-gray-900">
-            Data Collection Modules
-          </h2>
+          Reference Data
+        </h2>
 
-          <p className="mt-1 text-sm text-gray-600">
-            Open and review the datasets currently stored in PostgreSQL.
-          </p>
+        <p className="mt-1 text-sm text-gray-600">
+          Review the agricultural datasets used for prediction, analysis,
+          and recommendations.
+        </p>
 
           <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             <ModuleCard
@@ -266,19 +268,6 @@ function Dashboard() {
               </p>
             )}
           </div>
-        </div>
-
-        <div className="mt-8 rounded-2xl border border-blue-200 bg-blue-50 p-5">
-          <h2 className="font-bold text-blue-900">
-            Current milestone status
-          </h2>
-
-          <p className="mt-2 text-sm leading-6 text-blue-800">
-            Authentication and agricultural dataset management are active.
-            Yield prediction, soil analysis, weather analysis, analytics,
-            and recommendations will be added in their respective later
-            milestones.
-          </p>
         </div>
       </section>
     </DashboardLayout>

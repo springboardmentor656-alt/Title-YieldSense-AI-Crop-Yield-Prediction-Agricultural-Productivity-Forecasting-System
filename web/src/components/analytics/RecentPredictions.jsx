@@ -24,6 +24,7 @@ function formatNumber(value, decimals = 2) {
 function RecentPredictions({
   predictions = [],
 }) {
+    const recentPredictions = predictions.slice(0, 3);
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="flex items-start justify-between gap-4">
@@ -44,11 +45,11 @@ function RecentPredictions({
         </div>
 
         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-          {predictions.length} records
+          {recentPredictions.length} records
         </span>
       </div>
 
-      {predictions.length === 0 ? (
+      {recentPredictions.length === 0 ? (
         <div className="mt-6 flex min-h-72 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 text-center">
           <Sprout className="h-10 w-10 text-slate-300" />
 
@@ -71,7 +72,7 @@ function RecentPredictions({
         </div>
       ) : (
         <div className="mt-6 space-y-3">
-          {predictions.map((prediction) => (
+          {recentPredictions.map((prediction) => (
             <article
               key={prediction.id}
               className="group rounded-2xl border border-slate-100 bg-slate-50 p-4 transition hover:border-emerald-200 hover:bg-emerald-50/40"

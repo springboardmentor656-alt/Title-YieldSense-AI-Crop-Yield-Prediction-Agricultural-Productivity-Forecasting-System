@@ -74,7 +74,7 @@ export default function AnalyticsScreen() {
         recent_predictions: Array.isArray(
           data?.recent_predictions
         )
-          ? data.recent_predictions
+          ? data.recent_predictions.slice(0, 3)
           : [],
       });
     } catch (requestError) {

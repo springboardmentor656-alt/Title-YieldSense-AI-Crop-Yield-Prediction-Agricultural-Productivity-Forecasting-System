@@ -109,6 +109,7 @@ function DashboardLayout({ children }) {
   } = useAuth();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
   const visibleNavigationItems = useMemo(() => {
@@ -144,19 +145,27 @@ function DashboardLayout({ children }) {
   };
 
   const sidebar = (
-    <aside className="flex h-full w-72 flex-col bg-green-950 text-white">
+    <aside
+        className={[
+          "flex h-full flex-col bg-green-950 text-white transition-all duration-300",
+          sidebarCollapsed ? "w-20" : "w-72",
+        ].join(" ")}
+      >
       <div className="flex items-center justify-between border-b border-green-900 px-6 py-5">
         <div className="flex items-center gap-3">
           <div className="rounded-xl bg-green-700 p-2">
             <Leaf size={24} />
           </div>
 
+          {!sidebarCollapsed && (
           <div>
             <h1 className="font-bold">YieldSense AI</h1>
+
             <p className="text-xs text-green-300">
               Data Management
             </p>
           </div>
+        )}
         </div>
 
         <button
@@ -178,22 +187,28 @@ function DashboardLayout({ children }) {
               to={item.path}
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) =>
-                [
-                  "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition",
-                  isActive
-                    ? "bg-green-700 text-white"
-                    : "text-green-100 hover:bg-green-900",
-                ].join(" ")
-              }
+              [
+                "flex items-center rounded-xl py-3 text-sm font-medium transition",
+                sidebarCollapsed
+                  ? "justify-center px-0"
+                  : "gap-3 px-4",
+                isActive
+                  ? "bg-green-700 text-white"
+                  : "text-green-100 hover:bg-green-900",
+              ].join(" ")
+            }
             >
-              <Icon size={19} />
-              {item.label}
+              <Icon size={19} className="shrink-0" />
+
+              {!sidebarCollapsed && (
+                <span>{item.label}</span>
+              )}
             </NavLink>
           );
         })}
       </nav>
 
-      {user && (
+      {user && !sidebarCollapsed && (
         <div className="border-t border-green-900 px-5 py-4">
           <p className="text-sm font-semibold text-white">
             {user.full_name}
@@ -214,11 +229,22 @@ function DashboardLayout({ children }) {
           type="button"
           disabled={loggingOut}
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-red-200 hover:bg-red-950 disabled:cursor-not-allowed disabled:opacity-50"
+          aria-label="Logout"
+          title={sidebarCollapsed ? "Logout" : undefined}
+          className={[
+            "flex items-center rounded-xl py-3 text-sm font-medium text-red-200 transition hover:bg-red-950 disabled:cursor-not-allowed disabled:opacity-50",
+            sidebarCollapsed
+              ? "w-full justify-center px-0"
+              : "w-full gap-3 px-4 text-left",
+          ].join(" ")}
         >
-          <LogOut size={19} />
+          <LogOut size={19} className="shrink-0" />
 
-          {loggingOut ? "Logging out..." : "Logout"}
+          {!sidebarCollapsed && (
+            <span>
+              {loggingOut ? "Logging out..." : "Logout"}
+            </span>
+          )}
         </button>
       </div>
     </aside>
@@ -245,15 +271,31 @@ function DashboardLayout({ children }) {
         </div>
       )}
 
-      <div className="lg:pl-72">
+      <div
+        className={[
+          "transition-all duration-300",
+          sidebarCollapsed ? "lg:pl-20" : "lg:pl-72",
+        ].join(" ")}
+      >
         <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b bg-white px-5 lg:px-8">
           <button
-            type="button"
-            onClick={() => setSidebarOpen(true)}
-            className="rounded-lg p-2 hover:bg-gray-100 lg:hidden"
-          >
-            <Menu size={24} />
-          </button>
+          type="button"
+          onClick={() => {
+            if (window.innerWidth >= 1024) {
+              setSidebarCollapsed((current) => !current);
+            } else {
+              setSidebarOpen(true);
+            }
+          }}
+          className="rounded-lg p-2 hover:bg-gray-100"
+          aria-label={
+            sidebarCollapsed
+              ? "Expand sidebar"
+              : "Collapse sidebar"
+          }
+        >
+          <Menu size={24} />
+        </button>
 
           <div className="flex items-center gap-2 text-sm text-gray-500">
             <Sprout
