@@ -48,6 +48,17 @@ class NotificationRepository:
 
         return query.all()
 
+    def count_unread(self, user_id: int) -> int:
+
+        return (
+            self.db.query(Notification)
+            .filter(
+                Notification.user_id == user_id,
+                Notification.is_read.is_(False)
+            )
+            .count()
+        )
+
     def mark_read(self, notification: Notification) -> Notification:
 
         notification.is_read = True

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.auth.oauth2 import verify_token
 from app.database.session import get_db
-from app.schemas.recommendation import RecommendationResponse
+from app.schemas.recommendation import RecommendationResponse, RiskAssessmentResponse
 from app.services.farm_service import FarmService
 from app.services.recommendation_service import RecommendationService
 
@@ -28,3 +28,17 @@ def get_recommendations(
 
     recommendation_service = RecommendationService(db)
     return recommendation_service.generate(farm_id, token)
+
+
+@router.get(
+    "/{farm_id}/risk",
+    response_model=RiskAssessmentResponse
+)
+def get_risk_assessment(
+    farm_id: int,
+    token=Depends(verify_token),
+    db: Session = Depends(get_db)
+):
+
+    recommendation_service = RecommendationService(db)
+    return recommendation_service.assess_risk(farm_id, token)

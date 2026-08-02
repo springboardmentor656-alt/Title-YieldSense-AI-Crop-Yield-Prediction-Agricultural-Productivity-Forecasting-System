@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.auth.oauth2 import verify_token
+from app.auth.permissions import farmer_required
 from app.database.session import get_db
 from app.schemas.crop import CropCreate, CropResponse, CropUpdate
 from app.services.crop_service import CropService
@@ -18,7 +19,7 @@ router = APIRouter(
 )
 def create_crop(
     request: CropCreate,
-    token=Depends(verify_token),
+    token=Depends(farmer_required),
     db: Session = Depends(get_db)
 ):
 
@@ -49,7 +50,7 @@ def get_farm_crops(
 def update_crop(
     crop_id: int,
     request: CropUpdate,
-    token=Depends(verify_token),
+    token=Depends(farmer_required),
     db: Session = Depends(get_db)
 ):
 
@@ -61,7 +62,7 @@ def update_crop(
 @router.delete("/{crop_id}")
 def delete_crop(
     crop_id: int,
-    token=Depends(verify_token),
+    token=Depends(farmer_required),
     db: Session = Depends(get_db)
 ):
 

@@ -3,6 +3,7 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 from app.schemas.farm import FarmUpdate
 from app.auth.oauth2 import verify_token
+from app.auth.permissions import farmer_required
 from app.database.session import get_db
 from app.schemas.farm import FarmCreate
 from app.schemas.farm import FarmResponse
@@ -21,7 +22,7 @@ router = APIRouter(
 )
 def create_farm(
     request: FarmCreate,
-    token=Depends(verify_token),
+    token=Depends(farmer_required),
     db: Session = Depends(get_db)
 ):
 
@@ -53,10 +54,6 @@ def get_my_farms(
     "/{farm_id}",
     response_model=FarmResponse
 )
-@router.get(
-    "/{farm_id}",
-    response_model=FarmResponse
-)
 def get_farm(
     farm_id: int,
     token=Depends(verify_token),
@@ -76,7 +73,7 @@ def delete_farm(
 
     farm_id: int,
 
-    token=Depends(verify_token),
+    token=Depends(farmer_required),
 
     db: Session = Depends(get_db)
 
@@ -92,10 +89,6 @@ def delete_farm(
 
     )
 
-    service = FarmService(db)
-
-    return service.delete(farm_id)
-
 
 @router.put(
 
@@ -110,7 +103,7 @@ def update_farm(
 
     request: FarmUpdate,
 
-    token=Depends(verify_token),
+    token=Depends(farmer_required),
 
     db: Session = Depends(get_db)
 

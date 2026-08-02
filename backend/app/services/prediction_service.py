@@ -30,6 +30,7 @@ from app.repositories.prediction_history_repository import (
 from app.repositories.soil_repository import SoilRepository
 from app.repositories.weather_repository import WeatherRepository
 from app.schemas.prediction import PredictionRequest
+from app.services.notification_service import NotificationService
 from app.services.soil_service import SoilService
 
 BASE_DIR = Path(__file__).resolve().parents[2]  # backend/
@@ -90,6 +91,7 @@ class PredictionService:
         self.weather_repo = WeatherRepository(db)
         self.soil_repo = SoilRepository(db)
         self.history_repo = PredictionHistoryRepository(db)
+        self.notification_service = NotificationService(db)
 
         self.pipeline = _load_pipeline()
         self.metadata = _load_metadata()
@@ -374,6 +376,14 @@ class PredictionService:
         logger.info(
             f"Prediction for farm {farm.id} (user {user_id}): "
             f"{adjusted_yield} via {model_used}"
+        )
+
+        self.notification_service.create_for_user(
+            user_id,
+            "Prediction Ready",
+            f"Yield prediction for {crop_name} on '{farm.farm_name}' is "
+            f"ready: {adjusted_yield} kg/ha ({confidence}% confidence).",
+            category="prediction",
         )
 
         timestamp: datetime = history_entry.created_at

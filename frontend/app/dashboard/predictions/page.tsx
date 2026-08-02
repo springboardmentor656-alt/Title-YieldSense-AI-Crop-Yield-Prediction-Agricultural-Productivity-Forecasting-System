@@ -158,7 +158,7 @@ export default function PredictionPage() {
                                         Confidence
                                     </p>
                                     <p className="text-3xl font-bold">
-                                        {(result.confidence * 100).toFixed(1)}%
+                                        {result.confidence.toFixed(1)}%
                                     </p>
                                 </div>
 

@@ -61,6 +61,14 @@ HIGH_TEMPERATURE_C = 30.0
 # and is called out regardless of crop.
 HIGH_HUMIDITY_PERCENT = 70.0
 
+# Environmental risk thresholds, evaluated against a farm's latest
+# weather record. Independent of the irrigation-plan rainfall bands
+# above, which use much finer-grained recent readings — these are
+# coarse drought/flood/heat thresholds for flagging outright threats.
+DROUGHT_RAINFALL_MM = 300.0
+FLOOD_RAINFALL_MM = 1200.0
+HEAT_STRESS_TEMP_C = 35.0
+
 # Crop-specific pest scouting tips, keyed by lowercase crop name.
 CROP_PEST_TIPS: Dict[str, List[str]] = {
     "rice": [
@@ -248,6 +256,61 @@ class RecommendationService:
             )
 
         return practices
+
+    def assess_risk(self, farm_id: int, token) -> Dict[str, Any]:
+        """Flag drought/flood/heat threats from the farm's latest weather record.
+
+        Raises:
+            ResourceNotFoundException: If the farm doesn't exist/isn't
+                owned by the caller, or has no weather record on file.
+        """
+        self.farm_service.get_farm(farm_id, token)
+
+        weather = self.weather_repo.latest(farm_id)
+        if weather is None:
+            raise ResourceNotFoundException("Weather record")
+
+        risks: List[Dict[str, str]] = []
+        overall_risk_level = "Low"
+
+        if weather.rainfall is not None and weather.rainfall < DROUGHT_RAINFALL_MM:
+            risks.append({
+                "type": "Drought Stress",
+                "severity": "High",
+                "advice": (
+                    f"Rainfall is critically low ({weather.rainfall} mm) — "
+                    "initiate drip or supplemental irrigation immediately."
+                ),
+            })
+            overall_risk_level = "High"
+        elif weather.rainfall is not None and weather.rainfall > FLOOD_RAINFALL_MM:
+            risks.append({
+                "type": "Flood/Root Rot",
+                "severity": "Medium",
+                "advice": (
+                    f"Rainfall is unusually high ({weather.rainfall} mm) — "
+                    "ensure field drainage paths are clear to prevent root rot."
+                ),
+            })
+            if overall_risk_level != "High":
+                overall_risk_level = "Medium"
+
+        if weather.temperature is not None and weather.temperature > HEAT_STRESS_TEMP_C:
+            risks.append({
+                "type": "Heat Stress",
+                "severity": "High",
+                "advice": (
+                    f"Temperature is critically high ({weather.temperature}°C) — "
+                    "consider shade netting or early-morning irrigation."
+                ),
+            })
+            overall_risk_level = "High"
+
+        return {
+            "farm_id": farm_id,
+            "overall_risk_level": overall_risk_level,
+            "risks": risks,
+        }
 
     def generate(self, farm_id: int, token) -> Dict[str, Any]:
         """Build the full recommendation set for a farm.

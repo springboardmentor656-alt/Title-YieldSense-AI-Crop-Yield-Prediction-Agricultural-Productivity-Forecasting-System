@@ -6,7 +6,7 @@ completes or a weather alert fires). Actual delivery to email/SMS/push
 is a separate work stream and is out of scope here.
 """
 
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
@@ -16,6 +16,7 @@ from app.core.exceptions import (
 )
 from app.models.notification import Notification
 from app.repositories.notification_repository import NotificationRepository
+from app.repositories.user_repository import UserRepository
 
 
 class NotificationService:
@@ -23,6 +24,7 @@ class NotificationService:
     def __init__(self, db: Session):
         self.db = db
         self.repo = NotificationRepository(db)
+        self.user_repo = UserRepository(db)
 
     def create_for_user(
         self,
@@ -44,10 +46,26 @@ class NotificationService:
     def list_for_user(
         self,
         user_id: int,
-        unread_only: bool = False
+        unread_only: bool = False,
+        limit: Optional[int] = None
     ) -> List[Notification]:
 
-        return self.repo.get_by_user(user_id, unread_only=unread_only)
+        return self.repo.get_by_user(
+            user_id, unread_only=unread_only, limit=limit
+        )
+
+    def unread_count(self, user_id: int) -> int:
+
+        return self.repo.count_unread(user_id)
+
+    def broadcast(self, title: str, message: str, category: str = "system") -> int:
+        """Raise a system-wide notification for every user. Returns the count."""
+        count = 0
+        for user in self.user_repo.get_all():
+            self.create_for_user(user.id, title, message, category=category)
+            count += 1
+
+        return count
 
     def mark_read(self, notification_id: int, user_id: int) -> Notification:
 

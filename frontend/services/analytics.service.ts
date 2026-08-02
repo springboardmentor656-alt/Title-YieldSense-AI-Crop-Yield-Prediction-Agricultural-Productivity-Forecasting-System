@@ -72,6 +72,30 @@ export const exportPredictionsCsv = async (farmId: number) => {
 
 };
 
+export const exportPredictionsPdf = async (farmId: number) => {
+
+    const response = await api.get(
+        `/analytics/predictions/${farmId}/report-pdf`,
+        { responseType: "blob" }
+    );
+
+    const url = window.URL.createObjectURL(
+        new Blob([response.data], { type: "application/pdf" })
+    );
+
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.setAttribute("download", `farm_${farmId}_report.pdf`);
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    window.URL.revokeObjectURL(url);
+
+};
+
 export const setActualYield = async (
     entryId: number,
     actualYield: number

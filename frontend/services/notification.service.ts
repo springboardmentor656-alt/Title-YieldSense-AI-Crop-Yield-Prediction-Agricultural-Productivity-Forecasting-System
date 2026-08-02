@@ -1,14 +1,31 @@
 import api from "@/lib/axios";
 
-export const getNotifications = async (
-    unreadOnly: boolean = false
-) => {
+import { Notification } from "@/types/notification";
 
-    const response = await api.get(
-        `/notifications/?unread_only=${unreadOnly}`
-    );
+export const getNotifications = async (
+    unreadOnly: boolean = false,
+    limit?: number
+): Promise<Notification[]> => {
+
+    const params = new URLSearchParams({
+        unread_only: String(unreadOnly),
+    });
+
+    if (limit !== undefined) {
+        params.set("limit", String(limit));
+    }
+
+    const response = await api.get(`/notifications/?${params.toString()}`);
 
     return response.data;
+
+};
+
+export const getUnreadCount = async (): Promise<number> => {
+
+    const response = await api.get("/notifications/unread-count");
+
+    return response.data.unread_count;
 
 };
 

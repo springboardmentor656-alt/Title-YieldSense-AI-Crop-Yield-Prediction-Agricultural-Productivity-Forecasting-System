@@ -13,6 +13,7 @@ from app.schemas.analytics import (
     YieldTrendResponse,
 )
 from app.services.analytics_service import AnalyticsService
+from app.services.report_service import ReportService
 
 router = APIRouter(
     prefix="/analytics",
@@ -100,6 +101,25 @@ def export_predictions_csv(
     csv_content = service.export_csv(farm_id, token)
 
     return Response(content=csv_content, media_type="text/csv")
+
+
+@router.get("/predictions/{farm_id}/report-pdf")
+def export_predictions_pdf(
+    farm_id: int,
+    token=Depends(verify_token),
+    db: Session = Depends(get_db)
+):
+
+    service = ReportService(db)
+    pdf_bytes = service.generate_pdf(farm_id, token)
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="farm_{farm_id}_report.pdf"'
+        },
+    )
 
 
 @router.patch(

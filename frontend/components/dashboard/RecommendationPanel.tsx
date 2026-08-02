@@ -1,4 +1,27 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+import { useFarm } from "@/hooks/useFarm";
+import { useRecommendations } from "@/hooks/useRecommendations";
+
 export default function RecommendationPanel() {
+
+    const { farms } = useFarm();
+
+    const [farmId, setFarmId] = useState<number | null>(null);
+
+    useEffect(() => {
+
+        if (!farmId && farms.length > 0) {
+
+            setFarmId((farms[0] as any).id);
+
+        }
+
+    }, [farms, farmId]);
+
+    const { recommendations, loading, notFound } = useRecommendations(farmId ?? undefined);
 
     return (
 
@@ -6,17 +29,23 @@ export default function RecommendationPanel() {
 
             <h2 className="font-bold text-xl mb-3">
 
-                🤖 AI Recommendation
+                AI Recommendation
 
             </h2>
 
-            <p>
+            {!farmId && <p>Add a farm to see recommendations.</p>}
 
-                Increase irrigation by approximately 8% this week.
-                Maintain soil pH near 6.5 for better wheat productivity.
-                Expected yield improvement: 6–8%.
+            {farmId && loading && <p>Loading recommendation...</p>}
 
-            </p>
+            {farmId && !loading && notFound && (
+                <p>No soil report on file yet for this farm.</p>
+            )}
+
+            {recommendations && (
+                <p>
+                    {recommendations.irrigation_plan} {recommendations.fertilizer_advice}
+                </p>
+            )}
 
         </div>
 

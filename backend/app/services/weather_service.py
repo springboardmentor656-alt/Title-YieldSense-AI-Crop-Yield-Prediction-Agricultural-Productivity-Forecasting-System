@@ -4,6 +4,13 @@ from app.providers.openweather_provider import OpenWeatherProvider
 from app.repositories.weather_repository import WeatherRepository
 from app.repositories.farm_repository import FarmRepository
 from app.models.weather import WeatherRecord
+from app.services.notification_service import NotificationService
+from app.services.recommendation_service import HEAT_STRESS_TEMP_C
+
+# Heavy rain in a single hour (WMO "violent rain" band), distinct from
+# the seasonal-total thresholds recommendation_service uses for drought
+# / flood risk since this reading is an hourly OpenWeather sample.
+HEAVY_RAINFALL_1H_MM = 50.0
 
 
 class WeatherService:
@@ -17,6 +24,8 @@ class WeatherService:
         self.weather_repo = WeatherRepository(db)
 
         self.farm_repo = FarmRepository(db)
+
+        self.notification_service = NotificationService(db)
 
     async def refresh_weather(self, farm_id: int):
 
@@ -50,7 +59,31 @@ class WeatherService:
 
         )
 
-        return self.weather_repo.create(record)
+        record = self.weather_repo.create(record)
+
+        self._raise_weather_alerts(farm, record)
+
+        return record
+
+    def _raise_weather_alerts(self, farm, record: WeatherRecord) -> None:
+
+        if record.temperature is not None and record.temperature > HEAT_STRESS_TEMP_C:
+            self.notification_service.create_for_user(
+                farm.user_id,
+                "Weather Alert",
+                f"Heat stress risk on '{farm.farm_name}': temperature is "
+                f"{record.temperature}°C.",
+                category="weather",
+            )
+
+        if record.rainfall is not None and record.rainfall > HEAVY_RAINFALL_1H_MM:
+            self.notification_service.create_for_user(
+                farm.user_id,
+                "Weather Alert",
+                f"Heavy rainfall on '{farm.farm_name}': {record.rainfall} mm "
+                "in the last hour — check field drainage.",
+                category="weather",
+            )
 
     def latest_weather(self, farm_id):
 

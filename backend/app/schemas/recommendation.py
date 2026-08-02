@@ -3,6 +3,28 @@ from typing import List
 from pydantic import BaseModel
 
 
+class RiskEntry(BaseModel):
+    """A single flagged environmental threat."""
+
+    type: str
+    severity: str
+    advice: str
+
+
+class RiskAssessmentResponse(BaseModel):
+    """Threshold-based environmental risk assessment for a farm.
+
+    Distinct from analytics.risk-anomaly (statistical outlier
+    detection on past predictions) — this evaluates the farm's
+    latest weather record against fixed drought/heat/flood
+    thresholds, independent of prediction history.
+    """
+
+    farm_id: int
+    overall_risk_level: str
+    risks: List[RiskEntry]
+
+
 class RecommendationResponse(BaseModel):
     """Rule-based farm recommendations derived from stored soil/weather data.
 

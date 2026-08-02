@@ -1,10 +1,15 @@
 "use client";
 
+import Link from "next/link";
+
 import {
     Plus,
     CloudSun,
+    Brain,
     FileText,
-    Brain
+    FlaskConical,
+    Bell,
+    BarChart3
 } from "lucide-react";
 
 const actions = [
@@ -12,21 +17,43 @@ const actions = [
     {
         title: "Add Farm",
         icon: <Plus />,
+        href: "/dashboard/farms/add",
     },
 
     {
         title: "Weather",
         icon: <CloudSun />,
+        href: "/dashboard/weather",
     },
 
     {
-        title: "Prediction",
+        title: "Predict Yield",
         icon: <Brain />,
+        href: "/dashboard/predictions",
+    },
+
+    {
+        title: "Add Soil Report",
+        icon: <FlaskConical />,
+        href: "/dashboard/soil/add",
+    },
+
+    {
+        title: "Notifications",
+        icon: <Bell />,
+        href: "/dashboard/notifications",
     },
 
     {
         title: "Reports",
         icon: <FileText />,
+        href: "/dashboard/reports",
+    },
+
+    {
+        title: "Analytics",
+        icon: <BarChart3 />,
+        href: "/dashboard/analytics",
     },
 
 ];
@@ -47,9 +74,11 @@ export default function QuickActions() {
 
                 {actions.map((action) => (
 
-                    <button
+                    <Link
 
                         key={action.title}
+
+                        href={action.href}
 
                         className="border rounded-lg p-5 hover:bg-green-50 transition"
 
@@ -67,7 +96,7 @@ export default function QuickActions() {
 
                         </div>
 
-                    </button>
+                    </Link>
 
                 ))}
 

@@ -1,8 +1,10 @@
 from sqlalchemy import Column
+from sqlalchemy import DateTime
 from sqlalchemy import Float
 from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 from app.database.base import Base
 
@@ -26,6 +28,8 @@ class SoilReport(Base):
 
     moisture = Column(Float)
 
+    organic_carbon = Column(Float)
+
     farm_id = Column(
         Integer,
         ForeignKey("farms.id")
@@ -34,4 +38,9 @@ class SoilReport(Base):
     farm = relationship(
         "Farm",
         back_populates="soil_reports"
+    )
+
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now()
     )

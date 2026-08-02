@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import {
 
     Chart as ChartJS,
@@ -22,6 +24,9 @@ import {
 
 import { Line } from "react-chartjs-2";
 
+import { useFarm } from "@/hooks/useFarm";
+import { useYieldTrend } from "@/hooks/useAnalytics";
+
 ChartJS.register(
 
     CategoryScale,
@@ -42,15 +47,31 @@ ChartJS.register(
 
 export default function YieldChart() {
 
+    const { farms } = useFarm();
+
+    const [farmId, setFarmId] = useState<number | null>(null);
+
+    useEffect(() => {
+
+        if (!farmId && farms.length > 0) {
+
+            setFarmId((farms[0] as any).id);
+
+        }
+
+    }, [farms, farmId]);
+
+    const { trend, loading } = useYieldTrend(farmId);
+
     const data = {
 
-        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+        labels: trend?.points?.map((p: any) => new Date(p.date).toLocaleDateString()) ?? [],
 
         datasets: [{
 
             label: "Predicted Yield",
 
-            data: [55, 61, 68, 80, 77, 92],
+            data: trend?.points?.map((p: any) => p.predicted_yield) ?? [],
 
             borderColor: "#16a34a",
 
@@ -70,7 +91,17 @@ export default function YieldChart() {
 
             </h2>
 
-            <Line data={data} />
+            {!farmId && <p className="text-gray-500">Add a farm to see yield trend.</p>}
+
+            {farmId && loading && <p className="text-gray-500">Loading yield trend...</p>}
+
+            {farmId && !loading && (!trend?.points || trend.points.length === 0) && (
+                <p className="text-gray-500">No predictions recorded yet for this farm.</p>
+            )}
+
+            {farmId && !loading && trend?.points?.length > 0 && (
+                <Line data={data} />
+            )}
 
         </div>
 

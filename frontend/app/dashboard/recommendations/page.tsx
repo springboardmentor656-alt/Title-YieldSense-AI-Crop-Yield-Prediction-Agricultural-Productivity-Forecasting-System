@@ -2,17 +2,27 @@
 
 import { useState } from "react";
 
-import { Bug, CheckCircle2, Droplets, FlaskConical, Sprout } from "lucide-react";
+import { AlertTriangle, Bug, CheckCircle2, Droplets, FlaskConical, ShieldAlert, Sprout } from "lucide-react";
 
 import FarmPicker from "@/components/farm/FarmPicker";
 import { useFarm } from "@/hooks/useFarm";
-import { useRecommendations } from "@/hooks/useRecommendations";
+import { useRecommendations, useRiskAssessment } from "@/hooks/useRecommendations";
+
+const RISK_BADGE_CLASS: Record<string, string> = {
+    High: "bg-red-100 text-red-700 border-red-300",
+    Medium: "bg-yellow-100 text-yellow-700 border-yellow-300",
+    Low: "bg-green-100 text-green-700 border-green-300",
+};
 
 export default function RecommendationsPage() {
     const { farms, loading: farmsLoading } = useFarm();
     const [farmId, setFarmId] = useState<number | null>(null);
 
     const { recommendations, loading, notFound } = useRecommendations(
+        farmId ?? undefined
+    );
+
+    const { risk, loading: riskLoading } = useRiskAssessment(
         farmId ?? undefined
     );
 
@@ -35,6 +45,49 @@ export default function RecommendationsPage() {
                     />
                 )}
             </div>
+
+            {farmId && riskLoading && (
+                <p className="text-gray-500">Loading risk assessment...</p>
+            )}
+
+            {farmId && !riskLoading && risk && (
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                        <ShieldAlert className="text-red-600" />
+                        <h2 className="text-2xl font-bold">
+                            Environmental Risk Assessment
+                        </h2>
+                        <span
+                            className={`ml-auto px-3 py-1 rounded-full text-xs font-bold border ${RISK_BADGE_CLASS[risk.overall_risk_level]}`}
+                        >
+                            Overall: {risk.overall_risk_level}
+                        </span>
+                    </div>
+
+                    {risk.risks.length === 0 ? (
+                        <p className="text-gray-500">
+                            No environmental threats currently flagged.
+                        </p>
+                    ) : (
+                        <div className="space-y-3">
+                            {risk.risks.map((r, i) => (
+                                <div
+                                    key={i}
+                                    className={`flex items-start gap-3 border rounded-lg p-4 ${RISK_BADGE_CLASS[r.severity]}`}
+                                >
+                                    <AlertTriangle className="shrink-0 mt-0.5" size={18} />
+                                    <div>
+                                        <p className="font-semibold">
+                                            {r.type} — {r.severity}
+                                        </p>
+                                        <p className="text-sm opacity-90">{r.advice}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
 
             {farmId && loading && (
                 <p className="text-gray-500">Loading recommendations...</p>

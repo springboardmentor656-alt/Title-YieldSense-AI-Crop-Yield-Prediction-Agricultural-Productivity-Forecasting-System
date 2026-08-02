@@ -4,11 +4,15 @@ import { useEffect, useState } from "react";
 
 import * as NotificationService from "@/services/notification.service";
 
+import { Notification } from "@/types/notification";
+
 import { toast } from "sonner";
 
-export function useNotifications(unreadOnly: boolean = false) {
+const BELL_POLL_INTERVAL_MS = 30000;
 
-    const [notifications, setNotifications] = useState<any[]>([]);
+export function useNotifications(unreadOnly: boolean = false, limit?: number) {
+
+    const [notifications, setNotifications] = useState<Notification[]>([]);
 
     const [loading, setLoading] = useState(true);
 
@@ -19,7 +23,8 @@ export function useNotifications(unreadOnly: boolean = false) {
             setLoading(true);
 
             const data = await NotificationService.getNotifications(
-                unreadOnly
+                unreadOnly,
+                limit
             );
 
             setNotifications(data);
@@ -101,8 +106,8 @@ export function useNotifications(unreadOnly: boolean = false) {
     useEffect(() => {
 
         load();
-
-    }, [unreadOnly]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [unreadOnly, limit]);
 
     return {
 
@@ -119,5 +124,41 @@ export function useNotifications(unreadOnly: boolean = false) {
         refresh: load,
 
     };
+
+}
+
+export function useUnreadCount() {
+
+    const [count, setCount] = useState(0);
+
+    async function load() {
+
+        try {
+
+            const data = await NotificationService.getUnreadCount();
+
+            setCount(data);
+
+        }
+
+        catch {
+
+            // Silent — the bell just keeps its last known count.
+
+        }
+
+    }
+
+    useEffect(() => {
+
+        load();
+
+        const interval = setInterval(load, BELL_POLL_INTERVAL_MS);
+
+        return () => clearInterval(interval);
+
+    }, []);
+
+    return { count, refresh: load };
 
 }

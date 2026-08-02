@@ -83,4 +83,58 @@ class AuthService:
         )
 
         return token
-   
+
+    def get_me(self, user_id: int) -> User:
+
+        user = self.user_repo.get_by_id(user_id)
+
+        if user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        return user
+
+    def update_profile(
+        self,
+        user_id: int,
+        full_name: str = None,
+        email: str = None
+    ) -> User:
+
+        user = self.user_repo.get_by_id(user_id)
+
+        if user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        if email is not None and email != user.email:
+
+            existing = self.user_repo.get_by_email(email)
+            if existing is not None:
+                raise HTTPException(status_code=400, detail="Email already exists")
+
+            user.email = email
+
+        if full_name is not None:
+            user.full_name = full_name
+
+        self.user_repo.update()
+
+        return user
+
+    def change_password(
+        self,
+        user_id: int,
+        current_password: str,
+        new_password: str
+    ) -> None:
+
+        user = self.user_repo.get_by_id(user_id)
+
+        if user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        if not Hash.verify_password(current_password, user.password):
+            raise HTTPException(status_code=401, detail="Current password is incorrect")
+
+        user.password = Hash.hash_password(new_password)
+
+        self.user_repo.update()

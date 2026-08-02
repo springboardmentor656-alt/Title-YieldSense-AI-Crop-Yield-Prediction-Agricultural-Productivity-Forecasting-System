@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.auth.oauth2 import verify_token
+from app.auth.permissions import farmer_required
 from app.database.session import get_db
 from app.repositories.prediction_history_repository import (
     PredictionHistoryRepository,
@@ -26,7 +27,7 @@ router = APIRouter(
 )
 def predict_yield(
     request: PredictionRequest,
-    token=Depends(verify_token),
+    token=Depends(farmer_required),
     db: Session = Depends(get_db)
 ):
 

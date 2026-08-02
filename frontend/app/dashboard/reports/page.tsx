@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { toast } from "sonner";
 
-import { Download } from "lucide-react";
+import { Download, FileText } from "lucide-react";
 
 import { useFarm } from "@/hooks/useFarm";
 
@@ -25,6 +25,8 @@ export default function ReportsPage() {
     const [submitting, setSubmitting] = useState(false);
 
     const [exporting, setExporting] = useState(false);
+
+    const [exportingPdf, setExportingPdf] = useState(false);
 
     const { accuracy, loading, recordActualYield } =
         useAccuracyTracking(farmId);
@@ -109,6 +111,36 @@ export default function ReportsPage() {
 
     }
 
+    async function handleExportPdf() {
+
+        if (!farmId) {
+
+            return;
+
+        }
+
+        setExportingPdf(true);
+
+        try {
+
+            await AnalyticsService.exportPredictionsPdf(farmId);
+
+        }
+
+        catch {
+
+            toast.error("Unable to export PDF report");
+
+        }
+
+        finally {
+
+            setExportingPdf(false);
+
+        }
+
+    }
+
     return (
         <div className="space-y-8">
 
@@ -137,6 +169,15 @@ export default function ReportsPage() {
                     >
                         <Download size={18} />
                         {exporting ? "Exporting..." : "Export CSV"}
+                    </button>
+
+                    <button
+                        onClick={handleExportPdf}
+                        disabled={!farmId || exportingPdf}
+                        className="flex items-center gap-2 bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-600 disabled:opacity-50"
+                    >
+                        <FileText size={18} />
+                        {exportingPdf ? "Generating..." : "Download Report (PDF)"}
                     </button>
                 </div>
             </div>
