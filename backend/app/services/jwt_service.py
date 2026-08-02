@@ -2,18 +2,16 @@
 Authentication service layer: registration and login business logic.
 File: backend/app/services/jwt_service.py
 
-NOTE: This Milestone-1 version uses an in-memory store as a stand-in so the
-API is runnable and testable before the SQLAlchemy session/DB wiring
-(Alembic migrations) is finalized. Swap `_FAKE_USER_DB` for a real
-SQLAlchemy session-backed repository in Milestone-2 without changing the
-public function signatures below.
+DB-backed version (Milestone-3): replaces the earlier in-memory
+_FAKE_USER_DB stand-in with real SQLAlchemy queries against the
+users/roles tables.
 """
 
 from datetime import timedelta
 from typing import Optional
-from uuid import uuid4
 
 from fastapi import HTTPException, status
+from sqlalchemy.orm import Session
 
 from app.core.security import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
@@ -21,46 +19,62 @@ from app.core.security import (
     hash_password,
     verify_password,
 )
+from app.models.user import User, Role
 from app.schemas.auth import RegisterRequest, TokenResponse
 
-# --- Temporary in-memory store (replace with DB repository in Milestone-2) ---
-# Shared by both auth.py (standalone register/login) and onboarding_service.py
-# (combined onboarding), so a user created via either path is visible to both.
-_FAKE_USER_DB: dict[str, dict] = {}
 
-
-def register_user(payload: RegisterRequest) -> dict:
+def register_user(payload: RegisterRequest, db: Session) -> dict:
     """Create a new user, hashing the password before storage."""
-    if payload.email in _FAKE_USER_DB:
+    existing = db.query(User).filter(User.email == payload.email).first()
+    if existing:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="An account with this email already exists.",
         )
 
-    user_record = {
-        "user_id": str(uuid4()),
-        "full_name": payload.full_name,
-        "email": payload.email,
-        "hashed_password": hash_password(payload.password),
-        "role": payload.role,
+    role = db.query(Role).filter(Role.role_name == payload.role).first()
+    if not role:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unknown role: {payload.role}",
+        )
+
+    user = User(
+        full_name=payload.full_name,
+        email=payload.email,
+        hashed_password=hash_password(payload.password),
+        role_id=role.role_id,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return {
+        "user_id": str(user.user_id),
+        "full_name": user.full_name,
+        "email": user.email,
+        "role": role.role_name,
     }
-    _FAKE_USER_DB[payload.email] = user_record
-    return user_record
 
 
-def authenticate_user(email: str, password: str) -> Optional[dict]:
+def authenticate_user(email: str, password: str, db: Session) -> Optional[dict]:
     """Validate credentials; return the user record if valid, else None."""
-    user_record = _FAKE_USER_DB.get(email)
-    if not user_record:
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
         return None
-    if not verify_password(password, user_record["hashed_password"]):
+    if not verify_password(password, user.hashed_password):
         return None
-    return user_record
+    return {
+        "user_id": str(user.user_id),
+        "full_name": user.full_name,
+        "email": user.email,
+        "role": user.role.role_name,
+    }
 
 
-def login_user(email: str, password: str) -> TokenResponse:
+def login_user(email: str, password: str, db: Session) -> TokenResponse:
     """Authenticate and issue a JWT access token."""
-    user_record = authenticate_user(email, password)
+    user_record = authenticate_user(email, password, db)
     if not user_record:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

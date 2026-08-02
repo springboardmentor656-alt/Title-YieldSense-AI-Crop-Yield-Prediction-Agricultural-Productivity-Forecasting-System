@@ -1,4 +1,7 @@
-from pydantic import BaseModel, Field
+from datetime import datetime
+from typing import List
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class PredictionRequest(BaseModel):
@@ -11,8 +14,24 @@ class PredictionRequest(BaseModel):
 
 
 class PredictionResponse(BaseModel):
-    model_config = {"protected_namespaces": ()}
+    model_config = ConfigDict(protected_namespaces=())
 
     predicted_yield_kg_ha: float
     soil_suitability_score: float
     model_version: str
+
+
+class PredictionHistoryItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True, protected_namespaces=())
+
+    id: int
+    crop_type: str
+    region: str
+    predicted_yield_kg_ha: float
+    soil_suitability_score: float
+    model_version: str
+    created_at: datetime
+
+
+class PredictionHistoryResponse(BaseModel):
+    predictions: List[PredictionHistoryItem]

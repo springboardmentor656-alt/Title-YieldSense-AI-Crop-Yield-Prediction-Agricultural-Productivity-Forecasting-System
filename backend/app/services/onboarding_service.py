@@ -2,14 +2,12 @@
 Onboarding service layer: creates a user account and its farm profile
 in a single operation.
 File: backend/app/services/onboarding_service.py
-
-NOTE: Milestone-1 in-memory stand-in, same pattern as jwt_service.py.
-Replace `_FAKE_FARM_DB` with SQLAlchemy-backed `farms`/`farm_crops`
-repositories once Alembic migrations are wired in Milestone-2.
 """
 
 from datetime import timedelta
 from uuid import uuid4
+
+from sqlalchemy.orm import Session
 
 from app.core.security import ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token
 from app.schemas.auth import RegisterRequest
@@ -19,7 +17,7 @@ from app.services.jwt_service import register_user
 _FAKE_FARM_DB: dict[str, dict] = {}
 
 
-def submit_onboarding(payload: OnboardingRequest) -> OnboardingResponse:
+def submit_onboarding(payload: OnboardingRequest, db: Session) -> OnboardingResponse:
     """Register the user and persist their farm profile in one step, then issue a JWT."""
     register_payload = RegisterRequest(
         full_name=payload.full_name,
@@ -27,7 +25,7 @@ def submit_onboarding(payload: OnboardingRequest) -> OnboardingResponse:
         password=payload.password,
         role=payload.role,
     )
-    user_record = register_user(register_payload)  # raises 409 if email already exists
+    user_record = register_user(register_payload, db)
 
     farm_id = str(uuid4())
     _FAKE_FARM_DB[farm_id] = {

@@ -2,10 +2,11 @@
 Authentication routes: register, login, current-user.
 File: backend/app/routes/auth.py
 """
-
 from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
 from app.core.security import get_current_user, require_role
+from app.db.session import get_db
 from app.schemas.auth import (
     CurrentUserResponse,
     LoginRequest,
@@ -19,9 +20,9 @@ router = APIRouter()
 
 
 @router.post("/register", response_model=RegisterResponse, status_code=201)
-def register(payload: RegisterRequest):
+def register(payload: RegisterRequest, db: Session = Depends(get_db)):
     """Register a new account directly (without the bundled farm profile — see /api/v1/onboarding for that)."""
-    user_record = register_user(payload)
+    user_record = register_user(payload, db)
     return RegisterResponse(
         user_id=user_record["user_id"],
         full_name=user_record["full_name"],
@@ -31,9 +32,9 @@ def register(payload: RegisterRequest):
 
 
 @router.post("/login", response_model=TokenResponse)
-def login(payload: LoginRequest):
+def login(payload: LoginRequest, db: Session = Depends(get_db)):
     """Authenticate a user and return a JWT access token."""
-    return login_user(payload.email, payload.password)
+    return login_user(payload.email, payload.password, db)
 
 
 @router.get("/me", response_model=CurrentUserResponse)

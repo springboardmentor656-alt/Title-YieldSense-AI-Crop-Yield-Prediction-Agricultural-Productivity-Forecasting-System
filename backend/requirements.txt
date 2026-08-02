@@ -19,12 +19,20 @@ python-dotenv==1.0.1
 
 # --- Data Processing -----------------------------------------------------
 pandas==2.2.2
-numpy==1.26.4
+numpy==2.5.1
 
-# --- Future ML (reserved — not used in Milestone-1) -----------------------------------------------------
-scikit-learn==1.5.*
+# --- ML (active — used by yield prediction model, Milestone-1) -----------------------------------------------------
+scikit-learn==1.9.0
 xgboost==2.1.*
-joblib==1.4.*
+joblib==1.5.3
+scipy==1.18.0
+threadpoolctl==3.6.0
+narwhals==2.24.0
+
+# --- Milestone-3: Analytics, Recommendations & Reporting -----------------------------------------------------
+# No new packages required for the Recommendation Engine / Risk Assessment router
+# (it only uses fastapi + pydantic, both already listed above).
+# reportlab==4.2.0        # uncomment when building Task 6 PDF export (Option B, backend-generated PDF)
 
 # --- Testing -----------------------------------------------------
 pytest==8.2.0
