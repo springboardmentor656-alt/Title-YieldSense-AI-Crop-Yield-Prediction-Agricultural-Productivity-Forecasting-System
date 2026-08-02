@@ -1,121 +1,268 @@
-// Dashboard — personalized with the user's onboarding data, styled to match the rest of the app.
-// File: frontend/app/dashboard/page.tsx
-
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
-import Navbar from "../../components/Navbar";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-
-interface Profile {
-  fullName: string;
-  state: string;
-  district: string;
-  crops: string[];
+interface PredictionHistoryItem {
+  id: number;
+  crop_type: string;
+  region: string;
+  predicted_yield_kg_ha: number;
+  soil_suitability_score: number;
+  model_version: string;
+  created_at: string;
 }
 
+interface PredictionHistoryResponse {
+  predictions: PredictionHistoryItem[];
+}
+
+interface TrendPoint {
+  date: string;
+  yield_kg_ha: number;
+  crop_type: string;
+}
+
+interface CropAverage {
+  crop_type: string;
+  avg_yield_kg_ha: number;
+  sample_count: number;
+}
+
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000";
+
 export default function DashboardPage() {
-  const router = useRouter();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [checked, setChecked] = useState(false);
+  const [predictions, setPredictions] = useState<PredictionHistoryItem[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  async function handleDownloadReport() {
+    const token = localStorage.getItem("ys_access_token");
+    if (!token) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/reports/export-csv`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to download report");
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "yieldsense_predictions.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Download failed:", err);
+    }
+  }
 
   useEffect(() => {
-    const token = localStorage.getItem("ys_access_token");
-    if (!token) {
-      router.push("/login");
-      return;
-    }
-    const raw = localStorage.getItem("ys_profile");
-    if (raw) {
+    const controller = new AbortController();
+
+    async function fetchHistory() {
+      setLoading(true);
+      setError(null);
+
+      const token = localStorage.getItem("ys_access_token");
+
+      if (!token) {
+        setError("You need to be signed in to view your dashboard.");
+        setLoading(false);
+        return;
+      }
+
       try {
-        setProfile(JSON.parse(raw));
-      } catch {
-        setProfile(null);
+        const res = await fetch(`${API_BASE}/api/v1/predictions/history`, {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: controller.signal,
+        });
+
+        if (!res.ok) {
+          throw new Error(
+            res.status === 401
+              ? "Your session has expired. Please sign in again."
+              : `Request failed with status ${res.status}`
+          );
+        }
+
+        const data: PredictionHistoryResponse = await res.json();
+        setPredictions(data.predictions);
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        setError(err instanceof Error ? err.message : "Something went wrong loading your dashboard.");
+      } finally {
+        setLoading(false);
       }
     }
-    setChecked(true);
-  }, [router]);
 
-  if (!checked) return null; // avoid flashing content before the auth check resolves
+    fetchHistory();
+    return () => controller.abort();
+  }, []);
 
-  const firstName = profile?.fullName?.split(" ")[0] ?? "there";
+  const trendData: TrendPoint[] = useMemo(() => {
+    if (!predictions) return [];
+    return [...predictions]
+      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+      .map((p) => ({
+        date: new Date(p.created_at).toLocaleDateString(undefined, {
+          month: "short",
+          day: "numeric",
+        }),
+        yield_kg_ha: p.predicted_yield_kg_ha,
+        crop_type: p.crop_type,
+      }));
+  }, [predictions]);
 
-  return(
-  <>
-    <Navbar />
-    <main className="page">
-      <section className="header">
-        <div>
-          <h1 className="greeting">Welcome back, {firstName} 👋</h1>
-          {profile?.state && (
-            <p className="location">
-              📍 {profile.district}, {profile.state}
+  const cropAverages: CropAverage[] = useMemo(() => {
+    if (!predictions) return [];
+    const groups = new Map<string, number[]>();
+    for (const p of predictions) {
+      const list = groups.get(p.crop_type) ?? [];
+      list.push(p.predicted_yield_kg_ha);
+      groups.set(p.crop_type, list);
+    }
+    return Array.from(groups.entries()).map(([crop_type, yields]) => ({
+      crop_type,
+      avg_yield_kg_ha: Math.round(yields.reduce((a, b) => a + b, 0) / yields.length),
+      sample_count: yields.length,
+    }));
+  }, [predictions]);
+
+  return (
+    <div className="min-h-screen bg-neutral-50 px-6 py-10">
+      <div className="mx-auto max-w-5xl">
+        <header className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-neutral-900">Yield Dashboard</h1>
+            <p className="mt-1 text-sm text-neutral-500">
+              Your prediction history, trended over time and compared across crops.
             </p>
-          )}
-        </div>
-      </section>
+          </div>
+          <button
+            onClick={handleDownloadReport}
+            disabled={!predictions || predictions.length === 0}
+            className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Download Report
+          </button>
+        </header>
 
-      <section className="predictCta">
-        <h3>Ready to see your yield prediction?</h3>
-        <p>Enter your soil and crop details to get a live, personalized forecast.</p>
-        <a href="/predict" className="ctaButton">Get a Live Prediction →</a>
-      </section>
+        {loading && <LoadingState />}
+        {!loading && error && <ErrorState message={error} />}
+        {!loading && !error && predictions && predictions.length === 0 && <EmptyState />}
 
-      <style jsx>{`
-        .page {
-          min-height: 100vh;
-          background: #f7f9f6;
-          padding: 3rem 2rem;
-          max-width: 960px;
-          margin: 0 auto;
-        }
-        .header { margin-bottom: 2rem; }
-        .greeting {
-          font-size: 1.75rem;
-          font-weight: 800;
-          color: #1a1a1a;
-          margin: 0 0 0.4rem;
-        }
-        .location {
-          font-size: 0.95rem;
-          color: #5f6368;
-          margin: 0;
-        }
-        .predictCta {
-          background: #e8f5e9;
-          border-radius: 16px;
-          box-shadow: 0 4px 16px rgba(26, 26, 26, 0.06);
-          padding: 2.5rem 2rem;
-          text-align: center;
-        }
-        .predictCta h3 {
-          margin: 0 0 0.5rem;
-          font-size: 1.3rem;
-          font-weight: 800;
-          color: #1b5e20;
-        }
-        .predictCta p {
-          margin: 0 0 1.25rem;
-          font-size: 0.9rem;
-          color: #4a5a4b;
-        }
-        .ctaButton {
-          display: inline-block;
-          background: #15803d;
-          color: white;
-          padding: 0.75rem 1.75rem;
-          border-radius: 10px;
-          font-weight: 700;
-          text-decoration: none;
-          transition: transform 0.15s ease, box-shadow 0.15s ease;
-        }
-        .ctaButton:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 20px rgba(27, 94, 32, 0.25);
-        }
-      `}</style>
-    </main>
-  </>
-);
+        {!loading && !error && predictions && predictions.length > 0 && (
+          <div className="space-y-8">
+            <ChartCard title="Yield trend" subtitle="Predicted yield over time">
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={trendData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                  <XAxis dataKey="date" tick={{ fontSize: 12, fill: "#737373" }} />
+                  <YAxis
+                    tick={{ fontSize: 12, fill: "#737373" }}
+                    label={{ value: "kg/ha", angle: -90, position: "insideLeft", fontSize: 12, fill: "#737373" }}
+                  />
+                  <Tooltip
+                    contentStyle={{ borderRadius: 8, border: "1px solid #e5e5e5", fontSize: 13 }}
+                    formatter={(value: number) => [`${value.toLocaleString()} kg/ha`, "Predicted yield"]}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="yield_kg_ha"
+                    stroke="#3f6212"
+                    strokeWidth={2}
+                    dot={{ r: 4, fill: "#3f6212" }}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </ChartCard>
+
+            <ChartCard title="Yield by crop" subtitle="Average predicted yield per crop type">
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={cropAverages} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                  <XAxis dataKey="crop_type" tick={{ fontSize: 12, fill: "#737373" }} />
+                  <YAxis
+                    tick={{ fontSize: 12, fill: "#737373" }}
+                    label={{ value: "kg/ha", angle: -90, position: "insideLeft", fontSize: 12, fill: "#737373" }}
+                  />
+                  <Tooltip
+                    contentStyle={{ borderRadius: 8, border: "1px solid #e5e5e5", fontSize: 13 }}
+                    formatter={(value: number, _name, item) => [
+                      `${value.toLocaleString()} kg/ha (${item.payload.sample_count} prediction${
+                        item.payload.sample_count === 1 ? "" : "s"
+                      })`,
+                      "Avg. yield",
+                    ]}
+                  />
+                  <Bar dataKey="avg_yield_kg_ha" fill="#65a30d" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </ChartCard>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ChartCard({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm">
+      <h2 className="text-base font-medium text-neutral-900">{title}</h2>
+      <p className="mb-4 text-sm text-neutral-500">{subtitle}</p>
+      {children}
+    </section>
+  );
+}
+
+function LoadingState() {
+  return (
+    <div className="flex h-64 items-center justify-center rounded-xl border border-neutral-200 bg-white">
+      <p className="text-sm text-neutral-500">Loading your predictions...</p>
+    </div>
+  );
+}
+
+function ErrorState({ message }: { message: string }) {
+  return (
+    <div className="rounded-xl border border-red-200 bg-red-50 p-6">
+      <p className="text-sm font-medium text-red-800">Couldn't load your dashboard</p>
+      <p className="mt-1 text-sm text-red-700">{message}</p>
+    </div>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="flex h-64 flex-col items-center justify-center rounded-xl border border-dashed border-neutral-300 bg-white text-center">
+      <p className="text-sm font-medium text-neutral-700">No predictions yet</p>
+      <p className="mt-1 max-w-xs text-sm text-neutral-500">
+        Submit a crop yield prediction to see your trends and comparisons here.
+      </p>
+    </div>
+  );
 }

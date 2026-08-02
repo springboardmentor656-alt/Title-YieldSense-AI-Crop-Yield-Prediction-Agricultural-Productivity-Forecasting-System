@@ -11,7 +11,7 @@ load_dotenv(dotenv_path=Path(__file__).resolve().parent / ".env")
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import auth, onboarding, predictions, recommendations
+from app.routes import auth, onboarding, predictions, recommendations, reports
 
 app = FastAPI(
     title="YieldSense AI API",
@@ -35,6 +35,7 @@ app.add_middleware(
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(onboarding.router, prefix="/api/v1/onboarding", tags=["Onboarding"])
+app.include_router(reports.router, tags=["Reports"])
 app.include_router(predictions.router, tags=["Predictions"])
 app.include_router(recommendations.router, tags=["Analytics & Recommendations"])
 

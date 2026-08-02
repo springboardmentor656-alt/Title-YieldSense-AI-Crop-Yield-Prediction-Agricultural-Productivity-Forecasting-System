@@ -1,4 +1,4 @@
-export interface PredictionRequest {
+﻿export interface PredictionRequest {
   crop_type: string;
   region: string;
   soil_ph: number;
@@ -16,7 +16,7 @@ export interface PredictionResponse {
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 
 export async function getPrediction(payload: PredictionRequest): Promise<PredictionResponse> {
-  const token = localStorage.getItem("ys_token"); // adjust to whatever key you store the JWT under
+  const token = localStorage.getItem("ys_access_token"); // adjust to whatever key you store the JWT under
 
   const res = await fetch(`${API_BASE}/api/v1/predictions`, {
     method: "POST",
