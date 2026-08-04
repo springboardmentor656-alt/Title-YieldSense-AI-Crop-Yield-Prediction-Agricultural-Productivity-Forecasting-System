@@ -1,20 +1,43 @@
-import axios from "axios";
+import apiClient from "./apiClient";
 
-import { getToken } from "../utils/token";
+const farmApi = {
+  get(url, config) {
+    return apiClient.get(
+      `/farms${url}`,
+      config
+    );
+  },
 
-const farmApi = axios.create({
-  baseURL: "http://127.0.0.1:8000/api/farms",
-  timeout: 20000,
-});
+  post(url, data, config) {
+    return apiClient.post(
+      `/farms${url}`,
+      data,
+      config
+    );
+  },
 
-farmApi.interceptors.request.use((config) => {
-  const token = getToken();
+  put(url, data, config) {
+    return apiClient.put(
+      `/farms${url}`,
+      data,
+      config
+    );
+  },
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  patch(url, data, config) {
+    return apiClient.patch(
+      `/farms${url}`,
+      data,
+      config
+    );
+  },
 
-  return config;
-});
+  delete(url, config) {
+    return apiClient.delete(
+      `/farms${url}`,
+      config
+    );
+  },
+};
 
 export default farmApi;

@@ -543,7 +543,7 @@ function Landing() {
                 </p>
 
                 <p className="mt-5 text-sm font-semibold text-slate-500">
-                  Add your Project repository link here.
+                  https://github.com/springboardmentor656-alt/Title-YieldSense-AI-Crop-Yield-Prediction-Agricultural-Productivity-Forecasting-System/tree/Kowshik
                 </p>
               </article>
             </div>

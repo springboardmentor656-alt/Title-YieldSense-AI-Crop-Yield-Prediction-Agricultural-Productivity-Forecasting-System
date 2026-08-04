@@ -1,25 +1,43 @@
-import axios from "axios";
+import apiClient from "./apiClient";
 
-import { getToken } from "../utils/token";
+const datasetApi = {
+  get(url, config) {
+    return apiClient.get(
+      `/datasets${url}`,
+      config
+    );
+  },
 
-const datasetApi = axios.create({
-  baseURL: "http://127.0.0.1:8000/api/datasets",
-  timeout: 30000,
-});
+  post(url, data, config) {
+    return apiClient.post(
+      `/datasets${url}`,
+      data,
+      config
+    );
+  },
 
-datasetApi.interceptors.request.use((config) => {
-  const token = getToken();
+  put(url, data, config) {
+    return apiClient.put(
+      `/datasets${url}`,
+      data,
+      config
+    );
+  },
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  patch(url, data, config) {
+    return apiClient.patch(
+      `/datasets${url}`,
+      data,
+      config
+    );
+  },
 
-  return config;
-});
-
-datasetApi.interceptors.response.use(
-  (response) => response,
-  (error) => Promise.reject(error)
-);
+  delete(url, config) {
+    return apiClient.delete(
+      `/datasets${url}`,
+      config
+    );
+  },
+};
 
 export default datasetApi;

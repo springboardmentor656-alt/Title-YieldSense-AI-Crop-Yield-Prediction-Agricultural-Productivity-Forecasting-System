@@ -1,25 +1,43 @@
-import axios from "axios";
+import apiClient from "./apiClient";
 
-import { getToken } from "../utils/token";
+const soilAnalysisApi = {
+  get(url, config) {
+    return apiClient.get(
+      `/soil-analysis${url}`,
+      config
+    );
+  },
 
-const soilAnalysisApi = axios.create({
-  baseURL: "http://127.0.0.1:8000/api/soil-analysis",
-  timeout: 30000,
-});
+  post(url, data, config) {
+    return apiClient.post(
+      `/soil-analysis${url}`,
+      data,
+      config
+    );
+  },
 
-soilAnalysisApi.interceptors.request.use((config) => {
-  const token = getToken();
+  put(url, data, config) {
+    return apiClient.put(
+      `/soil-analysis${url}`,
+      data,
+      config
+    );
+  },
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  patch(url, data, config) {
+    return apiClient.patch(
+      `/soil-analysis${url}`,
+      data,
+      config
+    );
+  },
 
-  return config;
-});
-
-soilAnalysisApi.interceptors.response.use(
-  (response) => response,
-  (error) => Promise.reject(error)
-);
+  delete(url, config) {
+    return apiClient.delete(
+      `/soil-analysis${url}`,
+      config
+    );
+  },
+};
 
 export default soilAnalysisApi;

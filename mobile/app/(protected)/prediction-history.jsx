@@ -17,7 +17,6 @@ import {
   BrainCircuit,
   ChevronLeft,
   ChevronRight,
-  Download,
   FileSpreadsheet,
   FileText,
   History,

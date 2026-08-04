@@ -183,11 +183,9 @@ export default function ProtectedLayout() {
         name="weather-analysis"
         options={{
           title: "Weather Analysis",
+          drawerLabel: "Weather Analysis",
           drawerIcon: ({ color, size }) => (
-            <CloudRain
-              color={color}
-              size={size}
-            />
+            <CloudRain color={color} size={size} />
           ),
         }}
       />
@@ -196,11 +194,9 @@ export default function ProtectedLayout() {
         name="soil-analysis"
         options={{
           title: "Soil Analysis",
+          drawerLabel: "Soil Analysis",
           drawerIcon: ({ color, size }) => (
-            <FlaskConical
-              color={color}
-              size={size}
-            />
+            <FlaskConical color={color} size={size} />
           ),
         }}
       />

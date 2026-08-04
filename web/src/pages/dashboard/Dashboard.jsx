@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 
+import { getApiErrorMessage } from "../../utils/apiError";
 import { datasetService } from "../../services/datasetService";
 import DashboardLayout from "../../layouts/dashboard/DashboardLayout";
 import SummaryCard from "../../components/datasets/SummaryCard";
@@ -43,10 +44,12 @@ function Dashboard() {
         setWeatherSummary(weatherResult);
       } catch (error) {
         toast.error(
-          error.response?.data?.detail ||
-            "Unable to load dashboard information"
+          getApiErrorMessage(
+            error,
+            "Unable to load dashboard information."
+          )
         );
-      } finally {
+      }finally {
         setLoading(false);
       }
     };
@@ -111,46 +114,74 @@ function Dashboard() {
         </div>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <SummaryCard
-            title="Historical Records"
-            value={
-              loading
-                ? "Loading..."
-                : yieldSummary?.total_records?.toLocaleString() || 0
-            }
-            subtitle="Crop yield dataset rows"
-            icon={Database}
-          />
+            <Link
+              to="/datasets/historical-yield"
+              aria-label="View historical crop yield records"
+              className="block rounded-2xl transition duration-200 hover:-translate-y-1 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-green-100"
+            >
+              <SummaryCard
+                title="Historical Records"
+                value={
+                  loading
+                    ? "Loading..."
+                    : yieldSummary?.total_records?.toLocaleString() || 0
+                }
+                subtitle="Crop yield dataset rows"
+                icon={Database}
+              />
+            </Link>
 
-          <SummaryCard
-            title="Crop Types"
-            value={
-              loading ? "Loading..." : yieldSummary?.total_crops || 0
-            }
-            subtitle="Unique crops"
-            icon={Sprout}
-          />
+            <Link
+              to="/datasets/historical-yield"
+              aria-label="View available crop types"
+              className="block rounded-2xl transition duration-200 hover:-translate-y-1 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-green-100"
+            >
+              <SummaryCard
+                title="Crop Types"
+                value={
+                  loading
+                    ? "Loading..."
+                    : yieldSummary?.total_crops || 0
+                }
+                subtitle="Unique crops"
+                icon={Sprout}
+              />
+            </Link>
 
-          <SummaryCard
-            title="Soil States"
-            value={
-              loading ? "Loading..." : soilSummary?.total_states || 0
-            }
-            subtitle="State soil references"
-            icon={MapPinned}
-          />
+            <Link
+              to="/datasets/soil"
+              aria-label="View state soil reference data"
+              className="block rounded-2xl transition duration-200 hover:-translate-y-1 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-green-100"
+            >
+              <SummaryCard
+                title="Soil States"
+                value={
+                  loading
+                    ? "Loading..."
+                    : soilSummary?.total_states || 0
+                }
+                subtitle="State soil references"
+                icon={MapPinned}
+              />
+            </Link>
 
-          <SummaryCard
-            title="Weather Records"
-            value={
-              loading
-                ? "Loading..."
-                : weatherSummary?.total_records?.toLocaleString() || 0
-            }
-            subtitle="State and year records"
-            icon={CloudRain}
-          />
-        </div>
+            <Link
+              to="/datasets/weather"
+              aria-label="View state weather records"
+              className="block rounded-2xl transition duration-200 hover:-translate-y-1 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-green-100"
+            >
+              <SummaryCard
+                title="Weather Records"
+                value={
+                  loading
+                    ? "Loading..."
+                    : weatherSummary?.total_records?.toLocaleString() || 0
+                }
+                subtitle="State and year records"
+                icon={CloudRain}
+              />
+            </Link>
+          </div>
 
         <div className="mt-8">
           <h2 className="text-xl font-bold text-gray-900">
@@ -234,32 +265,81 @@ function Dashboard() {
             </h2>
 
             <div className="mt-5 space-y-3">
-              {isAdmin && (
+                {isAdmin && (
+                  <Link
+                    to="/datasets/upload"
+                    className="flex items-center justify-between rounded-xl bg-green-700 px-5 py-4 font-semibold text-white transition hover:bg-green-800"
+                  >
+                    <span className="flex items-center gap-3">
+                      <Upload size={20} />
+                      Upload Reference Datasets
+                    </span>
+
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                )}
+
+                {!isAdmin && (
+                  <>
+                    <Link
+                      to="/prediction"
+                      className="flex items-center justify-between rounded-xl border border-gray-300 px-5 py-4 font-semibold text-gray-700 transition hover:border-green-300 hover:bg-green-50"
+                    >
+                      <span className="flex items-center gap-3">
+                        <Sprout
+                          size={20}
+                          className="text-green-700"
+                        />
+                        Generate Yield Prediction
+                      </span>
+
+                      <span aria-hidden="true">→</span>
+                    </Link>
+
+                    <Link
+                      to="/recommendation"
+                      className="flex items-center justify-between rounded-xl border border-gray-300 px-5 py-4 font-semibold text-gray-700 transition hover:border-green-300 hover:bg-green-50"
+                    >
+                      <span className="flex items-center gap-3">
+                        <MapPinned
+                          size={20}
+                          className="text-green-700"
+                        />
+                        Crop Recommendation
+                      </span>
+
+                      <span aria-hidden="true">→</span>
+                    </Link>
+                  </>
+                )}
+
                 <Link
-                  to="/datasets/upload"
-                  className="flex items-center justify-between rounded-xl bg-green-700 px-5 py-4 font-semibold text-white transition hover:bg-green-800"
+                  to="/analytics"
+                  className="flex items-center justify-between rounded-xl border border-gray-300 px-5 py-4 font-semibold text-gray-700 transition hover:border-green-300 hover:bg-green-50"
                 >
                   <span className="flex items-center gap-3">
-                    <Upload size={20} />
-                    Upload Reference Datasets
+                    <Database
+                      size={20}
+                      className="text-green-700"
+                    />
+                    Analytics Dashboard
                   </span>
 
-                  <span>→</span>
+                  <span aria-hidden="true">→</span>
                 </Link>
-              )}
 
-              <Link
-                to="/profile"
-                className="flex items-center justify-between rounded-xl border border-gray-300 px-5 py-4 font-semibold text-gray-700 transition hover:bg-gray-50"
-              >
-                <span className="flex items-center gap-3">
-                  <UserRound size={20} />
-                  Manage Profile
-                </span>
+                <Link
+                  to="/profile"
+                  className="flex items-center justify-between rounded-xl border border-gray-300 px-5 py-4 font-semibold text-gray-700 transition hover:border-green-300 hover:bg-green-50"
+                >
+                  <span className="flex items-center gap-3">
+                    <UserRound size={20} />
+                    Manage Profile
+                  </span>
 
-                <span>→</span>
-              </Link>
-            </div>
+                  <span aria-hidden="true">→</span>
+                </Link>
+              </div>
 
             {!isAdmin && user && (
               <p className="mt-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-800">

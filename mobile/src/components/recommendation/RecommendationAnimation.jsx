@@ -1,4 +1,7 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 import {
   ActivityIndicator,
   StyleSheet,
@@ -73,7 +76,7 @@ export default function RecommendationAnimation({
     }, 800);
 
     return () => clearInterval(timer);
-  }, [visible]);
+  }, [visible, onFinished]);
 
   if (!visible) {
     return null;

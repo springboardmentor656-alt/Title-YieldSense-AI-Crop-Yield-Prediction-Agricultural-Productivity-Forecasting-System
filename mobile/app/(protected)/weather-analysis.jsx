@@ -32,7 +32,7 @@ import {
 import { colors } from "../../src/constants/colors";
 import WeatherTrendCharts from "../../src/components/weather/WeatherTrendCharts";
 
-
+const RECORDS_PAGE_SIZE = 10;
 export default function WeatherAnalysisScreen() {
   const [options, setOptions] = useState({
     states: [],
@@ -60,6 +60,9 @@ export default function WeatherAnalysisScreen() {
 
   const [error, setError] = useState("");
 
+  const [recordsPage, setRecordsPage] =
+  useState(1);
+
 
   useEffect(() => {
     loadOptions();
@@ -82,6 +85,7 @@ export default function WeatherAnalysisScreen() {
         await getWeatherAnalysisOptions();
 
       setOptions(data);
+      setRecordsPage(1);
 
       const defaultState =
         data.states?.[0] || "";
@@ -191,6 +195,7 @@ export default function WeatherAnalysisScreen() {
       });
 
       setAnalysis(data);
+      setRecordsPage(1);
     } catch (requestError) {
       setError(
         getErrorMessage(
@@ -294,9 +299,9 @@ export default function WeatherAnalysisScreen() {
             />
 
             <WeatherRecordsSection
-              records={
-                analysis.records || []
-              }
+              records={analysis.records || []}
+              page={recordsPage}
+              onPageChange={setRecordsPage}
             />
           </>
         )}
@@ -552,6 +557,7 @@ function SelectField({
 
             <FlatList
               data={normalizedOptions}
+              keyboardShouldPersistTaps="handled"
               keyExtractor={(item) =>
                 item.value
               }
@@ -1031,7 +1037,32 @@ function RiskBadge({
 
 function WeatherRecordsSection({
   records,
+  page,
+  onPageChange,
 }) {
+  const totalPages =
+    records.length > 0
+      ? Math.ceil(
+          records.length /
+            RECORDS_PAGE_SIZE
+        )
+      : 0;
+
+  const safePage = Math.min(
+    Math.max(page, 1),
+    totalPages || 1
+  );
+
+  const startIndex =
+    (safePage - 1) *
+    RECORDS_PAGE_SIZE;
+
+  const visibleRecords = records.slice(
+    startIndex,
+    startIndex +
+      RECORDS_PAGE_SIZE
+  );
+
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>
@@ -1044,19 +1075,95 @@ function WeatherRecordsSection({
       </Text>
 
       {records.length ? (
-        <View style={styles.recordsList}>
-          {records.map((record) => (
-            <WeatherRecordCard
-              key={record.year}
-              record={record}
-            />
-          ))}
-        </View>
+        <>
+          <View style={styles.recordsList}>
+            {visibleRecords.map((record) => (
+              <WeatherRecordCard
+                key={record.year}
+                record={record}
+              />
+            ))}
+          </View>
+
+          <View style={styles.paginationCard}>
+            <Pressable
+              disabled={safePage <= 1}
+              onPress={() =>
+                onPageChange((current) =>
+                  Math.max(
+                    1,
+                    current - 1
+                  )
+                )
+              }
+              style={({ pressed }) => [
+                styles.paginationButton,
+                pressed &&
+                  styles.buttonPressed,
+                safePage <= 1 &&
+                  styles.paginationButtonDisabled,
+              ]}
+            >
+              <Text
+                style={
+                  styles.paginationButtonText
+                }
+              >
+                Previous
+              </Text>
+            </Pressable>
+
+            <View
+              style={
+                styles.paginationInformation
+              }
+            >
+              <Text style={styles.pageText}>
+                Page {safePage} of{" "}
+                {totalPages || 1}
+              </Text>
+
+              <Text style={styles.totalText}>
+                {records.length} yearly record
+                {records.length === 1
+                  ? ""
+                  : "s"}
+              </Text>
+            </View>
+
+            <Pressable
+              disabled={
+                safePage >= totalPages
+              }
+              onPress={() =>
+                onPageChange((current) =>
+                  Math.min(
+                    totalPages,
+                    current + 1
+                  )
+                )
+              }
+              style={({ pressed }) => [
+                styles.paginationButton,
+                pressed &&
+                  styles.buttonPressed,
+                safePage >= totalPages &&
+                  styles.paginationButtonDisabled,
+              ]}
+            >
+              <Text
+                style={
+                  styles.paginationButtonText
+                }
+              >
+                Next
+              </Text>
+            </Pressable>
+          </View>
+        </>
       ) : (
         <View style={styles.emptyRecordsCard}>
-          <Text
-            style={styles.emptyRecordsText}
-          >
+          <Text style={styles.emptyRecordsText}>
             No yearly records were returned.
           </Text>
         </View>
@@ -1952,6 +2059,57 @@ const styles = StyleSheet.create({
   emptyRecordsText: {
     textAlign: "center",
     fontSize: 13,
+    color: "#64748B",
+  },
+
+  paginationCard: {
+    marginTop: 16,
+    padding: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 16,
+    backgroundColor: "#FFFFFF",
+  },
+
+  paginationButton: {
+    minWidth: 84,
+    minHeight: 42,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: 12,
+    backgroundColor: "#FFFFFF",
+  },
+
+  paginationButtonDisabled: {
+    opacity: 0.4,
+  },
+
+  paginationButtonText: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: colors.primary,
+  },
+
+  paginationInformation: {
+    flex: 1,
+    alignItems: "center",
+    paddingHorizontal: 8,
+  },
+
+  pageText: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: "#0F172A",
+  },
+
+  totalText: {
+    marginTop: 3,
+    fontSize: 11,
     color: "#64748B",
   },
 });

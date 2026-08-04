@@ -162,7 +162,7 @@ function DashboardLayout({ children }) {
             <h1 className="font-bold">YieldSense AI</h1>
 
             <p className="text-xs text-green-300">
-              Data Management
+              Agricultural Intelligence Platform
             </p>
           </div>
         )}
@@ -186,6 +186,11 @@ function DashboardLayout({ children }) {
               key={item.path}
               to={item.path}
               onClick={() => setSidebarOpen(false)}
+              title={
+                sidebarCollapsed
+                  ? item.label
+                  : undefined
+              }
               className={({ isActive }) =>
               [
                 "flex items-center rounded-xl py-3 text-sm font-medium transition",

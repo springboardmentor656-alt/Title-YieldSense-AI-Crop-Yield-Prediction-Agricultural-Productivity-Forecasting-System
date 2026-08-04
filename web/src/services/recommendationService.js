@@ -1,18 +1,5 @@
+import apiClient from "../api/apiClient";
 import recommendationApi from "../api/recommendationApi";
-
-function getReportsBaseUrl() {
-  const recommendationBaseUrl =
-    recommendationApi.defaults.baseURL || "";
-
-  if (!recommendationBaseUrl) {
-    return "";
-  }
-
-  return recommendationBaseUrl.replace(
-    /\/(?:api\/)?crop-recommendation\/?$/,
-    "/api/reports/recommendations"
-  );
-}
 
 function getDownloadFilename(
   contentDisposition,
@@ -27,7 +14,9 @@ function getDownloadFilename(
   );
 
   if (utf8Match?.[1]) {
-    return decodeURIComponent(utf8Match[1]);
+    return decodeURIComponent(
+      utf8Match[1]
+    );
   }
 
   const normalMatch = contentDisposition.match(
@@ -38,8 +27,11 @@ function getDownloadFilename(
 }
 
 function downloadBlob(blob, filename) {
-  const downloadUrl = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
+  const downloadUrl =
+    URL.createObjectURL(blob);
+
+  const anchor =
+    document.createElement("a");
 
   anchor.href = downloadUrl;
   anchor.download = filename;
@@ -55,16 +47,8 @@ async function downloadRecommendationReport(
   format,
   params = {}
 ) {
-  const reportsBaseUrl = getReportsBaseUrl();
-
-  if (!reportsBaseUrl) {
-    throw new Error(
-      "Recommendation API base URL is not configured."
-    );
-  }
-
-  const response = await recommendationApi.get(
-    `${reportsBaseUrl}/${format}`,
+  const response = await apiClient.get(
+    `/reports/recommendations/${format}`,
     {
       params,
       responseType: "blob",
@@ -72,20 +56,28 @@ async function downloadRecommendationReport(
   );
 
   const filename = getDownloadFilename(
-    response.headers["content-disposition"],
+    response.headers[
+      "content-disposition"
+    ],
     `crop_recommendations.${format}`
   );
 
-  downloadBlob(response.data, filename);
+  downloadBlob(
+    response.data,
+    filename
+  );
 
   return filename;
 }
 
-export async function generateRecommendation(data) {
-  const response = await recommendationApi.post(
-    "",
-    data
-  );
+export async function generateRecommendation(
+  data
+) {
+  const response =
+    await recommendationApi.post(
+      "",
+      data
+    );
 
   return response.data;
 }
@@ -93,20 +85,24 @@ export async function generateRecommendation(data) {
 export async function getRecommendationHistory(
   params = {}
 ) {
-  const response = await recommendationApi.get(
-    "/history",
-    {
-      params,
-    }
-  );
+  const response =
+    await recommendationApi.get(
+      "/history",
+      {
+        params,
+      }
+    );
 
   return response.data;
 }
 
-export async function getRecommendation(id) {
-  const response = await recommendationApi.get(
-    `/${id}`
-  );
+export async function getRecommendation(
+  id
+) {
+  const response =
+    await recommendationApi.get(
+      `/${id}`
+    );
 
   return response.data;
 }

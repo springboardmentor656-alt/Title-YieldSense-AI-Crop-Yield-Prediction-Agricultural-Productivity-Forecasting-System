@@ -1,25 +1,43 @@
-import axios from "axios";
+import apiClient from "./apiClient";
 
-import { getToken } from "../utils/token";
+const recommendationApi = {
+  get(url, config) {
+    return apiClient.get(
+      `/crop-recommendation${url}`,
+      config
+    );
+  },
 
-const recommendationApi = axios.create({
-  baseURL: "http://127.0.0.1:8000/api/crop-recommendation",
-  timeout: 30000,
-});
+  post(url, data, config) {
+    return apiClient.post(
+      `/crop-recommendation${url}`,
+      data,
+      config
+    );
+  },
 
-recommendationApi.interceptors.request.use((config) => {
-  const token = getToken();
+  put(url, data, config) {
+    return apiClient.put(
+      `/crop-recommendation${url}`,
+      data,
+      config
+    );
+  },
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  patch(url, data, config) {
+    return apiClient.patch(
+      `/crop-recommendation${url}`,
+      data,
+      config
+    );
+  },
 
-  return config;
-});
-
-recommendationApi.interceptors.response.use(
-  (response) => response,
-  (error) => Promise.reject(error)
-);
+  delete(url, config) {
+    return apiClient.delete(
+      `/crop-recommendation${url}`,
+      config
+    );
+  },
+};
 
 export default recommendationApi;

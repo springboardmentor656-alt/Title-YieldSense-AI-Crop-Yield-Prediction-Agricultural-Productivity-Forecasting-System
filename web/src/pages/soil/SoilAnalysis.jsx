@@ -41,12 +41,6 @@ export default function SoilAnalysis() {
   const [error, setError] =
     useState("");
 
-
-  useEffect(() => {
-    loadOptions();
-  }, []);
-
-
   async function loadOptions() {
     try {
       setError("");
@@ -79,6 +73,9 @@ export default function SoilAnalysis() {
       setOptionsLoading(false);
     }
   }
+  useEffect(() => {
+    loadOptions();
+  }, []);
 
 
   async function handleAnalyzeSoil() {

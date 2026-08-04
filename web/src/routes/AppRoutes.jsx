@@ -5,6 +5,7 @@ import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import SendOTP from "../pages/auth/SendOTP";
 import VerifyOTP from "../pages/auth/VerifyOTP";
+import NotFound from "../pages/NotFound";
 import ForgotPassword from "../pages/auth/ForgotPassword";
 import ResetPassword from "../pages/auth/ResetPassword";
 import Dashboard from "../pages/dashboard/Dashboard";
@@ -219,6 +220,11 @@ function AppRoutes() {
             <AdminFarmList />
           </ProtectedRoute>
         }
+      />
+
+      <Route
+        path="*"
+        element={<NotFound />}
       />
     </Routes>
   );

@@ -1,13 +1,11 @@
-import axios from "axios";
+import { create } from "axios";
 
 import { config } from "../constants/config";
 import { tokenStorage } from "../storage/tokenStorage";
 
-const apiRootUrl = config.apiBaseUrl.replace(/\/auth\/?$/, "");
-
-const apiClient = axios.create({
-  baseURL: apiRootUrl,
-  timeout: 15000,
+const apiClient = create({
+  baseURL: config.apiBaseUrl,
+  timeout: 30000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -18,7 +16,8 @@ apiClient.interceptors.request.use(
     const token = await tokenStorage.get();
 
     if (token) {
-      requestConfig.headers.Authorization = `Bearer ${token}`;
+      requestConfig.headers.Authorization =
+        `Bearer ${token}`;
     }
 
     return requestConfig;

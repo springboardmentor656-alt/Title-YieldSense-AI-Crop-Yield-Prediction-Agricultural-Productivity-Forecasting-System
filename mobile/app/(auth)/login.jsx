@@ -119,7 +119,7 @@ export default function LoginScreen() {
 
           <View style={commonStyles.centeredRow}>
             <Text style={commonStyles.helperText}>
-              Don't have an account?{" "}
+              {"Don't have an account? "}
             </Text>
 
             <Link href="/(auth)/register" asChild>

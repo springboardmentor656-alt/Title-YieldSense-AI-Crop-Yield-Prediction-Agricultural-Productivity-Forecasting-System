@@ -79,7 +79,7 @@ export default function ProfileScreen() {
     };
 
     loadProfile();
-  }, []);
+  }, [user, refreshUser]);
 
   const updateProfileField = (field, value) => {
     setProfileForm((current) => ({

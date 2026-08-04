@@ -31,7 +31,7 @@ const initialFilters = {
 };
 
 function FarmList() {
-  const { user, isFarmer } = useAuth();
+  const {isFarmer } = useAuth();
 
   const [farms, setFarms] = useState([]);
   const [summary, setSummary] = useState(null);

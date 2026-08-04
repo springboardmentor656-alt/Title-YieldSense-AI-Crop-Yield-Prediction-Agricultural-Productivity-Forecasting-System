@@ -1,18 +1,43 @@
-import axios from "axios";
-import { getToken } from "../utils/token";
+import apiClient from "./apiClient";
 
-const authApi = axios.create({
-  baseURL: "http://127.0.0.1:8000/api/auth",
-});
+const authApi = {
+  get(url, config) {
+    return apiClient.get(
+      `/auth${url}`,
+      config
+    );
+  },
 
-authApi.interceptors.request.use((config) => {
-  const token = getToken();
+  post(url, data, config) {
+    return apiClient.post(
+      `/auth${url}`,
+      data,
+      config
+    );
+  },
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  put(url, data, config) {
+    return apiClient.put(
+      `/auth${url}`,
+      data,
+      config
+    );
+  },
 
-  return config;
-});
+  patch(url, data, config) {
+    return apiClient.patch(
+      `/auth${url}`,
+      data,
+      config
+    );
+  },
+
+  delete(url, config) {
+    return apiClient.delete(
+      `/auth${url}`,
+      config
+    );
+  },
+};
 
 export default authApi;

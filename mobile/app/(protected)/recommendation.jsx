@@ -1,9 +1,13 @@
-import { useState } from "react";
+import {
+  useCallback,
+  useState,
+} from "react";
 import {
   ScrollView,
   StyleSheet,
   Text,
   View,
+  Alert,
 } from "react-native";
 import { router } from "expo-router";
 import {
@@ -21,6 +25,11 @@ export default function RecommendationScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [showAnimation, setShowAnimation] = useState(false);
   const [recommendation, setRecommendation] = useState(null);
+  
+  const handleAnimationFinished =
+    useCallback(() => {
+      setShowAnimation(false);
+    }, []);
 
   const handleRecommendation = async (payload) => {
     try {
@@ -110,9 +119,7 @@ export default function RecommendationScreen() {
 
       <RecommendationAnimation
         visible={showAnimation}
-        onFinished={() => {
-          setShowAnimation(false);
-        }}
+        onFinished={handleAnimationFinished}
       />
     </View>
   );

@@ -1,14 +1,5 @@
+import apiClient from "../api/apiClient";
 import predictionApi from "../api/predictionApi";
-
-function getReportsBaseUrl() {
-  const predictionBaseUrl =
-    predictionApi.defaults.baseURL || "";
-
-  return predictionBaseUrl.replace(
-    /\/api\/predictions\/?$/,
-    "/api/reports/predictions"
-  );
-}
 
 function getDownloadFilename(
   contentDisposition,
@@ -23,19 +14,24 @@ function getDownloadFilename(
   );
 
   if (utf8Match?.[1]) {
-    return decodeURIComponent(utf8Match[1]);
+    return decodeURIComponent(
+      utf8Match[1]
+    );
   }
 
   const normalMatch = contentDisposition.match(
-    /filename="?([^"]+)"?/
+    /filename="?([^";]+)"?/
   );
 
   return normalMatch?.[1] || fallbackFilename;
 }
 
 function downloadBlob(blob, filename) {
-  const downloadUrl = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
+  const downloadUrl =
+    URL.createObjectURL(blob);
+
+  const anchor =
+    document.createElement("a");
 
   anchor.href = downloadUrl;
   anchor.download = filename;
@@ -51,16 +47,8 @@ async function downloadPredictionReport(
   format,
   params = {}
 ) {
-  const reportsBaseUrl = getReportsBaseUrl();
-
-  if (!reportsBaseUrl) {
-    throw new Error(
-      "Prediction API base URL is not configured."
-    );
-  }
-
-  const response = await predictionApi.get(
-    `${reportsBaseUrl}/${format}`,
+  const response = await apiClient.get(
+    `/reports/predictions/${format}`,
     {
       params,
       responseType: "blob",
@@ -68,68 +56,84 @@ async function downloadPredictionReport(
   );
 
   const filename = getDownloadFilename(
-    response.headers["content-disposition"],
+    response.headers[
+      "content-disposition"
+    ],
     `yield_predictions.${format}`
   );
 
-  downloadBlob(response.data, filename);
+  downloadBlob(
+    response.data,
+    filename
+  );
 
   return filename;
 }
 
 export const predictionService = {
   async createPrediction(payload) {
-    const response = await predictionApi.post(
-      "",
-      payload
-    );
+    const response =
+      await predictionApi.post(
+        "",
+        payload
+      );
 
     return response.data;
   },
 
   async getPredictions(params = {}) {
-    const response = await predictionApi.get("", {
-      params,
-    });
+    const response =
+      await predictionApi.get("", {
+        params,
+      });
 
     return response.data;
   },
 
   async getPrediction(id) {
-    const response = await predictionApi.get(
-      `/${id}`
-    );
+    const response =
+      await predictionApi.get(
+        `/${id}`
+      );
 
     return response.data;
   },
 
-  async getPredictionSummary(params = {}) {
-    const response = await predictionApi.get(
-      "/summary",
-      {
-        params,
-      }
-    );
+  async getPredictionSummary(
+    params = {}
+  ) {
+    const response =
+      await predictionApi.get(
+        "/summary",
+        {
+          params,
+        }
+      );
 
     return response.data;
   },
 
   async getModelInformation() {
-    const response = await predictionApi.get(
-      "/model/info"
-    );
+    const response =
+      await predictionApi.get(
+        "/model/info"
+      );
 
     return response.data;
   },
 
-  async exportPredictionsCsv(params = {}) {
+  async exportPredictionsCsv(
+    params = {}
+  ) {
     return downloadPredictionReport(
       "csv",
       params
     );
   },
 
-  async exportPredictionsPdf(params = {}) {
+  async exportPredictionsPdf(
+    params = {}
+  ) {
     return downloadPredictionReport(
       "pdf",
       params

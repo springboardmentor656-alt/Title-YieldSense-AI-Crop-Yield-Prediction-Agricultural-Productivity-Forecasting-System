@@ -1,25 +1,43 @@
-import axios from "axios";
+import apiClient from "./apiClient";
 
-import { getToken } from "../utils/token";
+const analyticsApi = {
+  get(url, config) {
+    return apiClient.get(
+      `/analytics${url}`,
+      config
+    );
+  },
 
-const analyticsApi = axios.create({
-  baseURL: "http://127.0.0.1:8000/api/analytics",
-  timeout: 30000,
-});
+  post(url, data, config) {
+    return apiClient.post(
+      `/analytics${url}`,
+      data,
+      config
+    );
+  },
 
-analyticsApi.interceptors.request.use((config) => {
-  const token = getToken();
+  put(url, data, config) {
+    return apiClient.put(
+      `/analytics${url}`,
+      data,
+      config
+    );
+  },
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  patch(url, data, config) {
+    return apiClient.patch(
+      `/analytics${url}`,
+      data,
+      config
+    );
+  },
 
-  return config;
-});
-
-analyticsApi.interceptors.response.use(
-  (response) => response,
-  (error) => Promise.reject(error)
-);
+  delete(url, config) {
+    return apiClient.delete(
+      `/analytics${url}`,
+      config
+    );
+  },
+};
 
 export default analyticsApi;

@@ -1,11 +1,12 @@
-const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
+const apiBaseUrl =
+  process.env.EXPO_PUBLIC_API_BASE_URL;
 
 if (!apiBaseUrl) {
-  console.warn(
-    "EXPO_PUBLIC_API_BASE_URL is missing. Add it to the mobile .env file."
+  throw new Error(
+    "EXPO_PUBLIC_API_BASE_URL is missing. Add it to mobile/.env or the EAS environment."
   );
 }
 
 export const config = {
-  apiBaseUrl,
+  apiBaseUrl: apiBaseUrl.replace(/\/+$/, ""),
 };

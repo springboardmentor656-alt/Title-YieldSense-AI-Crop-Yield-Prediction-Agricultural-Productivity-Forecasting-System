@@ -161,7 +161,7 @@ export default function RecommendationForm({
             (farm) => farm.is_active !== false
           )
         );
-      } catch (error) {
+      } catch (_error) {
         setFarmError("Unable to load your farms.");
       } finally {
         setLoadingFarms(false);

@@ -19,7 +19,6 @@ import {
   ArrowLeft,
   BrainCircuit,
   CalendarDays,
-  ChartNoAxesCombined,
   CircleAlert,
   CloudRain,
   Droplets,

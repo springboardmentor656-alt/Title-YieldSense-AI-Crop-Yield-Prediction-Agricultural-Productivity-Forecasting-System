@@ -1,25 +1,49 @@
-import axios from "axios";
+import apiClient from "./apiClient";
 
-import { getToken } from "../utils/token";
+const predictionApi = {
+  defaults: {
+    get baseURL() {
+      return `${apiClient.defaults.baseURL}/predictions`;
+    },
+  },
 
-const predictionApi = axios.create({
-  baseURL: "http://127.0.0.1:8000/api/predictions",
-  timeout: 30000,
-});
+  get(url, config) {
+    return apiClient.get(
+      `/predictions${url}`,
+      config
+    );
+  },
 
-predictionApi.interceptors.request.use((config) => {
-  const token = getToken();
+  post(url, data, config) {
+    return apiClient.post(
+      `/predictions${url}`,
+      data,
+      config
+    );
+  },
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  put(url, data, config) {
+    return apiClient.put(
+      `/predictions${url}`,
+      data,
+      config
+    );
+  },
 
-  return config;
-});
+  patch(url, data, config) {
+    return apiClient.patch(
+      `/predictions${url}`,
+      data,
+      config
+    );
+  },
 
-predictionApi.interceptors.response.use(
-  (response) => response,
-  (error) => Promise.reject(error)
-);
+  delete(url, config) {
+    return apiClient.delete(
+      `/predictions${url}`,
+      config
+    );
+  },
+};
 
 export default predictionApi;

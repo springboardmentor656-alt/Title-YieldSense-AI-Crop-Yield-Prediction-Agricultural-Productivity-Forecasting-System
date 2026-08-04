@@ -411,7 +411,9 @@ export default function FarmDetailsScreen() {
         <Text style={commonStyles.sectionTitle}>Farm Actions</Text>
 
         <Text style={styles.actionDescription}>
-          Edit farm details or change the farm's active status.
+          <Text style={styles.actionDescription}>
+            {"Edit farm details or change the farm's active status."}
+          </Text>
         </Text>
 
         <View style={styles.actionButtons}>

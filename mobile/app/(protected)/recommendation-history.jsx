@@ -45,14 +45,17 @@ function extractRecommendations(response) {
   return [];
 }
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 10;
 
 export default function RecommendationHistoryScreen() {
   const [recommendations, setRecommendations] = useState([]);
 
-  const [skip, setSkip] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+
+  const [pagination, setPagination] = useState({
+    total: 0,
+    totalPages: 0,
+  });
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] =
@@ -68,31 +71,49 @@ export default function RecommendationHistoryScreen() {
           setLoading(true);
         }
 
-        const response =
-          await recommendationService.getRecommendationHistory({
-            skip: 0,
-            limit: PAGE_SIZE,
-          });
+        const skip =
+          (page - 1) * PAGE_SIZE;
 
-        const items = extractRecommendations(response);
-        const total = response?.total ?? items.length;
+        const response =
+          await recommendationService
+            .getRecommendationHistory({
+              skip,
+              limit: PAGE_SIZE,
+            });
+
+        const items =
+          extractRecommendations(response);
+
+        const total =
+          response?.total ?? items.length;
 
         setRecommendations(items);
-        setSkip(items.length);
-        setHasMore(items.length < total);
+
+        setPagination({
+          total,
+          totalPages:
+            total > 0
+              ? Math.ceil(
+                  total / PAGE_SIZE
+                )
+              : 0,
+        });
       } catch (error) {
         const message =
           error.response?.data?.detail ||
           error.message ||
           "Unable to load recommendation history.";
 
-        Alert.alert("History Loading Failed", message);
+        Alert.alert(
+          "History Loading Failed",
+          message
+        );
       } finally {
         setLoading(false);
         setRefreshing(false);
       }
     },
-    []
+    [page]
   );
 
   useFocusEffect(
@@ -104,72 +125,14 @@ export default function RecommendationHistoryScreen() {
   const handleRefresh = () => {
     setRefreshing(true);
 
-    loadHistory({
-      showLoader: false,
-    });
-  };
-
-  const loadMoreHistory = useCallback(async () => {
-    if (
-      loading ||
-      refreshing ||
-      loadingMore ||
-      !hasMore
-    ) {
-      return;
-    }
-
-    try {
-      setLoadingMore(true);
-
-      const response =
-        await recommendationService.getRecommendationHistory({
-          skip,
-          limit: PAGE_SIZE,
-        });
-
-      const newItems = extractRecommendations(response);
-      const total =
-        response?.total ??
-        recommendations.length + newItems.length;
-
-      setRecommendations((currentItems) => {
-        const existingIds = new Set(
-          currentItems.map((item) => item.id)
-        );
-
-        const uniqueNewItems = newItems.filter(
-          (item) => !existingIds.has(item.id)
-        );
-
-        return [...currentItems, ...uniqueNewItems];
+    if (page === 1) {
+      loadHistory({
+        showLoader: false,
       });
-
-      const nextSkip = skip + newItems.length;
-
-      setSkip(nextSkip);
-      setHasMore(
-        newItems.length === PAGE_SIZE &&
-          nextSkip < total
-      );
-    } catch (error) {
-      const message =
-        error.response?.data?.detail ||
-        error.message ||
-        "Unable to load more recommendations.";
-
-      Alert.alert("Loading Failed", message);
-    } finally {
-      setLoadingMore(false);
+    } else {
+      setPage(1);
     }
-  }, [
-    hasMore,
-    loading,
-    loadingMore,
-    recommendations.length,
-    refreshing,
-    skip,
-  ]);
+  };
 
   const handleExport = async (format) => {
     try {
@@ -202,7 +165,7 @@ export default function RecommendationHistoryScreen() {
     }
   };
 
-    if (loading) {
+  if (loading) {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator
@@ -223,8 +186,6 @@ export default function RecommendationHistoryScreen() {
         data={recommendations}
         keyExtractor={(item) => String(item.id)}
         showsVerticalScrollIndicator={false}
-        onEndReached={loadMoreHistory}
-        onEndReachedThreshold={0.3}
         contentContainerStyle={[
           styles.content,
           recommendations.length === 0 &&
@@ -349,16 +310,66 @@ export default function RecommendationHistoryScreen() {
         )}
 
         ListFooterComponent={
-          loadingMore ? (
-            <View style={styles.footerLoader}>
-              <ActivityIndicator
-                size="small"
-                color={colors.primaryDark}
-              />
+          recommendations.length > 0 ? (
+            <View style={styles.paginationCard}>
+              <Pressable
+                disabled={page <= 1 || loading}
+                onPress={() =>
+                  setPage((current) =>
+                    Math.max(1, current - 1)
+                  )
+                }
+                style={({ pressed }) => [
+                  styles.paginationButton,
+                  pressed && styles.pressed,
+                  (page <= 1 || loading) &&
+                    styles.disabledButton,
+                ]}
+              >
+                <Text style={styles.paginationButtonText}>
+                  Previous
+                </Text>
+              </Pressable>
 
-              <Text style={styles.footerLoaderText}>
-                Loading more recommendations...
-              </Text>
+              <View style={styles.pageInformation}>
+                <Text style={styles.pageText}>
+                  Page {page} of{" "}
+                  {pagination.totalPages || 1}
+                </Text>
+
+                <Text style={styles.totalText}>
+                  {pagination.total} recommendation
+                  {pagination.total === 1 ? "" : "s"}
+                </Text>
+              </View>
+
+              <Pressable
+                disabled={
+                  loading ||
+                  pagination.totalPages === 0 ||
+                  page >= pagination.totalPages
+                }
+                onPress={() =>
+                  setPage((current) =>
+                    Math.min(
+                      pagination.totalPages,
+                      current + 1
+                    )
+                  )
+                }
+                style={({ pressed }) => [
+                  styles.paginationButton,
+                  pressed && styles.pressed,
+                  (loading ||
+                    pagination.totalPages === 0 ||
+                    page >= pagination.totalPages) &&
+                    styles.disabledButton,
+                ]}
+              >
+                <Text style={styles.paginationButtonText}>
+                  Next
+                </Text>
+              </Pressable>
             </View>
           ) : null
         }
@@ -584,16 +595,50 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
 
-  footerLoader: {
-    paddingVertical: 20,
+  paginationCard: {
+    marginTop: 18,
+    padding: 14,
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-between",
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 16,
+    backgroundColor: colors.surface,
   },
 
-  footerLoaderText: {
-    marginTop: 8,
+  paginationButton: {
+    minWidth: 88,
+    minHeight: 44,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.primaryDark,
+    borderRadius: 12,
+    backgroundColor: colors.surface,
+  },
+
+  paginationButtonText: {
     fontSize: 13,
-    fontWeight: "600",
+    fontWeight: "800",
+    color: colors.primaryDark,
+  },
+
+  pageInformation: {
+    flex: 1,
+    alignItems: "center",
+    paddingHorizontal: 8,
+  },
+
+  pageText: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: colors.textPrimary,
+  },
+
+  totalText: {
+    marginTop: 3,
+    fontSize: 11,
     color: colors.textSecondary,
   },
 });
