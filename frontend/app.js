@@ -1,5 +1,4 @@
 // Check Login
-
 const token = localStorage.getItem("token");
 
 if (!token) {
@@ -7,352 +6,364 @@ if (!token) {
     window.location.href = "login.html";
 }
 
+let yieldChartInstance = null;
+
 async function predictYield() {
-document.getElementById("loader").style.display = "block";
+    const loader = document.getElementById("loader");
+    if (loader) loader.style.display = "block";
 
     const area = document.getElementById("area").value;
-        const year = document.getElementById("year").value;
-    const temp = document.getElementById("temp").value;
-    const rainfall = document.getElementById("rainfall").value;
+    const year = document.getElementById("year").value;
+
     const pesticides = document.getElementById("pesticides").value;
     const ph = document.getElementById("ph").value;
 
-    // Crop Type
-    const selectedCrop =
-        document.getElementById("cropType").value;
+    const selectedCrop = document.getElementById("cropType").value;
+    const cropType = selectedCrop === "Other" ? document.getElementById("otherCrop").value : selectedCrop;
 
-    const cropType =
-        selectedCrop === "Other"
-            ? document.getElementById("otherCrop").value
-            : selectedCrop;
-
-    // Validation
-    if (
-    !area ||
-    !year ||
-    !cropType ||
-    !temp ||
-    !rainfall ||
-    !pesticides ||
-    !ph
-){
+    if (!area || !year || !cropType ||  !pesticides || !ph) {
         alert("⚠ Please fill all fields before prediction.");
+        if (loader) loader.style.display = "none";
         return;
     }
 
-    // Loading State
-    document.getElementById("yield").innerHTML = "⏳";
-    document.getElementById("weather").innerHTML = "Analyzing...";
-    document.getElementById("soil").innerHTML = "Analyzing Soil...";
-    document.getElementById("risk").innerHTML = "Calculating...";
-    document.getElementById("recommendation").innerHTML =
-        "Generating recommendation...";
-    document.getElementById("report").innerHTML =
-        "Preparing report...";
-
-    document.getElementById("summary").innerHTML =
-        "🤖 AI is analyzing crop conditions...";
-
     try {
-
         const response = await fetch(
             "http://127.0.0.1:8000/api/v1/predict-yield",
             {
                 method: "POST",
                 headers: {
-    "Content-Type": "application/json",
-    "Authorization": "Bearer " + localStorage.getItem("token")
-},
-               body: JSON.stringify({
-
-    area: area,
-
-    crop_type: cropType,
-
-    year: parseInt(year),
-
-    average_rain_fall_mm_per_year:
-        parseFloat(rainfall),
-
-    pesticides_tonnes:
-        parseFloat(pesticides),
-
-    avg_temp:
-        parseFloat(temp),
-
-    ph:
-        parseFloat(ph)
-
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + localStorage.getItem("token")
+                },
+                body: JSON.stringify({
+                    area: area,
+                    crop_type: cropType,
+                    year: parseInt(year),
+                    average_rain_fall_mm_per_year: 0,
+                    pesticides_tonnes: parseFloat(pesticides),
+                    avg_temp: 0,
+                    ph: parseFloat(ph)
                 })
             }
         );
 
         const data = await response.json();
-        document.getElementById("loader").style.display = "none";
-        if (data.risk_level === "High Risk") {
+        if (loader) loader.style.display = "none";
 
-    alert(
-        `⚠ High Risk Detected!\n\n` +
-        `Estimated Yield: ${data.estimated_yield}\n\n` +
-        `Recommendation:\n${data.recommendation}`
-    );
+        if (!response.ok) {
+            throw new Error(data.detail || "Prediction failed on server.");
+        }
 
-} else {
+        const yieldValue = data.estimated_yield_kg_per_ha;
+        const overallRisk = data.analytics.overall_risk;
+        const riskAlerts = data.analytics.risk_alerts;
+        const recommendations = data.analytics.recommendations;
 
-    alert(
-        `✅ Prediction Completed Successfully!\n\n` +
-        `Crop: ${cropType}\n` +
-        `Estimated Yield: ${data.estimated_yield}\n` +
-        `Risk Level: ${data.risk_level}`
-    );
+        // --- POPULATE ALL ORIGINAL DASHBOARD OUTPUT CARDS ---
+
+        // 1. Estimated Yield Card
+        const yieldEl = document.getElementById("yield");
+        if (yieldEl) yieldEl.innerHTML = `🌾 ${yieldValue.toFixed(2)} kg/ha`;
+
+        // 2. Weather Status Card
+        // 2. Weather Status Card
+const weatherEl = document.getElementById("weather");
+
+if (weatherEl) {
+
+    const liveWeather = data.weather;
+
+    weatherEl.innerHTML = `
+        <h3>🌦 Live Weather</h3>
+
+        📍 <b>${liveWeather.city}</b><br><br>
+
+        🌡 Temperature :
+        <b>${liveWeather.temperature}°C</b><br>
+
+        ☁ Weather :
+        <b>${liveWeather.weather_condition}</b><br>
+
+        💧 Humidity :
+        <b>${liveWeather.humidity}%</b><br>
+
+        🌬 Wind Speed :
+        <b>${liveWeather.wind_speed} m/s</b><br>
+
+        🌧 Rainfall :
+        <b>${liveWeather.rainfall} mm</b>
+    `;
+
+    weatherEl.style.color = "#2e7d32";
 }
 
-        // Yield
-        document.getElementById("yield").innerHTML =
-            `🌾 ${data.estimated_yield.toFixed(2)}`;
-
-        // Weather
-        const weatherElement =
-            document.getElementById("weather");
-
-        weatherElement.innerHTML =
-            `☀ ${data.weather_status}`;
-
-        if (data.weather_status === "Optimal") {
-            weatherElement.style.color = "#2e7d32";
-        } else {
-            weatherElement.style.color = "#d32f2f";
+        // 3. Soil Analysis Card
+        const soilEl = document.getElementById("soil");
+        if (soilEl) {
+            soilEl.innerHTML = `🌱 Soil pH: ${ph} (Analyzed)`;
+            soilEl.style.color = "#2e7d32";
         }
 
-        // Soil
-        document.getElementById("soil").innerHTML =
-            `🌱 ${data.soil_status}`;
-
-        // Risk
-        const riskElement =
-            document.getElementById("risk");
-
-        riskElement.innerHTML =
-            `⚠ ${data.risk_level}`;
-
-        if (data.risk_level === "Low Risk") {
-            riskElement.style.color = "#2e7d32";
-        }
-        else if (data.risk_level === "Medium Risk") {
-            riskElement.style.color = "#ff9800";
-        }
-        else {
-            riskElement.style.color = "#d32f2f";
+        // 4. Risk Level Card
+        const riskEl = document.getElementById("risk");
+        if (riskEl) {
+            riskEl.innerHTML = `⚠ ${overallRisk}`;
+            if (overallRisk === "Low Risk") riskEl.style.color = "#2e7d32";
+            else if (overallRisk === "Medium Risk") riskEl.style.color = "#ff9800";
+            else riskEl.style.color = "#d32f2f";
         }
 
-        // Recommendation
-        document.getElementById("recommendation").innerHTML =
-            `💡 ${data.recommendation}`;
-
-        // Productivity Report
-        document.getElementById("report").innerHTML =
-            `📈 ${data.productivity_report}`;
-
-        // Crop Advisory (if backend returns it)
-        if (data.crop_message) {
-            document.getElementById("cropAdvice").innerHTML =
-                `🌾 ${data.crop_message}`;
+        // 5. Recommendation Card
+        const recEl = document.getElementById("recommendation");
+        if (recEl) {
+            recEl.innerHTML = `💡 <br>` + recommendations.join("<br>");
         }
 
-        // AI Summary
-        document.getElementById("summary").innerHTML =
-            `
-            <b>🤖 AI Prediction Summary</b><br><br>
+        // 6. Productivity Report Card
+        const reportEl = document.getElementById("report");
+        if (reportEl) {
+            reportEl.innerHTML = `📈 Yield performance optimized for ${cropType} in ${area}.`;
+        }
 
-            🌾 Crop:
-            <b>${cropType}</b><br><br>
+        // 7. Crop Advisory Card
+        const adviceEl = document.getElementById("cropAdvice");
+        if (adviceEl) {
+            adviceEl.innerHTML = `🌾 ${data.crop_message}`;
+        }
+        // ---------------- AI Recommendation ----------------
 
-            🌾 Estimated Yield:
-            <b>${data.estimated_yield.toFixed(2)}</b><br><br>
+const ai = data.ai_recommendation;
 
-            ☀ Weather Status:
-            <b>${data.weather_status}</b><br><br>
+if (ai) {
 
-            🌱 Soil Status:
-            <b>${data.soil_status}</b><br><br>
+    const recommendationBox = document.getElementById("aiRecommendation") || document.getElementById("recommendation");
+    const reasonList = document.getElementById("aiReason");
+    const adviceList = document.getElementById("farmerAdvice");
 
-            ⚠ Risk Level:
-            <b>${data.risk_level}</b><br><br>
+    if (recommendationBox) {
 
-            📈 Productivity:
-            <b>${data.productivity_report}</b><br><br>
+        recommendationBox.innerHTML = `
+            <p><strong>🌾 Recommended Crop:</strong> ${ai.recommended_crop}</p>
+            <p><strong>🎯 Confidence:</strong> ${ai.confidence}%</p>
 
-            💡 Recommendation:<br>
-            ${data.recommendation}
-            `;
+            <p><strong>🧠 Reason:</strong></p>
+            <ul id="aiReason"></ul>
+
+            <p><strong>👨‍🌾 Farmer Advice:</strong></p>
+            <ul id="farmerAdvice"></ul>
+        `;
+
+        const newReasonList = document.getElementById("aiReason");
+        ai.reason.forEach(item => {
+            newReasonList.innerHTML += `<li>${item}</li>`;
+        });
+
+        const newAdviceList = document.getElementById("farmerAdvice");
+        ai.farmer_advice.forEach(item => {
+            newAdviceList.innerHTML += `<li>${item}</li>`;
+        });
+
     }
-    catch (error) {
+}
 
+        // 8. Summary Box
+        const summaryBox = document.getElementById("summary");
+        if (summaryBox) {
+            summaryBox.innerHTML = `
+            <b>🤖 AI Prediction Summary</b><br><br>
+            🌾 Crop: <b>${cropType}</b><br><br>
+            🌾 Estimated Yield: <b>${yieldValue.toFixed(2)} kg/ha</b><br><br>
+            ⚠ Risk Level: <b>${overallRisk}</b><br><br>
+            💡 Recommendations:<br>${recommendations.join("<br>")}
+            `;
+        }
+
+        loadDashboardStats();
+        loadYieldChart();
+
+    } catch (error) {
         console.error(error);
-
-        document.getElementById("summary").innerHTML =
-            "❌ Prediction Failed. Please check FastAPI server.";
-
+        if (loader) loader.style.display = "none";
         alert("Prediction failed! Check backend connection.");
     }
 }
 
 function toggleOtherCrop() {
-
-    const cropSelect =
-        document.getElementById("cropType");
-
-    const otherCrop =
-        document.getElementById("otherCrop");
+    const cropSelect = document.getElementById("cropType");
+    const otherCrop = document.getElementById("otherCrop");
 
     if (cropSelect.value === "Other") {
         otherCrop.style.display = "block";
-    }
-    else {
+    } else {
         otherCrop.style.display = "none";
         otherCrop.value = "";
     }
 }
-// Display Logged-in User
 
 const username = localStorage.getItem("name");
+const usernameEl = document.getElementById("username");
+if (usernameEl) usernameEl.innerText = "👤 " + username;
 
-document.getElementById("username").innerText =
-    "👤 " + username;
-
-
-// Logout
-
-function logout(){
-
+function logout() {
     localStorage.clear();
-
-    window.location.href="login.html";
-
+    window.location.href = "login.html";
 }
-// Welcome Card
 
 const name = localStorage.getItem("name");
-
 const role = localStorage.getItem("role");
 
-document.getElementById("welcomeMessage").innerHTML =
-    "Welcome Back, " + name + " 👋";
+const welcomeMsg = document.getElementById("welcomeMessage");
+if (welcomeMsg) welcomeMsg.innerHTML = "Welcome Back, " + name + " 👋";
 
-document.getElementById("welcomeRole").innerHTML =
-    "Role : " + role;
-
- // ---------------- Dashboard Statistics ----------------
+const welcomeRole = document.getElementById("welcomeRole");
+if (welcomeRole) welcomeRole.innerHTML = "Role : " + role;
 
 async function loadDashboardStats() {
-
     try {
-
-        const response = await fetch(
-            "http://127.0.0.1:8000/api/v1/dashboard-stats"
-        );
-
+        const response = await fetch("http://127.0.0.1:8000/api/v1/dashboard-stats");
         const data = await response.json();
 
-        document.getElementById("totalPredictions").innerHTML =
-            data.total_predictions;
+        const totalEl = document.getElementById("totalPredictions");
+        if (totalEl) totalEl.innerHTML = data.total_predictions;
 
-        document.getElementById("averageYield").innerHTML =
-            data.average_yield.toFixed(2);
+        const yieldEl = document.getElementById("averageYield");
+        if (yieldEl) yieldEl.innerHTML = data.average_yield.toFixed(2);
 
-        document.getElementById("bestCrop").innerHTML =
-            data.best_crop;
+        const bestCropEl = document.getElementById("bestCrop");
+        if (bestCropEl) bestCropEl.innerHTML = data.best_crop;
 
-        document.getElementById("currentRisk").innerHTML =
-            data.current_risk;
-
-    }
-    catch(error){
-
+        const currentRiskEl = document.getElementById("currentRisk");
+        if (currentRiskEl) currentRiskEl.innerHTML = data.current_risk;
+    } catch(error) {
         console.log(error);
-
     }
-
 }
-
 loadDashboardStats();
 
-// ---------------- Live Yield Chart ----------------
-
 async function loadYieldChart() {
-
     try {
-
-        const response = await fetch(
-            "http://127.0.0.1:8000/api/v1/predictions"
-        );
-
+        const response = await fetch("http://127.0.0.1:8000/api/v1/predictions");
         const predictions = await response.json();
 
         const crops = predictions.map(p => p.crop);
-
         const yields = predictions.map(p => p.estimated_yield);
 
-        const ctx = document
-            .getElementById("yieldChart")
-            .getContext("2d");
+        const canvas = document.getElementById("yieldChart");
+        if (!canvas) return;
 
-        new Chart(ctx, {
+        const ctx = canvas.getContext("2d");
 
+        if (yieldChartInstance) {
+            yieldChartInstance.destroy();
+        }
+
+        yieldChartInstance = new Chart(ctx, {
             type: "bar",
-
             data: {
-
                 labels: crops,
-
                 datasets: [{
-
-                    label: "Estimated Yield",
-
+                    label: "Estimated Yield (kg/ha)",
                     data: yields,
-
-                    borderWidth: 1
-
+                    borderWidth: 1,
+                    backgroundColor: "rgba(76, 175, 80, 0.6)",
+                    borderColor: "rgba(56, 142, 60, 1)"
                 }]
-
             },
-
             options: {
-
                 responsive: true,
-
                 plugins: {
-
-                    legend: {
-
-                        display: true
-
-                    }
-
+                    legend: { display: true }
                 },
-
                 scales: {
-
-                    y: {
-
-                        beginAtZero: true
-
-                    }
-
+                    y: { beginAtZero: true }
                 }
-
             }
+        });
+    } catch(error) {
+        console.log(error);
+    }
+}
+loadYieldChart();
+function downloadPDF() {
+
+    // Fill PDF Data
+
+    document.getElementById("pdfArea").innerText =
+        document.getElementById("area").value;
+
+    document.getElementById("pdfCrop").innerText =
+        document.getElementById("cropType").value;
+
+    document.getElementById("pdfYield").innerText =
+        document.getElementById("yield").innerText;
+
+    document.getElementById("pdfWeather").innerText =
+        document.getElementById("weather").innerText;
+
+    document.getElementById("pdfRisk").innerText =
+        document.getElementById("risk").innerText;
+
+    document.getElementById("pdfRecommendation").innerHTML =
+        document.getElementById("aiRecommendation").innerHTML;
+
+    document.getElementById("pdfAdvice").innerHTML =
+        document.getElementById("cropAdvice").innerHTML;
+    document.getElementById("pdfUser").innerText =
+        localStorage.getItem("name");
+
+    document.getElementById("pdfDate").innerText =
+         new Date().toLocaleString();
+    // Show Report
+
+    const report = document.getElementById("pdfReport");
+
+    report.style.display = "block";
+
+    const options = {
+
+        margin: 0.5,
+
+        filename: "YieldSense_AI_Report.pdf",
+
+        image: {
+
+            type: "jpeg",
+
+            quality: 1
+
+        },
+
+        html2canvas: {
+
+            scale: 2
+
+        },
+
+        jsPDF: {
+
+            unit: "in",
+
+            format: "a4",
+
+            orientation: "portrait"
+
+        }
+
+    };
+
+    html2pdf()
+
+        .set(options)
+
+        .from(report)
+
+        .save()
+
+        .then(() => {
+
+            report.style.display = "none";
 
         });
 
-    }
-
-    catch(error){
-
-        console.log(error);
-
-    }
-
 }
-
-loadYieldChart();

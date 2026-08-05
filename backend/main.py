@@ -3,7 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import joblib
 import pandas as pd
-
+import json
+from backend.weather_api import get_live_weather
+from fastapi.responses import FileResponse
+import os
 from backend.database import SessionLocal, engine, Base
 from backend.models import User, Prediction
 from backend.schemas import (
@@ -44,7 +47,6 @@ area_encoder= joblib.load("models/area_encoder.pkl")
 item_encoder = joblib.load("models/item_encoder.pkl")
 
 # Database Session
-# Database Session
 def get_db():
     db = SessionLocal()
     try:
@@ -54,9 +56,16 @@ def get_db():
 
 
 def get_current_user(authorization: str = Header(...)):
+    print("\n========== AUTH DEBUG ==========")
+    print("Authorization Header:", authorization)
+
     token = authorization.replace("Bearer ", "")
+    print("Extracted Token:", token)
 
     payload = verify_access_token(token)
+    print("Decoded Payload:", payload)
+
+    print("================================\n")
 
     if payload is None:
         raise HTTPException(
@@ -65,6 +74,7 @@ def get_current_user(authorization: str = Header(...)):
         )
 
     return payload
+
 # Home Route
 @app.get("/")
 def home():
@@ -153,165 +163,189 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
 def predict_yield(
     data: PredictionInput,
     db: Session = Depends(get_db),
-
     current_user: dict = Depends(get_current_user)
 ):
-    # Weather Analysis
-    weather_status = (
-        "Optimal"
-        if 20 <= data.avg_temp <= 30
-        else "Stress Detected"
-    )
+    # --- NEW WEATHER API LOGIC ---
+    if data.avg_temp == 0 or data.average_rain_fall_mm_per_year == 0:
+        print(f"Fetching live weather for: {data.area}")
+        weather_data = get_live_weather(data.area)
 
-    # Soil Analysis
-    if 6.0 <= data.ph <= 7.5:
-        soil_status = "🌱 Fertile Soil"
-
-    elif 5.0 <= data.ph < 6.0:
-        soil_status = "🟡 Moderately Fertile"
-
-    else:
-        soil_status = "🔴 Soil Needs Improvement"
+        if weather_data.get("success"):
+            data.avg_temp = weather_data["avg_temp"]
+            data.average_rain_fall_mm_per_year = weather_data["current_rainfall_mm"]
+            print(f"Weather updated! Temp: {data.avg_temp}, Rain: {data.average_rain_fall_mm_per_year}")
+        else:
+            print("Weather API failed, using default values.")
+    # -----------------------------
 
     # Crop Advisory
     crop = data.crop_type.lower()
-
     if crop == "wheat":
-        crop_message = (
-            "Wheat grows best in fertile soil and moderate temperatures."
-        )
-
+        crop_message = "Wheat grows best in fertile soil and moderate temperatures."
     elif crop == "rice":
-        crop_message = (
-            "Rice requires abundant water and high rainfall."
-        )
-
+        crop_message = "Rice requires abundant water and high rainfall."
     elif crop == "maize":
-        crop_message = (
-            "Maize performs best under warm weather conditions."
-        )
-
+        crop_message = "Maize performs best under warm weather conditions."
     elif crop == "cotton":
-        crop_message = (
-            "Cotton requires warm temperatures and well-drained soil."
-        )
-
+        crop_message = "Cotton requires warm temperatures and well-drained soil."
     elif crop == "sugarcane":
-        crop_message = (
-            "Sugarcane requires high rainfall and nutrient-rich soil."
-        )
-
+        crop_message = "Sugarcane requires high rainfall and nutrient-rich soil."
     elif crop == "barley":
-        crop_message = (
-            "Barley can tolerate cooler climates and moderate rainfall."
-        )
-
+        crop_message = "Barley can tolerate cooler climates and moderate rainfall."
     else:
-        crop_message = (
-            f"Custom crop selected: {data.crop_type}. "
-            f"Monitor local weather and soil conditions carefully."
-        )
+        crop_message = f"Custom crop selected: {data.crop_type}. Monitor local weather and soil conditions carefully."
+    # ---------- AI Crop Recommendation ----------
 
-    # Model Input
-    # Encode Area
-    area_value = area_encoder.transform([data.area])[0]
+    recommended_crop = data.crop_type
+    confidence = 90
+    reason = []
+    farmer_advice = []
 
-    # Encode Crop
-    crop_value = item_encoder.transform([data.crop_type])[0]
+    if data.ph >= 6.0 and data.ph <= 7.5:
+        confidence += 2
+        reason.append("Ideal soil pH for crop growth.")
+    else:
+        reason.append("Soil pH should be adjusted for better yield.")
+        farmer_advice.append("Maintain soil pH between 6.0 and 7.5.")
+
+    if data.avg_temp >= 20 and data.avg_temp <= 32:
+        confidence += 2
+        reason.append("Temperature is suitable.")
+    else:
+        reason.append("Temperature is outside the ideal range.")
+
+    if data.average_rain_fall_mm_per_year >= 50:
+        confidence += 2
+        reason.append("Adequate rainfall available.")
+    else:
+        reason.append("Low rainfall detected.")
+        farmer_advice.append("Provide supplemental irrigation.")
+
+    if data.pesticides_tonnes > 0:
+        reason.append("Crop protection measures detected.")
+    else:
+        farmer_advice.append("Apply appropriate pest management practices.")
+
+    farmer_advice.append("Monitor crop growth every week.")
+    farmer_advice.append("Use balanced fertilizers based on soil health.")
+
+    confidence = min(confidence, 99)
+    # Encode Area & Crop
+
+    if data.area in area_encoder.classes_:
+        area_value = area_encoder.transform([data.area])[0]
+    else:
+        area_value = area_encoder.transform([area_encoder.classes_[0]])[0]
+
+    # Safe Encode Crop (Fallback if crop is unknown to model)
+    if data.crop_type in item_encoder.classes_:
+        crop_value = item_encoder.transform([data.crop_type])[0]
+    else:
+        crop_value = item_encoder.transform([item_encoder.classes_[0]])[0]
+
+
 
     # Model Input
     input_data = pd.DataFrame({
-
-        "Area": [
-            area_value
-        ],
-
-        "Item": [
-            crop_value
-        ],
-
-        "Year": [
-            data.year
-        ],
-
-        "average_rain_fall_mm_per_year": [
-            data.average_rain_fall_mm_per_year
-        ],
-
-        "pesticides_tonnes": [
-            data.pesticides_tonnes
-        ],
-
-        "avg_temp": [
-            data.avg_temp
-        ]
-
+        "Area": [area_value],
+        "Item": [crop_value],
+        "Year": [data.year],
+        "average_rain_fall_mm_per_year": [data.average_rain_fall_mm_per_year],
+        "pesticides_tonnes": [data.pesticides_tonnes],
+        "avg_temp": [data.avg_temp]
     })
 
     prediction = model.predict(input_data)
+    final_yield = round(float(prediction[0]), 2)
 
-    # Recommendation
-    if prediction[0] < 20000:
+    # --- MILESTONE 3: RISK ASSESSMENT & RECOMMENDATION ENGINE ---
+    risk_alerts = []
+    recommendations = []
+    highest_risk_level = "Low Risk" # Default baseline for DB
 
-        recommendation = (
-            "Low Yield Risk. Increase irrigation and soil nutrients."
-        )
-
-        risk_level = "High Risk"
-
-        productivity_report = (
-            "Low Productivity Expected"
-        )
-
-    elif prediction[0] < 40000:
-
-        recommendation = (
-            "Moderate Yield Expected. Monitor weather conditions."
-        )
-
-        risk_level = "Medium Risk"
-
-        productivity_report = (
-            "Moderate Productivity Expected"
-        )
-
+    # 1. Environmental Risk: Rainfall
+    if data.average_rain_fall_mm_per_year < 200:
+        risk_alerts.append({"type": "Drought Risk", "level": "High", "color": "red"})
+        recommendations.append("Critical: Implement drip irrigation immediately. Consider drought-resistant crop varieties.")
+        highest_risk_level = "High Risk"
+    elif data.average_rain_fall_mm_per_year > 1500:
+        risk_alerts.append({"type": "Flood Risk", "level": "Warning", "color": "yellow"})
+        recommendations.append("Warning: Ensure proper field drainage to prevent root rot.")
+        if highest_risk_level != "High Risk": highest_risk_level = "Medium Risk"
     else:
+        risk_alerts.append({"type": "Rainfall", "level": "Optimal", "color": "green"})
+        recommendations.append("Rainfall levels are optimal for standard irrigation schedules.")
 
-        recommendation = (
-            "High Yield Expected. Continue current farming practices."
-        )
+    # 2. Environmental Risk: Temperature
+    if data.avg_temp > 35:
+        risk_alerts.append({"type": "Heat Stress", "level": "High", "color": "red"})
+        recommendations.append("Critical: Increase watering frequency to combat heat stress.")
+        highest_risk_level = "High Risk"
+    elif 20 <= data.avg_temp <= 30:
+        risk_alerts.append({"type": "Temperature", "level": "Optimal", "color": "green"})
+    else:
+        risk_alerts.append({"type": "Temperature Anomaly", "level": "Warning", "color": "yellow"})
+        recommendations.append("Warning: Monitor crop growth closely due to suboptimal temperatures.")
+        if highest_risk_level != "High Risk": highest_risk_level = "Medium Risk"
 
-        risk_level = "Low Risk"
+    # 3. Soil Health Analysis
+    if data.ph < 5.5:
+        risk_alerts.append({"type": "High Acidity", "level": "Warning", "color": "yellow"})
+        recommendations.append("Action: Apply agricultural lime to raise soil pH.")
+        if highest_risk_level != "High Risk": highest_risk_level = "Medium Risk"
+    elif data.ph > 7.5:
+        risk_alerts.append({"type": "High Alkalinity", "level": "Warning", "color": "yellow"})
+        recommendations.append("Action: Apply elemental sulfur to lower soil pH.")
+        if highest_risk_level != "High Risk": highest_risk_level = "Medium Risk"
+    else:
+        risk_alerts.append({"type": "Soil pH", "level": "Optimal", "color": "green"})
 
-        productivity_report = (
-            "High Productivity Expected"
-        )
-
+    # Save to Database
+    # Convert lists to strings to safely store in the DB text columns
     prediction_record = Prediction(
-        user_email=current_user["sub"], # We'll replace this with the logged-in user's email later
+        user_email=current_user["sub"],
         crop=data.crop_type,
         rainfall=data.average_rain_fall_mm_per_year,
         pesticides=data.pesticides_tonnes,
         temperature=data.avg_temp,
         ph=data.ph,
-        estimated_yield=round(float(prediction[0]), 2),
-        risk=risk_level,
-        recommendation=recommendation
+        estimated_yield=final_yield,
+        risk=highest_risk_level,
+        recommendation=json.dumps(recommendations) # Safely store array as string
     )
 
     db.add(prediction_record)
     db.commit()
     db.refresh(prediction_record)
 
-    return {
-        "estimated_yield": round(float(prediction[0]), 2),
-        "weather_status": weather_status,
-        "soil_status": soil_status,
-        "crop_message": crop_message,
-        "recommendation": recommendation,
-        "risk_level": risk_level,
-        "productivity_report": productivity_report
+    # --- FINAL API RESPONSE (MILESTONE 3 FORMAT) ---
+    weather_response = {
+        "city": weather_data.get("city") if weather_data else data.area,
+        "temperature": data.avg_temp,
+        "rainfall": data.average_rain_fall_mm_per_year,
+        "humidity": weather_data.get("humidity") if weather_data else None,
+        "weather_condition": weather_data.get("weather") if weather_data else None,
+        "wind_speed": weather_data.get("wind_speed") if weather_data else None
     }
+    return {
+        "success": True,
+        "estimated_yield_kg_per_ha": final_yield,
+        "crop_message": crop_message,
+
+        "weather": weather_response,
+        "ai_recommendation": {
+            "recommended_crop": recommended_crop,
+            "confidence": confidence,
+            "reason": reason,
+            "farmer_advice": farmer_advice
+        },
+        "analytics": {
+            "overall_risk": highest_risk_level,
+            "risk_alerts": risk_alerts,
+            "recommendations": recommendations
+        }
+    }
+
 @app.get("/api/v1/predictions")
 def get_predictions(db: Session = Depends(get_db)):
     predictions = db.query(Prediction).order_by(Prediction.id.desc()).all()
@@ -332,9 +366,9 @@ def get_predictions(db: Session = Depends(get_db)):
         }
         for p in predictions
     ]
+
 @app.get("/api/v1/dashboard-stats")
 def dashboard_stats(db: Session = Depends(get_db)):
-
     predictions = db.query(Prediction).all()
 
     if len(predictions) == 0:
@@ -355,7 +389,6 @@ def dashboard_stats(db: Session = Depends(get_db)):
     crop_count = {}
 
     for p in predictions:
-
         crop_count[p.crop] = crop_count.get(p.crop, 0) + 1
 
     best_crop = max(
@@ -371,3 +404,36 @@ def dashboard_stats(db: Session = Depends(get_db)):
         "best_crop": best_crop,
         "current_risk": current_risk
     }
+@app.get("/api/v1/reports/export-csv")
+def export_csv(
+    db: Session = Depends(get_db)
+):
+    predictions = db.query(Prediction).all()
+
+    rows = []
+
+    for p in predictions:
+        rows.append({
+            "User Email": p.user_email,
+            "Crop": p.crop,
+            "Temperature (°C)": p.temperature,
+            "Rainfall (mm)": p.rainfall,
+            "Pesticides (tonnes)": p.pesticides,
+            "Soil pH": p.ph,
+            "Predicted Yield (kg/ha)": p.estimated_yield,
+            "Risk Level": p.risk,
+            "Recommendation": p.recommendation,
+            "Prediction Date": p.created_at.strftime("%Y-%m-%d %H:%M:%S") if p.created_at else ""
+        })
+
+    df = pd.DataFrame(rows)
+
+    filename = "YieldSense_Report.csv"
+
+    df.to_csv(filename, index=False)
+
+    return FileResponse(
+        path=filename,
+        media_type="text/csv",
+        filename=filename
+    )

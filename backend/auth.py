@@ -32,7 +32,16 @@ def verify_access_token(token: str):
             SECRET_KEY,
             algorithms=[ALGORITHM]
         )
+
+        print("\n========== JWT DEBUG ==========")
+        print("JWT Decode Success:", payload)
+        print("===============================\n")
+
         return payload
 
-    except JWTError:
+    except JWTError as e:
+        print("\n========== JWT DEBUG ==========")
+        print("JWT Decode Error:", str(e))
+        print("===============================\n")
+
         return None
