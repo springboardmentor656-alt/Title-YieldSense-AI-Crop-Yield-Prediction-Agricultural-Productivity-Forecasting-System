@@ -11,6 +11,7 @@ import {
   type YieldComparisonResponse,
   type PredictionHistoryItem,
   type SoilAnalysisResponse,
+  type FarmAnalyticsResponse,
 } from "@/lib/api";
 import {
   Sprout,
@@ -29,11 +30,25 @@ import {
   FlaskConical,
   CheckCircle2,
   Trophy,
+  Download,
+  Printer,
+  Sparkles,
+  Info,
+  Calendar,
 } from "lucide-react";
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from "recharts";
 
-// Must match whatever train.py printed as "Known crops" for your current
-// model_assets.pkl. Re-run train.py after changing the dataset, then
-// update this list to match its output.
 const KNOWN_CROPS = [
   "Cassava",
   "Maize",
@@ -47,10 +62,6 @@ const KNOWN_CROPS = [
   "Yams",
 ];
 
-// Mirrors the IDEAL_RANGES heuristic in routers/predict.py — used here only
-// to visualize how close each soil reading is to that same target range.
-// This is NOT a trained model coefficient; it's the same heuristic the
-// backend uses to compute soil_adjustment_factor, shown per-nutrient.
 const IDEAL_RANGES: Record<"soil_ph" | "soil_n" | "soil_p" | "soil_k", [number, number]> = {
   soil_ph: [6.0, 7.0],
   soil_n: [80, 120],
@@ -66,47 +77,48 @@ function closenessScore(value: number, range: [number, number]): number {
   return Math.max(0, 1 - distance / span);
 }
 
-function riskFromWeather(tempC: number, rainfallMm: number): { level: "Safe" | "Caution" | "Danger"; desc: string } {
-  if (tempC > 32) return { level: "Danger", desc: "Estimated heat stress — irrigation may need to increase." };
-  if (tempC < 8) return { level: "Danger", desc: "Estimated frost risk for this region." };
-  if (rainfallMm < 400) return { level: "Caution", desc: "Estimated low rainfall for the area — monitor soil moisture." };
-  if (rainfallMm > 2000) return { level: "Caution", desc: "Estimated high rainfall — monitor drainage." };
-  return { level: "Safe", desc: "Estimated conditions are within a typical range for this crop." };
-}
-
 export default function DashboardPage() {
   const [farms, setFarms] = useState<FarmResponse[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedFarm, setSelectedFarm] = useState<FarmResponse | null>(null);
-  const [selectedCrop, setSelectedCrop] = useState<string>(KNOWN_CROPS[0]);
+  const [selectedCrop, setSelectedCrop] = useState<string>(KNOWN_CROPS[8]); // Default to Wheat (index 8)
 
   const [prediction, setPrediction] = useState<PredictResponse | null>(null);
   const [predicting, setPredicting] = useState(false);
   const [predictError, setPredictError] = useState<string | null>(null);
 
-  // Full report (persists a prediction_runs row on the backend)
+  // Full report state
   const [report, setReport] = useState<YieldReportResponse | null>(null);
   const [reportLoading, setReportLoading] = useState(false);
   const [reportError, setReportError] = useState<string | null>(null);
 
-  // Multi-crop comparison
+  // Multi-crop comparison state
   const [compareSelection, setCompareSelection] = useState<string[]>([]);
   const [compareResult, setCompareResult] = useState<YieldComparisonResponse | null>(null);
   const [compareLoading, setCompareLoading] = useState(false);
   const [compareError, setCompareError] = useState<string | null>(null);
 
-  // Prediction history for the selected farm
+  // Prediction history state
   const [history, setHistory] = useState<PredictionHistoryItem[] | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
 
-  // Standalone soil analysis — not tied to any farm
+  // Soil analysis state (standalone)
   const [soilForm, setSoilForm] = useState({ soil_ph: "", soil_n: "", soil_p: "", soil_k: "" });
   const [soilResult, setSoilResult] = useState<SoilAnalysisResponse | null>(null);
   const [soilLoading, setSoilLoading] = useState(false);
   const [soilError, setSoilError] = useState<string | null>(null);
 
+  // Milestone 3: Recommendations & Risk Assessment state
+  const [insights, setInsights] = useState<FarmAnalyticsResponse | null>(null);
+  const [insightsLoading, setInsightsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<"charts" | "recommendations" | "risks">("charts");
+
+  // SSR protection for Recharts
+  const [isMounted, setIsMounted] = useState(false);
+
   useEffect(() => {
+    setIsMounted(true);
     api
       .listFarms()
       .then((data) => {
@@ -116,6 +128,7 @@ export default function DashboardPage() {
       .catch((err) => setError(err instanceof Error ? err.message : "Could not load farms"));
   }, []);
 
+  // Fetch prediction details
   useEffect(() => {
     if (!selectedFarm) return;
     setPredicting(true);
@@ -143,7 +156,7 @@ export default function DashboardPage() {
       .finally(() => setHistoryLoading(false));
   }
 
-  // Reset per-farm workflows and pull fresh history whenever the selected farm changes.
+  // Load history and reset state on farm change
   useEffect(() => {
     setReport(null);
     setReportError(null);
@@ -152,8 +165,28 @@ export default function DashboardPage() {
     setCompareError(null);
     setHistory(null);
     setHistoryError(null);
+    setInsights(null);
     if (selectedFarm) loadHistory(selectedFarm.id);
   }, [selectedFarm]);
+
+  // Milestone 3: Fetch Recommendations and Risk Ratings dynamically
+  useEffect(() => {
+    if (!selectedFarm || !prediction) return;
+    setInsightsLoading(true);
+    api
+      .generateFarmInsights({
+        crop_type: selectedCrop,
+        avg_temp: prediction.weather_used.avg_temp,
+        rainfall: prediction.weather_used.average_rain_fall_mm_per_year,
+        soil_ph: selectedFarm.soil_ph ?? 6.5,
+        nitrogen: selectedFarm.soil_n ?? 80,
+        phosphorus: selectedFarm.soil_p ?? 40,
+        potassium: selectedFarm.soil_k ?? 40,
+      })
+      .then(setInsights)
+      .catch(() => setInsights(null))
+      .finally(() => setInsightsLoading(false));
+  }, [selectedFarm, selectedCrop, prediction]);
 
   function handleGenerateReport() {
     if (!selectedFarm) return;
@@ -163,7 +196,7 @@ export default function DashboardPage() {
       .getYieldReport({ farm_id: selectedFarm.id, crop_name: selectedCrop })
       .then((res) => {
         setReport(res);
-        loadHistory(selectedFarm.id); // report persists a run, so refresh the history list
+        loadHistory(selectedFarm.id);
       })
       .catch((err) => {
         setReport(null);
@@ -186,7 +219,7 @@ export default function DashboardPage() {
       .compareCrops({ farm_id: selectedFarm.id, crops: compareSelection })
       .then((res) => {
         setCompareResult(res);
-        loadHistory(selectedFarm.id); // compare persists a run per crop, so refresh the history list
+        loadHistory(selectedFarm.id);
       })
       .catch((err) => {
         setCompareResult(null);
@@ -213,9 +246,36 @@ export default function DashboardPage() {
       .finally(() => setSoilLoading(false));
   }
 
-  const risk = prediction
-    ? riskFromWeather(prediction.weather_used.avg_temp, prediction.weather_used.average_rain_fall_mm_per_year)
-    : null;
+  // Milestone 3: Download CSV predictions report from backend endpoint
+  async function handleDownloadCSV() {
+    if (!selectedFarm) return;
+    try {
+      const token = localStorage.getItem("ys_token");
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000";
+      const res = await fetch(`${API_BASE_URL}/api/v1/analytics/export-csv?farm_id=${selectedFarm.id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error("Could not fetch CSV report.");
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `yieldsense_${selectedFarm.farm_name.toLowerCase().replace(/\s+/g, "_")}_history.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to download report.");
+    }
+  }
+
+  // Trigger print-to-pdf stylesheet options
+  function handlePrintPDF() {
+    window.print();
+  }
 
   const soilScores = selectedFarm
     ? {
@@ -226,32 +286,95 @@ export default function DashboardPage() {
       }
     : null;
 
-  return (
-    <main className="min-h-screen bg-paper text-ink selection:bg-wheat selection:text-paper">
-      <Navbar role="Farmer" />
+  // Recharts Line Chart Data formatting (prediction history)
+  const yieldTrendData = history
+    ? history
+        .slice()
+        .reverse()
+        .map((item) => ({
+          date: new Date(item.created_at).toLocaleDateString(undefined, {
+            month: "short",
+            day: "numeric",
+          }),
+          Yield: item.predicted_yield_kg_ha,
+          crop: item.crop_name,
+        }))
+    : [];
 
-      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
-        <div className="flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-baseline sm:justify-between">
+  // Recharts Bar Chart Data formatting (multi-crop comparison)
+  const comparisonChartData = compareResult
+    ? compareResult.crops.map((c) => ({
+        name: c.crop_name,
+        Yield: c.predicted_yield_kg_ha,
+        Baseline: c.base_model_yield_kg_ha,
+      }))
+    : [];
+
+  return (
+    <main className="min-h-screen bg-paper text-ink selection:bg-wheat selection:text-paper font-body antialiased">
+      <div className="print:hidden">
+        <Navbar role="Farmer" />
+      </div>
+
+      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12 print:px-0 print:py-0">
+        
+        {/* Printable Document Header (Only visible on print/PDF) */}
+        <div className="hidden print:flex flex-col border-b border-line pb-6 mb-8">
+          <div className="flex justify-between items-center">
+            <span className="font-display font-extrabold text-2xl tracking-tight text-canopy">YieldSense.</span>
+            <span className="font-mono text-xs text-ink/40">Date: {new Date().toLocaleDateString()}</span>
+          </div>
+          <h1 className="font-display text-3xl font-black text-ink mt-6">Acreage Diagnostics & Yield Forecast Summary</h1>
+          <p className="text-xs text-ink/70 leading-relaxed mt-2">
+            Generated report for acreage: <strong>{selectedFarm?.farm_name}</strong>. Evaluated on agricultural forecasting models with combined N-P-K soil logs.
+          </p>
+        </div>
+
+        {/* Dashboard Header */}
+        <div className="flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-baseline sm:justify-between print:hidden">
           <div>
             <p className="font-mono text-xs uppercase tracking-widest text-canopy">Agronomy Dashboard</p>
             <h1 className="mt-1 font-display text-4xl font-extrabold tracking-tight text-ink">Field Command.</h1>
           </div>
-          <Link
-            href="/onboarding"
-            className="inline-block border border-ink bg-ink px-5 py-2.5 text-center text-sm font-semibold text-paper shadow-sm transition duration-200 hover:border-canopyDeep hover:bg-canopyDeep"
-          >
-            + Register New Acreage
-          </Link>
+          
+          <div className="flex flex-wrap items-center gap-3">
+            {selectedFarm && (
+              <>
+                <button
+                  onClick={handleDownloadCSV}
+                  className="inline-flex items-center gap-2 border border-line bg-paper px-4 py-2.5 text-xs font-semibold text-ink transition hover:border-canopy hover:text-canopy"
+                >
+                  <Download className="h-3.5 w-3.5 text-canopy" />
+                  <span>Export CSV</span>
+                </button>
+                <button
+                  onClick={handlePrintPDF}
+                  className="inline-flex items-center gap-2 border border-line bg-paper px-4 py-2.5 text-xs font-semibold text-ink transition hover:border-canopy hover:text-canopy"
+                >
+                  <Printer className="h-3.5 w-3.5 text-canopy" />
+                  <span>Print PDF</span>
+                </button>
+              </>
+            )}
+            <Link
+              href="/onboarding"
+              className="inline-block border border-ink bg-ink px-5 py-2.5 text-center text-sm font-semibold text-paper shadow-sm transition duration-200 hover:border-canopyDeep hover:bg-canopyDeep"
+            >
+              + Register New Acreage
+            </Link>
+          </div>
         </div>
 
         {error && (
-          <div role="alert" className="mt-6 border border-clay bg-clay/10 px-3 py-2 text-sm text-clay">
+          <div role="alert" className="mt-6 border border-clay bg-clay/10 px-3 py-2 text-sm text-clay print:hidden">
             {error}
           </div>
         )}
 
-        <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-12">
-          <div className="flex flex-col gap-6 lg:col-span-4">
+        <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-12 print:block">
+          
+          {/* Column 1: Farm Selector Ledger (35%) */}
+          <div className="flex flex-col gap-6 lg:col-span-4 print:hidden">
             <div className="border border-line bg-paper p-5 shadow-sm">
               <h2 className="mb-4 flex items-center justify-between border-b border-line pb-2 font-display text-base font-extrabold text-ink">
                 <span>Your Acreages</span>
@@ -329,19 +452,34 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <div className="flex flex-col gap-6 lg:col-span-8">
+          {/* Column 2: Dashboard Visualization Widgets (65%) */}
+          <div className="flex flex-col gap-6 lg:col-span-8 print:w-full print:block">
             {selectedFarm ? (
               <>
-                <div className="border border-line bg-paper p-6 shadow-sm">
-                  <div className="mb-4 flex flex-col gap-4 border-b border-line pb-4 sm:flex-row sm:items-center sm:justify-between">
+                {/* Printable Farm Specs block (Only visible on print/PDF) */}
+                <div className="hidden print:block border border-line p-5 bg-paper/30 mb-6">
+                  <h2 className="font-display font-bold text-base border-b border-line pb-2 mb-3">Farm Parameters Log</h2>
+                  <div className="grid grid-cols-3 gap-4 font-mono text-xs">
+                    <div><strong>Acreage ID:</strong> {selectedFarm.id}</div>
+                    <div><strong>Plot Name:</strong> {selectedFarm.farm_name}</div>
+                    <div><strong>Coordinates:</strong> {selectedFarm.latitude.toFixed(4)}, {selectedFarm.longitude.toFixed(4)}</div>
+                    <div><strong>Soil pH:</strong> {selectedFarm.soil_ph ?? "N/A"}</div>
+                    <div><strong>NPK Balance:</strong> {selectedFarm.soil_n ?? "N/A"}-{selectedFarm.soil_p ?? "N/A"}-{selectedFarm.soil_k ?? "N/A"}</div>
+                    <div><strong>Forecast Crop:</strong> {selectedCrop}</div>
+                  </div>
+                </div>
+
+                {/* 1. Yield Forecast Summary Card */}
+                <div className="border border-line bg-paper p-6 shadow-sm print:break-inside-avoid print:mb-6">
+                  <div className="mb-4 flex flex-col gap-4 border-b border-line pb-4 sm:flex-row sm:items-center sm:justify-between print:border-b-2 print:pb-2">
                     <div>
                       <h3 className="font-display text-lg font-extrabold text-ink">Yield Forecast</h3>
-                      <p className="text-xs text-ink/60">From the trained Random Forest model, adjusted for this farm&apos;s soil.</p>
+                      <p className="text-xs text-ink/60 print:hidden">From the trained Random Forest model, adjusted for this farm&apos;s soil.</p>
                     </div>
                     <select
                       value={selectedCrop}
                       onChange={(e) => setSelectedCrop(e.target.value)}
-                      className="border border-line bg-paper px-3 py-1.5 text-xs font-semibold text-ink"
+                      className="border border-line bg-paper px-3 py-1.5 text-xs font-semibold text-ink print:hidden"
                     >
                       {KNOWN_CROPS.map((crop) => (
                         <option key={crop} value={crop}>
@@ -351,7 +489,7 @@ export default function DashboardPage() {
                     </select>
                   </div>
 
-                  {predicting && <p className="py-8 text-center text-sm text-ink/40">Running forecast…</p>}
+                  {predicting && <p className="py-8 text-center text-sm text-ink/40 print:hidden">Running forecast…</p>}
 
                   {predictError && !predicting && (
                     <p role="alert" className="border border-clay bg-clay/10 px-3 py-2 text-xs text-clay">
@@ -360,15 +498,15 @@ export default function DashboardPage() {
                   )}
 
                   {prediction && !predicting && (
-                    <div className="grid grid-cols-1 items-center gap-6 md:grid-cols-12">
+                    <div className="grid grid-cols-1 items-center gap-6 md:grid-cols-12 print:block">
                       <div className="md:col-span-7">
-                        <span className="block font-mono text-[10px] text-ink/40">SOIL-ADJUSTED FORECAST</span>
+                        <span className="block font-mono text-[10px] text-ink/40 uppercase tracking-wide">SOIL-ADJUSTED FORECAST YIELD</span>
                         <span className="font-display text-4xl font-black tracking-tight text-canopy">
                           {prediction.predicted_yield_kg_ha.toLocaleString()}
                           <span className="ml-1 font-mono text-sm font-medium text-ink/50">kg/ha</span>
                         </span>
 
-                        <div className="mt-4 h-2 w-full bg-line">
+                        <div className="mt-4 h-2 w-full bg-line print:hidden">
                           <div
                             className="h-full bg-canopy"
                             style={{
@@ -377,18 +515,18 @@ export default function DashboardPage() {
                           />
                         </div>
                         <p className="mt-2 font-mono text-[10px] text-ink/40">
-                          Model baseline: {prediction.base_model_yield_kg_ha.toLocaleString()} kg/ha · soil factor ×{prediction.soil_adjustment_factor}
+                          Model baseline: {prediction.base_model_yield_kg_ha.toLocaleString()} kg/ha · soil adjustment factor ×{prediction.soil_adjustment_factor}
                         </p>
                       </div>
 
-                      <div className="flex flex-col gap-3 border-t border-line pt-4 md:col-span-5 md:border-l md:border-t-0 md:pl-4 md:pt-0">
-                        <div className="flex items-center gap-2 border border-line bg-ink/[0.01] p-3 text-xs">
+                      <div className="flex flex-col gap-3 border-t border-line pt-4 md:col-span-5 md:border-l md:border-t-0 md:pl-4 md:pt-0 print:border-none print:mt-4">
+                        <div className="flex items-center gap-2 border border-line bg-ink/[0.01] p-3 text-xs print:p-1.5">
                           <Gauge className="h-4 w-4 shrink-0 text-wheat" />
                           <span className="leading-tight text-ink/75">
-                            Model confidence (R\u00b2): <strong className="text-wheat">{prediction.model_r2_score}</strong>
+                            Model confidence (R²): <strong className="text-wheat">{prediction.model_r2_score}</strong>
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 border border-line bg-ink/[0.01] p-3 text-xs">
+                        <div className="flex items-center gap-2 border border-line bg-ink/[0.01] p-3 text-xs print:hidden">
                           <TrendingUp className="h-4 w-4 shrink-0 text-canopy" />
                           <span className="leading-tight text-ink/75">{prediction.note}</span>
                         </div>
@@ -397,15 +535,192 @@ export default function DashboardPage() {
                   )}
                 </div>
 
-                <div className="border border-line bg-paper p-6 shadow-sm">
+                {/* ================= MILESTONE 3: ANALYTICS & RECOMMENDATION SECTION ================= */}
+                <div className="border border-line bg-paper p-6 shadow-sm print:break-inside-avoid print:mb-6">
+                  {/* Milestone 3 Tabs header */}
+                  <div className="mb-5 flex items-center justify-between border-b border-line pb-4 print:border-b-2 print:pb-2">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5 text-canopy fill-canopy/20" />
+                      <h3 className="font-display text-lg font-extrabold text-ink">Agricultural Intelligence</h3>
+                    </div>
+                    {/* Tab controllers */}
+                    <div className="flex border border-line bg-paper text-xs print:hidden">
+                      {(["charts", "recommendations", "risks"] as const).map((tab) => (
+                        <button
+                          key={tab}
+                          onClick={() => setActiveTab(tab)}
+                          className={`px-3 py-1.5 font-semibold transition ${
+                            activeTab === tab ? "bg-canopy text-paper" : "hover:text-canopy text-ink/70"
+                          }`}
+                        >
+                          {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {insightsLoading && (
+                    <div className="py-12 text-center text-sm text-ink/40 flex flex-col items-center justify-center gap-2">
+                      <span className="h-6 w-6 border-2 border-canopy border-t-transparent rounded-full animate-spin" />
+                      <span>Analyzing diagnostics & climate stress…</span>
+                    </div>
+                  )}
+
+                  {/* Print formatting: render everything sequentially without tabs */}
+                  <div className="flex flex-col gap-8 print:gap-6">
+                    
+                    {/* TAB A: INTERACTIVE VISUALIZATION CHARTS */}
+                    {isMounted && (activeTab === "charts" || window.matchMedia("print").matches) && !insightsLoading && (
+                      <div className="flex flex-col gap-6 print:block">
+                        
+                        {/* Historical Yield Trends Line Chart */}
+                        {yieldTrendData.length > 0 ? (
+                          <div className="border border-line bg-ink/[0.01] p-4 rounded-sm print:mb-6">
+                            <h4 className="font-display font-semibold text-sm text-ink mb-4 flex items-center gap-1.5">
+                              <Calendar className="h-4 w-4 text-canopy" />
+                              <span>Historical Yield Trends</span>
+                            </h4>
+                            <div className="w-full h-[220px]">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={yieldTrendData} margin={{ top: 10, right: 20, left: -10, bottom: 5 }}>
+                                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-line)" />
+                                  <XAxis dataKey="date" stroke="var(--color-ink)" style={{ fontSize: "9px" }} />
+                                  <YAxis stroke="var(--color-ink)" style={{ fontSize: "9px" }} />
+                                  <Tooltip contentStyle={{ backgroundColor: "var(--color-paper)", borderColor: "var(--color-line)", fontSize: "11px" }} />
+                                  <Line type="monotone" dataKey="Yield" stroke="var(--color-canopy)" strokeWidth={2.5} activeDot={{ r: 6 }} />
+                                </LineChart>
+                              </ResponsiveContainer>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="border border-dashed border-line p-8 text-center text-xs text-ink/40 print:hidden">
+                            Run more simulations or reports to populate historical yield trend charts.
+                          </div>
+                        )}
+
+                        {/* Crop Comparison Bar Chart */}
+                        {compareResult && (
+                          <div className="border border-line bg-ink/[0.01] p-4 rounded-sm print:break-inside-avoid">
+                            <h4 className="font-display font-semibold text-sm text-ink mb-4 flex items-center gap-1.5">
+                              <GitCompare className="h-4 w-4 text-canopy" />
+                              <span>Comparative Performance Matrix</span>
+                            </h4>
+                            <div className="w-full h-[220px]">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={comparisonChartData} margin={{ top: 10, right: 10, left: -10, bottom: 5 }}>
+                                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-line)" />
+                                  <XAxis dataKey="name" stroke="var(--color-ink)" style={{ fontSize: "9px" }} />
+                                  <YAxis stroke="var(--color-ink)" style={{ fontSize: "9px" }} />
+                                  <Tooltip contentStyle={{ backgroundColor: "var(--color-paper)", borderColor: "var(--color-line)", fontSize: "11px" }} />
+                                  <Legend wrapperStyle={{ fontSize: "10px" }} />
+                                  <Bar dataKey="Yield" fill="var(--color-canopy)" radius={[0, 0, 0, 0]} />
+                                  <Bar dataKey="Baseline" fill="var(--color-wheat)" radius={[0, 0, 0, 0]} />
+                                </BarChart>
+                              </ResponsiveContainer>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* TAB B: REMEDIATION & FARMING RECOMMENDATIONS */}
+                    {(activeTab === "recommendations" || window.matchMedia("print").matches) && insights && !insightsLoading && (
+                      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 print:grid-cols-2">
+                        {/* Recommendations */}
+                        <div className="border border-line p-4 bg-paper/60 rounded-sm">
+                          <h4 className="font-display font-bold text-sm text-ink mb-3 flex items-center gap-2 border-b border-line pb-2">
+                            <CheckCircle2 className="h-4.5 w-4.5 text-canopy" />
+                            <span>Actionable Remediation</span>
+                          </h4>
+                          <ul className="flex flex-col gap-2">
+                            {insights.actionable_recommendations.map((rec, idx) => (
+                              <li key={idx} className="text-xs text-ink/75 leading-relaxed bg-white/40 p-2.5 border border-line/40 rounded-sm pl-7 relative">
+                                <span className="absolute left-2.5 top-3.5 h-1.5 w-1.5 bg-canopy rounded-full" />
+                                {rec}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        {/* Best Practice Tips */}
+                        <div className="border border-line p-4 bg-paper/60 rounded-sm">
+                          <h4 className="font-display font-bold text-sm text-ink mb-3 flex items-center gap-2 border-b border-line pb-2">
+                            <Info className="h-4.5 w-4.5 text-canopy" />
+                            <span>Best Practice Tips</span>
+                          </h4>
+                          <ul className="flex flex-col gap-2">
+                            {insights.best_practice_tips.map((tip, idx) => (
+                              <li key={idx} className="text-xs text-ink/75 leading-relaxed bg-white/40 p-2.5 border border-line/40 rounded-sm pl-7 relative">
+                                <span className="absolute left-2.5 top-3.5 h-1.5 w-1.5 bg-wheat rounded-full animate-pulse" />
+                                {tip}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* TAB C: AGRICULTURAL RISK ALERT CARDS */}
+                    {(activeTab === "risks" || window.matchMedia("print").matches) && insights && !insightsLoading && (
+                      <div className="flex flex-col gap-4 print:break-inside-avoid">
+                        <div className="flex items-center justify-between border-b border-line pb-2">
+                          <span className="text-xs font-mono uppercase text-ink/50 tracking-wider">Overall Environmental Stress Level</span>
+                          <span
+                            className={`border px-3 py-1 font-mono text-xs font-black uppercase ${
+                              insights.overall_risk_level === "High"
+                                ? "border-clay/40 bg-clay/10 text-clay"
+                                : insights.overall_risk_level === "Medium"
+                                ? "border-wheat/40 bg-wheat/10 text-wheat"
+                                : "border-canopy/40 bg-canopy/10 text-canopy"
+                            }`}
+                          >
+                            {insights.overall_risk_level} Risk
+                          </span>
+                        </div>
+
+                        {insights.identified_risks.length > 0 ? (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {insights.identified_risks.map((risk, idx) => (
+                              <div key={idx} className="border border-line bg-paper/30 p-4 rounded-sm">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="font-display font-bold text-sm text-ink">{risk.type}</span>
+                                  <span
+                                    className={`px-2 py-0.5 border font-mono text-[9px] font-bold uppercase rounded-sm ${
+                                      risk.severity === "High"
+                                        ? "border-clay/40 bg-clay/10 text-clay"
+                                        : "border-wheat/40 bg-wheat/10 text-wheat"
+                                    }`}
+                                  >
+                                    {risk.severity} Severity
+                                  </span>
+                                </div>
+                                <p className="text-xs text-ink/75 leading-relaxed bg-white/40 p-2 border border-line/40 rounded-sm">
+                                  {risk.advice}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="py-6 text-center text-xs text-ink/50 bg-canopy/5 border border-canopy/25 p-4 rounded-sm flex items-center justify-center gap-2">
+                            <CheckCircle2 className="h-4 w-4 text-canopy" />
+                            <span>No hazardous environmental stresses detected for this profile.</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 2. Full Yield Report Card */}
+                <div className="border border-line bg-paper p-6 shadow-sm print:hidden">
                   <div className="mb-4 flex flex-col gap-3 border-b border-line pb-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <h3 className="flex items-center gap-2 font-display text-lg font-extrabold text-ink">
                         <FileText className="h-4 w-4 text-canopy" />
-                        <span>Full Yield Report</span>
+                        <span>Full Yield Report Narrative</span>
                       </h3>
                       <p className="text-xs text-ink/60">
-                        Persists a run to history and includes weather + soil analytics for {selectedCrop}.
+                        Persists run records and outputs complete textual interpretations.
                       </p>
                     </div>
                     <button
@@ -419,7 +734,7 @@ export default function DashboardPage() {
                           <span>Generating…</span>
                         </>
                       ) : (
-                        <span>Generate Full Report</span>
+                        <span>Generate Narrative Report</span>
                       )}
                     </button>
                   </div>
@@ -485,7 +800,8 @@ export default function DashboardPage() {
                   )}
                 </div>
 
-                <div className="border border-line bg-paper p-6 shadow-sm">
+                {/* 3. Compare Crops Card */}
+                <div className="border border-line bg-paper p-6 shadow-sm print:hidden">
                   <div className="mb-4 flex flex-col gap-3 border-b border-line pb-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <h3 className="flex items-center gap-2 font-display text-lg font-extrabold text-ink">
@@ -568,7 +884,8 @@ export default function DashboardPage() {
                   )}
                 </div>
 
-                <div className="border border-line bg-paper p-6 shadow-sm">
+                {/* 4. Prediction History Card */}
+                <div className="border border-line bg-paper p-6 shadow-sm print:hidden">
                   <div className="mb-4 flex items-center justify-between border-b border-line pb-4">
                     <h3 className="flex items-center gap-2 font-display text-lg font-extrabold text-ink">
                       <History className="h-4 w-4 text-canopy" />
@@ -610,38 +927,10 @@ export default function DashboardPage() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <div className="flex flex-col justify-between border border-line bg-paper p-5 shadow-sm">
-                    <div>
-                      <h3 className="mb-1 flex items-center justify-between font-display text-base font-extrabold text-ink">
-                        <span>Climate Risk Estimate</span>
-                        {risk && (
-                          <span
-                            className={`border px-2 py-0.5 font-mono text-[10px] font-bold uppercase ${
-                              risk.level === "Danger"
-                                ? "border-clay/30 bg-clay/10 text-clay"
-                                : risk.level === "Caution"
-                                ? "border-wheat/30 bg-wheat/10 text-wheat"
-                                : "border-canopy/30 bg-canopy/10 text-canopy"
-                            }`}
-                          >
-                            {risk.level}
-                          </span>
-                        )}
-                      </h3>
-                      <p className="mb-4 font-mono text-[11px] text-ink/50">
-                        GPS: {selectedFarm.latitude.toFixed(4)}, {selectedFarm.longitude.toFixed(4)}
-                      </p>
-                      <p className="border border-line bg-ink/[0.01] p-3 text-xs leading-relaxed text-ink/75">
-                        {risk?.desc ?? (predicting ? "Estimating…" : "Run a forecast to see a climate estimate.")}
-                      </p>
-                    </div>
-                    <div className="mt-4 flex items-center gap-2 border-t border-line/60 pt-3 font-mono text-[10px] text-ink/40">
-                      <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-wheat" />
-                      <span>Simple threshold rule over estimated weather — not a trained risk model.</span>
-                    </div>
-                  </div>
-
+                {/* 5. Weather & Soil Quality Breakdown (Print layouts adapt it nicely) */}
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 print:break-inside-avoid print:mb-6">
+                  
+                  {/* Weather Used panel */}
                   <div className="border border-line bg-paper p-5 shadow-sm">
                     <h3 className="mb-3 flex items-center gap-2 font-display text-base font-extrabold text-ink">
                       <CloudSun className="h-4 w-4 text-canopy" />
@@ -654,7 +943,7 @@ export default function DashboardPage() {
                           Temperature
                         </span>
                         <span className="font-mono text-sm font-bold text-ink">
-                          {prediction ? `${prediction.weather_used.avg_temp}\u00b0C` : "—"}
+                          {prediction ? `${prediction.weather_used.avg_temp}°C` : "—"}
                         </span>
                       </div>
                       <div className="flex items-center justify-between border-b border-line/50 pb-2">
@@ -677,43 +966,42 @@ export default function DashboardPage() {
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {soilScores && (
-                  <div className="border border-line bg-paper p-6 shadow-sm">
-                    <h3 className="mb-1 flex items-center gap-2 font-display text-base font-extrabold text-ink">
-                      <Sliders className="h-4 w-4 text-canopy" />
-                      <span>Soil Quality Breakdown</span>
-                    </h3>
-                    <p className="mb-6 text-xs text-ink/50">
-                      How close each reading is to the target range used in the soil adjustment factor above — not a trained model coefficient.
-                    </p>
-
-                    <div className="flex flex-col gap-4">
-                      {(
-                        [
-                          ["Nitrogen (N)", soilScores.n, "bg-canopy"],
-                          ["Phosphorus (P)", soilScores.p, "bg-wheat"],
-                          ["Potassium (K)", soilScores.k, "bg-horizonTop"],
-                          ["Soil pH", soilScores.ph, "bg-clay"],
-                        ] as const
-                      ).map(([label, score, colorClass]) => (
-                        <div key={label}>
-                          <div className="mb-1 flex justify-between font-mono text-xs font-medium text-ink">
-                            <span>{label}</span>
-                            <span>{score != null ? `${Math.round(score * 100)}% of ideal` : "No reading"}</span>
+                  {/* Soil Quality Breakdown */}
+                  {soilScores && (
+                    <div className="border border-line bg-paper p-5 shadow-sm">
+                      <h3 className="mb-1 flex items-center gap-2 font-display text-base font-extrabold text-ink">
+                        <Sliders className="h-4 w-4 text-canopy" />
+                        <span>Soil Quality Breakdown</span>
+                      </h3>
+                      
+                      <div className="flex flex-col gap-3.5 mt-4">
+                        {(
+                          [
+                            ["Nitrogen (N)", soilScores.n, "bg-canopy"],
+                            ["Phosphorus (P)", soilScores.p, "bg-wheat"],
+                            ["Potassium (K)", soilScores.k, "bg-horizonTop"],
+                            ["Soil pH", soilScores.ph, "bg-clay"],
+                          ] as const
+                        ).map(([label, score, colorClass]) => (
+                          <div key={label}>
+                            <div className="mb-1 flex justify-between font-mono text-xs text-ink">
+                              <span>{label}</span>
+                              <span>{score != null ? `${Math.round(score * 100)}%` : "No reading"}</span>
+                            </div>
+                            <div className="h-1.5 w-full bg-line">
+                              <div className={`h-full ${colorClass}`} style={{ width: `${score != null ? score * 100 : 0}%` }} />
+                            </div>
                           </div>
-                          <div className="h-2 w-full bg-line">
-                            <div className={`h-full ${colorClass}`} style={{ width: `${score != null ? score * 100 : 0}%` }} />
-                          </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+
+                </div>
               </>
             ) : (
-              <div className="flex h-[400px] flex-col items-center justify-center border border-dashed border-line bg-ink/[0.01] p-6 text-center">
+              <div className="flex h-[400px] flex-col items-center justify-center border border-dashed border-line bg-ink/[0.01] p-6 text-center print:hidden">
                 <Sprout className="mb-3 h-12 w-12 text-ink/20" />
                 <h3 className="font-display text-lg font-bold text-ink/70">No Farm Selected</h3>
                 <p className="mt-1 max-w-[280px] text-xs leading-relaxed text-ink/50">
@@ -728,9 +1016,11 @@ export default function DashboardPage() {
               </div>
             )}
           </div>
+
         </div>
 
-        <div className="mt-8 border border-line bg-paper p-6 shadow-sm">
+        {/* Standalone Soil Analysis Widget */}
+        <div className="mt-8 border border-line bg-paper p-6 shadow-sm print:hidden">
           <div className="mb-1 flex items-center gap-2">
             <FlaskConical className="h-4 w-4 text-canopy" />
             <h3 className="font-display text-lg font-extrabold text-ink">Standalone Soil Analysis</h3>
@@ -862,6 +1152,7 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
       </div>
     </main>
   );

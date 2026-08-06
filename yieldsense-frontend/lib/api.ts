@@ -143,6 +143,32 @@ export interface SoilAnalysisResponse {
   note: string;
 }
 
+// --- Analytics & Recommendations ---
+
+export interface FarmAnalyticsRequest {
+  crop_type: string;
+  avg_temp: number;
+  rainfall: number;
+  soil_ph: number;
+  nitrogen: number;
+  phosphorus: number;
+  potassium: number;
+}
+
+export interface IdentifiedRisk {
+  type: string;
+  severity: "Low" | "Medium" | "High";
+  advice: string;
+}
+
+export interface FarmAnalyticsResponse {
+  crop: string;
+  overall_risk_level: "Low" | "Medium" | "High";
+  identified_risks: IdentifiedRisk[];
+  actionable_recommendations: string[];
+  best_practice_tips: string[];
+}
+
 class ApiError extends Error {
   status: number;
   constructor(status: number, message: string) {
@@ -237,6 +263,13 @@ export const api = {
   // Standalone soil scoring + remediation suggestions (no farm/crop required).
   analyzeSoil: (payload: SoilAnalysisRequest) =>
     request<SoilAnalysisResponse>("/api/v1/soil/analysis", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  // Recommendations and Risk Assessment Engine
+  generateFarmInsights: (payload: FarmAnalyticsRequest) =>
+    request<FarmAnalyticsResponse>("/api/v1/analytics/recommendations", {
       method: "POST",
       body: JSON.stringify(payload),
     }),
