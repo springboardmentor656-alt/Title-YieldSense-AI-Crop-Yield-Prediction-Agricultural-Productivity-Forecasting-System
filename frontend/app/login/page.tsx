@@ -23,7 +23,7 @@ export default function LoginPage() {
       const { access_token, role } = await authService.login({ email, password });
       localStorage.setItem("ys_access_token", access_token);
       localStorage.setItem("ys_role", role);
-      router.push("/dashboard");
+      router.push("/predict");
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Login failed. Check your credentials and try again."
@@ -139,10 +139,12 @@ export default function LoginPage() {
           grid-template-columns: 1fr 1fr;
           background: var(--color-background, #f7f9f6);
         }
+
         @media (max-width: 860px) {
           .page { grid-template-columns: 1fr; }
           .brandPanel { min-height: 220px; }
         }
+
         .brandPanel {
           position: relative;
           overflow: hidden;
@@ -153,6 +155,7 @@ export default function LoginPage() {
           justify-content: center;
           padding: 4rem;
         }
+
         .brandGlyph { position: absolute; font-size: 8rem; opacity: 0.12; line-height: 1; user-select: none; }
         .g1 { top: -2rem; left: -2rem; transform: rotate(-15deg); }
         .g2 { bottom: -3rem; right: -1rem; transform: rotate(20deg); }
@@ -162,6 +165,7 @@ export default function LoginPage() {
         .featureItem { display: flex; align-items: center; gap: 0.75rem; font-size: 0.95rem; }
         .featureIcon { font-size: 1.4rem; }
         .formPanel { display: flex; align-items: center; justify-content: center; padding: 2rem; }
+
         .card {
           width: 100%;
           max-width: 420px;
@@ -171,12 +175,14 @@ export default function LoginPage() {
           padding: 3rem 2rem;
           animation: fadeInUp 0.5s ease both;
         }
+
         .cardHeading { font-size: 1.75rem; font-weight: 700; color: #1a1a1a; margin: 0 0 0.5rem; }
         .cardSubheading { color: #5f6368; margin: 0 0 2rem; font-size: 0.95rem; }
         .field { margin-bottom: 1.5rem; }
         .fieldLabel { display: block; font-size: 0.85rem; font-weight: 600; color: #1a1a1a; margin-bottom: 0.5rem; }
         .inputWrap { position: relative; display: flex; align-items: center; }
         .inputIcon { position: absolute; left: 12px; display: flex; opacity: 0.55; pointer-events: none; color: #1a1a1a; }
+
         .input {
           width: 100%;
           box-sizing: border-box;
@@ -188,32 +194,51 @@ export default function LoginPage() {
           background: #f7f9f6;
           transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
+
         .input:focus { outline: none; border-color: #2e7d32; box-shadow: 0 0 0 3px #e8f5e9; }
+
         .toggleVisibility {
           position: absolute; right: 8px; background: none; border: none; padding: 6px;
           display: flex; cursor: pointer; color: #5f6368; border-radius: 6px;
         }
+
         .toggleVisibility:hover { background: #e8f5e9; color: #1b5e20; }
+
         .errorBanner {
           background: #fdeceA; color: #c62828; padding: 0.75rem 1rem; border-radius: 10px;
           font-size: 0.9rem; margin-bottom: 1.5rem; animation: shake 0.4s ease;
         }
+
         .submitButton {
           width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
           padding: 0.85rem; font-size: 1rem; border-radius: 10px;
           background: #2e7d32; color: #fff; border: none; font-weight: 600; cursor: pointer;
         }
+
         .submitButton:hover { background: #1b5e20; }
         .submitButton:disabled { background: #e0e0e0; color: #5f6368; cursor: not-allowed; }
+
         .spinner {
           width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4);
           border-top-color: #ffffff; border-radius: 50%; animation: spin 0.7s linear infinite;
         }
+
         .footerText { text-align: center; margin: 1.5rem 0 0; font-size: 0.9rem; color: #5f6368; }
         .footerLink { color: #1b5e20; font-weight: 600; text-decoration: none; }
         .footerLink:hover { text-decoration: underline; }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes shake { 10%,90%{transform:translateX(-1px);} 20%,80%{transform:translateX(2px);} 30%,50%,70%{transform:translateX(-4px);} 40%,60%{transform:translateX(4px);} }
+
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(12px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes shake {
+          10%,90%{transform:translateX(-1px);}
+          20%,80%{transform:translateX(2px);}
+          30%,50%,70%{transform:translateX(-4px);}
+          40%,60%{transform:translateX(4px);}
+        }
+
         @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
     </main>

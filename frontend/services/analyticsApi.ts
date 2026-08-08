@@ -28,7 +28,7 @@ export interface AnalyticsResponse {
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 
 export async function getFarmInsights(payload: AnalyticsRequest): Promise<AnalyticsResponse> {
-  const token = localStorage.getItem("ys_token"); // same key predictionApi.ts uses
+  const token = localStorage.getItem("ys_access_token");
 
   const res = await fetch(`${API_BASE}/api/v1/analytics/recommendations`, {
     method: "POST",

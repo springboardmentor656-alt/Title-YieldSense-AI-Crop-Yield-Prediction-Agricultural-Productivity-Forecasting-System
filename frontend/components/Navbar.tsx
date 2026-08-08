@@ -1,4 +1,3 @@
-// Shared navigation bar — shown on authenticated pages (dashboard, and future pages).
 // File: frontend/components/Navbar.tsx
 
 "use client";
@@ -27,10 +26,18 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="brand">🌾 YieldSense AI</div>
+      <div className="navLinks">
+        <a href="/predict" className="navLink">Predict</a>
+        <a href="/dashboard" className="navLink">Dashboard</a>
+      </div>
       <div className="right">
-        {role && <span className="roleBadge">{ROLE_LABELS[role] ?? role}</span>}
+        {role && (
+          <span className="roleBadge">
+            {ROLE_LABELS[role] ?? role}
+          </span>
+        )}
         <button className="logoutBtn" onClick={handleLogout}>
-          Log Out
+          Log out
         </button>
       </div>
 
@@ -51,6 +58,9 @@ export default function Navbar() {
           font-weight: 700;
           color: #1b5e20;
         }
+        .navLinks { display: flex; gap: 1.5rem; }
+        .navLink { color: #374151; font-size: 0.9rem; font-weight: 600; text-decoration: none; }
+        .navLink:hover { color: #15803d; }
         .right {
           display: flex;
           align-items: center;
