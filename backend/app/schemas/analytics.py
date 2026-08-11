@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class ActualYieldUpdate(BaseModel):
@@ -74,3 +74,30 @@ class AccuracyTrackingResponse(BaseModel):
     sample_size: int
     mape: Optional[float] = None
     entries: List[AccuracyEntry]
+
+
+class ProductivityScoreResponse(BaseModel):
+    productivity_score: Optional[float] = None
+    latest_yield: Optional[float] = None
+    average_yield: Optional[float] = None
+    sample_size: int
+    interpretation: Optional[str] = None
+
+
+class SeasonalComparisonPoint(BaseModel):
+    season: str
+    yield_amount: float = Field(alias="yield")
+    count: int
+
+    class Config:
+        populate_by_name = True
+
+
+class DashboardYieldTrendPoint(BaseModel):
+    date: datetime
+    yield_amount: float = Field(alias="yield")
+    farm_id: int
+    crop: Optional[str] = None
+
+    class Config:
+        populate_by_name = True

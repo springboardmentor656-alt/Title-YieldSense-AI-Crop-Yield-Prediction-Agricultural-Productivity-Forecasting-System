@@ -215,6 +215,91 @@ class AnalyticsService:
             "entries": entries,
         }
 
+    def productivity_score(self, user_id: int) -> Dict[str, Any]:
+        """Productivity score = (latest_yield / average_yield) * 100,
+        computed across all of a user's predictions (every farm). A
+        score above 100 means the most recent prediction beats the
+        user's own historical average; below 100 means it trails it.
+        """
+        history = self.history_repo.get_by_user(user_id)  # newest first
+        predictions = [entry.prediction for entry in history]
+
+        if not predictions:
+            return {
+                "productivity_score": None,
+                "latest_yield": None,
+                "average_yield": None,
+                "sample_size": 0,
+                "interpretation": None,
+            }
+
+        latest_yield = predictions[0]
+        average_yield = statistics.mean(predictions)
+        score = (
+            round((latest_yield / average_yield) * 100, 2)
+            if average_yield else None
+        )
+
+        return {
+            "productivity_score": score,
+            "latest_yield": round(latest_yield, 2),
+            "average_yield": round(average_yield, 2),
+            "sample_size": len(predictions),
+            "interpretation": self._interpret_score(score, len(predictions)),
+        }
+
+    @staticmethod
+    def _interpret_score(score: Optional[float], sample_size: int) -> Optional[str]:
+        if score is None:
+            return None
+        if sample_size < 2:
+            return "Baseline reading - add more predictions to track trend"
+        if score >= 110:
+            return "Excellent Productivity"
+        if score >= 95:
+            return "Good Productivity"
+        if score >= 80:
+            return "Average Productivity"
+        return "Needs Attention"
+
+    def seasonal_comparison(self, user_id: int) -> List[Dict[str, Any]]:
+        """Groups a user's predictions by the calendar year they were
+        made in and averages the predicted yield per year. There is no
+        explicit season field on PredictionHistory, so calendar year
+        is the closest season-like grouping the stored data supports.
+        """
+        history = self.history_repo.get_by_user(user_id)
+
+        by_year: Dict[int, List[float]] = {}
+        for entry in history:
+            year = entry.created_at.year
+            by_year.setdefault(year, []).append(entry.prediction)
+
+        return [
+            {
+                "season": str(year),
+                "yield": round(statistics.mean(values), 2),
+                "count": len(values),
+            }
+            for year, values in sorted(by_year.items())
+        ]
+
+    def dashboard_yield_trend(self, user_id: int) -> List[Dict[str, Any]]:
+        """Chronological time series (oldest -> newest) across all of a
+        user's farms, for the dashboard-level yield trend chart.
+        """
+        history = self.history_repo.get_by_user(user_id)
+
+        return [
+            {
+                "date": entry.created_at,
+                "yield": entry.prediction,
+                "farm_id": entry.farm_id,
+                "crop": entry.features.get("crop"),
+            }
+            for entry in reversed(history)  # oldest -> newest
+        ]
+
     def export_csv(self, farm_id: int, token: dict) -> str:
         """Build a CSV export of a farm's full prediction history."""
         self.farm_service.get_farm(farm_id, token)

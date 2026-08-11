@@ -1,12 +1,14 @@
 from app.repositories.dashboard_repository import (
     DashboardRepository
 )
+from app.services.analytics_service import AnalyticsService
 
 
 class DashboardService:
     def __init__(self, db):
 
         self.repo = DashboardRepository(db)
+        self.analytics_service = AnalyticsService(db)
 
     def summary(self, user_id):
 
@@ -50,7 +52,23 @@ class DashboardService:
 
                         if weather else 0,
 
-                }
+                },
+
+            "productivity_score":
+
+                self.analytics_service.productivity_score(user_id),
+
+            "yield_trend":
+
+                self.analytics_service.dashboard_yield_trend(user_id),
+
+            "seasonal_comparison":
+
+                self.analytics_service.seasonal_comparison(user_id),
+
+            "farm_comparison":
+
+                self.analytics_service.farm_comparison(user_id),
 
         }
 

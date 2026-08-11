@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { toast } from "sonner";
+
 import {
 
     getDashboardSummary,
@@ -10,35 +12,53 @@ import {
 
 } from "@/services/dashboard.service";
 
+import type { DashboardSummary } from "@/types/analytics";
+
 export function useDashboard() {
 
-    const [summary, setSummary] = useState<any>();
+    const [summary, setSummary] = useState<DashboardSummary>();
 
     const [farms, setFarms] = useState([]);
 
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
+    const [error, setError] = useState<string | null>(null);
 
-        async function load() {
+    async function load() {
 
-            try {
+        try {
 
-                const dashboard = await getDashboardSummary();
+            setLoading(true);
 
-                const farmList = await getFarms();
+            setError(null);
 
-                setSummary(dashboard);
+            const [dashboard, farmList] = await Promise.all([
 
-                setFarms(farmList);
+                getDashboardSummary(),
 
-            } finally {
+                getFarms(),
 
-                setLoading(false);
+            ]);
 
-            }
+            setSummary(dashboard);
+
+            setFarms(farmList);
+
+        } catch {
+
+            setError("Unable to load dashboard data. Please try again.");
+
+            toast.error("Unable to load dashboard data");
+
+        } finally {
+
+            setLoading(false);
 
         }
+
+    }
+
+    useEffect(() => {
 
         load();
 
@@ -51,6 +71,10 @@ export function useDashboard() {
         farms,
 
         loading,
+
+        error,
+
+        refresh: load,
 
     };
 

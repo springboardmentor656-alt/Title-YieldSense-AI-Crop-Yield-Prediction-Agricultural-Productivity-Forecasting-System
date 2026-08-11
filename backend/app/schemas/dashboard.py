@@ -1,5 +1,12 @@
 from pydantic import BaseModel
 
+from app.schemas.analytics import (
+    DashboardYieldTrendPoint,
+    FarmComparisonEntry,
+    ProductivityScoreResponse,
+    SeasonalComparisonPoint,
+)
+
 
 class WeatherSummary(BaseModel):
 
@@ -21,6 +28,14 @@ class DashboardSummary(BaseModel):
     weather_alerts: int
 
     weather: WeatherSummary | None = None
+
+    productivity_score: ProductivityScoreResponse
+
+    yield_trend: list[DashboardYieldTrendPoint]
+
+    seasonal_comparison: list[SeasonalComparisonPoint]
+
+    farm_comparison: list[FarmComparisonEntry]
 
 
 class MonthlyTrendPoint(BaseModel):
