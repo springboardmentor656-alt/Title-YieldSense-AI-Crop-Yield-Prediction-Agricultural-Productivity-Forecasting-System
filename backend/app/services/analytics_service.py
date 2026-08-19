@@ -1,12 +1,10 @@
+from fastapi import HTTPException, status
 from sqlalchemy import func
 from sqlalchemy.orm import Query, Session
 
 from app.models.farm import Farm
 from app.models.prediction import YieldPrediction
 from app.models.user import User
-
-
-from fastapi import HTTPException, status
 
 
 def get_user_role(current_user: User) -> str:

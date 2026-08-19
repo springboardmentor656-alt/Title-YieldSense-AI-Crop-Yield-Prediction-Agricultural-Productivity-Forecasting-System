@@ -1,14 +1,13 @@
 import hashlib
 import hmac
 import secrets
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.models.user import EmailOTP, User
-
 
 EMAIL_VERIFICATION_PURPOSE = "email_verification"
 PASSWORD_RESET_PURPOSE = "password_reset"
@@ -110,7 +109,7 @@ def get_resend_wait_seconds(
     sent_at = latest_otp.last_sent_at or latest_otp.created_at
 
     elapsed_seconds = (
-        datetime.utcnow() - sent_at
+        datetime.now(UTC).replace(tzinfo=None) - sent_at
     ).total_seconds()
 
     remaining_seconds = (
@@ -190,7 +189,7 @@ def create_otp(
         purpose=purpose,
     )
 
-    now = datetime.utcnow()
+    now = datetime.now(UTC).replace(tzinfo=None)
     otp_code = generate_otp_code()
 
     otp_record = EmailOTP(
@@ -265,7 +264,7 @@ def verify_otp(
             detail="This OTP has already been used",
         )
 
-    if datetime.utcnow() > otp_record.expires_at:
+    if datetime.now(UTC).replace(tzinfo=None) > otp_record.expires_at:
         otp_record.is_active = False
         db.commit()
 
@@ -327,7 +326,7 @@ def verify_otp(
             ),
         )
 
-    otp_record.used_at = datetime.utcnow()
+    otp_record.used_at = datetime.now(UTC).replace(tzinfo=None)
     otp_record.is_active = False
 
     db.commit()

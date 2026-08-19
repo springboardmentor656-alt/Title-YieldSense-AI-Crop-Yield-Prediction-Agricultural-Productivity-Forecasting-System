@@ -1,4 +1,3 @@
-from typing import List
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -63,7 +62,7 @@ class WeatherAnalysisResponse(BaseModel):
     trend: WeatherTrend
     assessment: WeatherRiskAssessment
 
-    records: List[WeatherAnalysisRecord]
+    records: list[WeatherAnalysisRecord]
 
 
 class WeatherAnalysisFilters(BaseModel):
@@ -95,8 +94,8 @@ class WeatherAnalysisFilters(BaseModel):
 
 
 class WeatherAnalysisOptionsResponse(BaseModel):
-    states: List[str]
-    years: List[int]
+    states: list[str]
+    years: list[int]
 
     minimum_year: int | None = None
     maximum_year: int | None = None

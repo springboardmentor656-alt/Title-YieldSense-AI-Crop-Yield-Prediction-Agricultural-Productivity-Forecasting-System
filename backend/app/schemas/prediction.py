@@ -1,3 +1,4 @@
+import math
 from datetime import datetime
 
 from pydantic import (
@@ -7,7 +8,6 @@ from pydantic import (
     field_validator,
 )
 
-import math
 
 class YieldPredictionRequest(BaseModel):
     farm_id: int = Field(

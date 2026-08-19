@@ -1,8 +1,9 @@
+from datetime import UTC, datetime, time
+
 from sqlalchemy.orm import Query
 
 from app.models.prediction import YieldPrediction
 
-from datetime import datetime, time, timezone
 
 def apply_prediction_filters(
     query: Query,
@@ -36,7 +37,7 @@ def apply_prediction_filters(
         start_datetime = datetime.combine(
             start_date,
             time.min,
-            tzinfo=timezone.utc,
+            tzinfo=UTC,
         )
 
         query = query.filter(
@@ -47,7 +48,7 @@ def apply_prediction_filters(
         end_datetime = datetime.combine(
             end_date,
             time.max,
-            tzinfo=timezone.utc,
+            tzinfo=UTC,
         )
 
         query = query.filter(

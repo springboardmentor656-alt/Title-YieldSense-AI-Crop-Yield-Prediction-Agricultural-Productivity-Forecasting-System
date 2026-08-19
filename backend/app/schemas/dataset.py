@@ -1,9 +1,6 @@
-from typing import List, Optional
-
-from pydantic import BaseModel, ConfigDict
-
 from typing import Generic, TypeVar
 
+from pydantic import BaseModel, ConfigDict
 
 T = TypeVar("T")
 
@@ -20,7 +17,7 @@ class DatasetImportResponse(BaseModel):
     updated_rows: int = 0
     skipped_rows: int
     invalid_rows: int
-    errors: List[DatasetImportError]
+    errors: list[DatasetImportError]
 
 
 class HistoricalCropYieldResponse(BaseModel):
@@ -33,9 +30,9 @@ class HistoricalCropYieldResponse(BaseModel):
     state: str
     area: float
     production: float
-    annual_rainfall: Optional[float]
-    fertilizer: Optional[float]
-    pesticide: Optional[float]
+    annual_rainfall: float | None
+    fertilizer: float | None
+    pesticide: float | None
     yield_value: float
 
 
@@ -65,36 +62,36 @@ class PaginatedResponse(BaseModel, Generic[T]):
     page: int
     page_size: int
     total_pages: int
-    items: List[T]
+    items: list[T]
 
 
 class HistoricalYieldSummaryResponse(BaseModel):
     total_records: int
     total_crops: int
     total_states: int
-    minimum_year: Optional[int]
-    maximum_year: Optional[int]
-    average_yield: Optional[float]
-    total_area: Optional[float]
-    total_production: Optional[float]
+    minimum_year: int | None
+    maximum_year: int | None
+    average_yield: float | None
+    total_area: float | None
+    total_production: float | None
 
 
 class SoilSummaryResponse(BaseModel):
     total_states: int
-    average_nitrogen: Optional[float]
-    average_phosphorus: Optional[float]
-    average_potassium: Optional[float]
-    average_ph: Optional[float]
+    average_nitrogen: float | None
+    average_phosphorus: float | None
+    average_potassium: float | None
+    average_ph: float | None
 
 
 class WeatherSummaryResponse(BaseModel):
     total_records: int
     total_states: int
-    minimum_year: Optional[int]
-    maximum_year: Optional[int]
-    average_temperature_c: Optional[float]
-    average_rainfall_mm: Optional[float]
-    average_humidity_percent: Optional[float]
+    minimum_year: int | None
+    maximum_year: int | None
+    average_temperature_c: float | None
+    average_rainfall_mm: float | None
+    average_humidity_percent: float | None
 
 class DatasetOptionResponse(BaseModel):
     value: str
@@ -102,7 +99,7 @@ class DatasetOptionResponse(BaseModel):
 
 
 class FarmReferenceOptionsResponse(BaseModel):
-    states: List[DatasetOptionResponse]
-    crops: List[DatasetOptionResponse]
-    seasons: List[DatasetOptionResponse]
-    irrigation_types: List[DatasetOptionResponse]
+    states: list[DatasetOptionResponse]
+    crops: list[DatasetOptionResponse]
+    seasons: list[DatasetOptionResponse]
+    irrigation_types: list[DatasetOptionResponse]

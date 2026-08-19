@@ -1,15 +1,15 @@
-from datetime import datetime, timezone
-from io import BytesIO, StringIO
-from typing import Any, Iterable, Sequence
-
 import csv
+from collections.abc import Iterable, Sequence
+from datetime import UTC, datetime
+from io import BytesIO, StringIO
+from typing import Any
+
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
 from reportlab.platypus import (
-    PageBreak,
     Paragraph,
     SimpleDocTemplate,
     Spacer,
@@ -19,7 +19,7 @@ from reportlab.platypus import (
 
 
 def utc_now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def build_report_filename(

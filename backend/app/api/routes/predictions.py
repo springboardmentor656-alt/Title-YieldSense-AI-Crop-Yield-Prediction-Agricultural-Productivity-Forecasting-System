@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import math
-from typing import Optional
 
 from fastapi import (
     APIRouter,
@@ -31,7 +30,6 @@ from app.services.prediction_service import (
     create_yield_prediction,
 )
 from ml.model_loader import get_yield_model
-
 
 router = APIRouter(
     prefix="/api/predictions",
@@ -63,11 +61,11 @@ def generate_yield_prediction(
 def list_predictions(
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
-    farm_id: Optional[int] = Query(default=None, gt=0),
-    crop: Optional[str] = Query(default=None),
-    state: Optional[str] = Query(default=None),
-    season: Optional[str] = Query(default=None),
-    crop_year: Optional[int] = Query(
+    farm_id: int | None = Query(default=None, gt=0),
+    crop: str | None = Query(default=None),
+    state: str | None = Query(default=None),
+    season: str | None = Query(default=None),
+    crop_year: int | None = Query(
         default=None,
         ge=1990,
         le=2100,
@@ -139,11 +137,11 @@ def list_predictions(
     response_model=YieldPredictionSummaryResponse,
 )
 def get_prediction_summary(
-    farm_id: Optional[int] = Query(default=None, gt=0),
-    crop: Optional[str] = Query(default=None),
-    state: Optional[str] = Query(default=None),
-    season: Optional[str] = Query(default=None),
-    crop_year: Optional[int] = Query(
+    farm_id: int | None = Query(default=None, gt=0),
+    crop: str | None = Query(default=None),
+    state: str | None = Query(default=None),
+    season: str | None = Query(default=None),
+    crop_year: int | None = Query(
         default=None,
         ge=1990,
         le=2100,

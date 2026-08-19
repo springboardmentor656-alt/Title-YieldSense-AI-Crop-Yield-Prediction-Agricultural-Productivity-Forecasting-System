@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
 from datetime import datetime
+
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
 
 from app.db.database import Base
 
@@ -35,14 +36,31 @@ class User(Base):
 
     role = relationship("Role", back_populates="users")
 
-    farms = relationship("Farm", back_populates="owner", cascade="all, delete-orphan",)
+    farms = relationship(
+        "Farm",
+        back_populates="owner",
+        cascade="all, delete-orphan",
+    )
 
-    email_otps = relationship("EmailOTP", back_populates="user", cascade="all, delete-orphan",)
+    email_otps = relationship(
+        "EmailOTP",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
 
-    yield_predictions = relationship("YieldPrediction", back_populates="user", cascade="all, delete-orphan",)
+    yield_predictions = relationship(
+        "YieldPrediction",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
 
-    crop_recommendations = relationship("CropRecommendation", back_populates="user", cascade="all, delete-orphan",)
+    crop_recommendations = relationship(
+        "CropRecommendation",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
 
+    
 class EmailOTP(Base):
     __tablename__ = "email_otps"
 

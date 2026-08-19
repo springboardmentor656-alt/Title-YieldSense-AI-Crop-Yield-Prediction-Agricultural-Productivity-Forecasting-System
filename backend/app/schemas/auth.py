@@ -1,11 +1,11 @@
+
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
 
 
 class RegisterRequest(BaseModel):
     full_name: str
     email: EmailStr
-    phone: Optional[str] = None
+    phone: str | None = None
     password: str
 
 
@@ -39,8 +39,8 @@ class ResetPasswordRequest(BaseModel):
 
 
 class UpdateProfileRequest(BaseModel):
-    full_name: Optional[str] = None
-    phone: Optional[str] = None
+    full_name: str | None = None
+    phone: str | None = None
 
 
 class ChangePasswordRequest(BaseModel):
@@ -52,7 +52,7 @@ class UserResponse(BaseModel):
     id: int
     full_name: str
     email: EmailStr
-    phone: Optional[str]
+    phone: str | None
     role: str
     is_active: bool
     is_verified: bool
@@ -64,7 +64,7 @@ class UserProfileResponse(BaseModel):
     id: int
     full_name: str
     email: EmailStr
-    phone: Optional[str]
+    phone: str | None
     role: str
     is_active: bool
     is_verified: bool

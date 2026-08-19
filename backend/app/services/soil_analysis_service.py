@@ -85,7 +85,10 @@ def build_recommendations(
         recommendations.append(
             SoilRecommendation(
                 title="Nitrogen",
-                message="Reduce nitrogen fertilizer to avoid excessive vegetative growth.",
+                message=(
+                    "Reduce nitrogen fertilizer to avoid "
+                    "excessive vegetative growth."
+                ),
             )
         )
 

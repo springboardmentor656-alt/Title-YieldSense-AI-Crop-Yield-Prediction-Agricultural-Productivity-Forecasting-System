@@ -10,6 +10,13 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     LOG_FILE: str = "logs/app.log"
 
+    CORS_ORIGINS: str = (
+        "http://localhost:5173,"
+        "http://127.0.0.1:5173,"
+        "http://localhost:4173,"
+        "http://127.0.0.1:4173"
+    )
+
     # Email configuration
     SMTP_HOST: str = "smtp.gmail.com"
     SMTP_PORT: int = 587

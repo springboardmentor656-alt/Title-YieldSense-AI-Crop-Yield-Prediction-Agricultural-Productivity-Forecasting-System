@@ -13,7 +13,6 @@ from app.services.soil_analysis_service import (
     get_soil_analysis_options,
 )
 
-
 router = APIRouter(
     prefix="/api/soil-analysis",
     tags=["Soil Analysis"],

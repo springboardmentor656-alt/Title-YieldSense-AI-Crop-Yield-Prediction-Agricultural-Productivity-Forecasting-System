@@ -1,5 +1,4 @@
-from datetime import datetime, time, timezone
-from typing import Optional
+from datetime import UTC, datetime, time
 
 from sqlalchemy import func
 from sqlalchemy.orm import Query
@@ -7,7 +6,6 @@ from sqlalchemy.orm import Query
 from app.models.crop_recommendation import (
     CropRecommendation,
 )
-
 
 RECOMMENDATION_HEADERS = [
     "Recommendation ID",
@@ -31,11 +29,11 @@ RECOMMENDATION_HEADERS = [
 def apply_recommendation_filters(
     query: Query,
     *,
-    farm_id: Optional[int] = None,
-    recommended_crop: Optional[str] = None,
-    season: Optional[str] = None,
-    crop_year: Optional[int] = None,
-    recommendation_strength: Optional[str] = None,
+    farm_id: int | None = None,
+    recommended_crop: str | None = None,
+    season: str | None = None,
+    crop_year: int | None = None,
+    recommendation_strength: str | None = None,
     start_date=None,
     end_date=None,
 ):
@@ -75,7 +73,7 @@ def apply_recommendation_filters(
         start_datetime = datetime.combine(
             start_date,
             time.min,
-            tzinfo=timezone.utc,
+            tzinfo=UTC,
         )
 
         query = query.filter(
@@ -87,7 +85,7 @@ def apply_recommendation_filters(
         end_datetime = datetime.combine(
             end_date,
             time.max,
-            tzinfo=timezone.utc,
+            tzinfo=UTC,
         )
 
         query = query.filter(

@@ -11,7 +11,6 @@ from app.services.analytics_service import (
     get_analytics_dashboard,
 )
 
-
 router = APIRouter(
     prefix="/api/analytics",
     tags=["Analytics Dashboard"],

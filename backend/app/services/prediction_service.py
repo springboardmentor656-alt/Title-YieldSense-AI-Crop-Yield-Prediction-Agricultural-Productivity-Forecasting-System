@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from fastapi import HTTPException, status
 from sqlalchemy import func
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.models.agriculture import (
@@ -14,6 +15,11 @@ from app.models.agriculture import (
     StateSoilReference,
     StateWeatherReference,
 )
+from app.models.farm import Farm
+from app.models.prediction import YieldPrediction
+from app.models.user import User
+from app.schemas.prediction import YieldPredictionRequest
+from app.services.farm_service import get_accessible_farm
 from app.services.prediction_validation import (
     build_prediction_warnings,
     resolve_supported_crop,
@@ -22,13 +28,7 @@ from app.services.prediction_validation import (
     validate_hard_numeric_ranges,
     validate_model_dataframe,
 )
-from app.models.farm import Farm
-from app.models.prediction import YieldPrediction
-from app.models.user import User
-from app.schemas.prediction import YieldPredictionRequest
-from app.services.farm_service import get_accessible_farm
 from ml.model_loader import get_yield_model
-
 
 PREDICTION_UNIT = "metric tons per hectare"
 PRODUCTION_UNIT = "metric tons"
@@ -709,7 +709,7 @@ def create_yield_prediction(
         db.add(prediction)
         db.commit()
         db.refresh(prediction)
-    except Exception:
+    except SQLAlchemyError as error:
         db.rollback()
 
         raise HTTPException(
@@ -718,6 +718,6 @@ def create_yield_prediction(
                 "The prediction was generated but could "
                 "not be saved"
             ),
-        )
+        ) from error
 
     return prediction

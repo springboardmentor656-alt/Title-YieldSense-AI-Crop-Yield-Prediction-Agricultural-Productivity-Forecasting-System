@@ -19,7 +19,6 @@ from app.services.weather_analysis_service import (
     get_weather_analysis_options,
 )
 
-
 router = APIRouter(
     prefix="/weather-analysis",
     tags=["Weather Analysis"],

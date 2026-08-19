@@ -1,5 +1,4 @@
 import math
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func
@@ -12,15 +11,14 @@ from app.models.user import User
 from app.schemas.farm import (
     FarmCreateRequest,
     FarmResponse,
-    FarmUpdateRequest,
     FarmSummaryResponse,
+    FarmUpdateRequest,
 )
 from app.services.farm_service import (
     get_accessible_farm,
     normalize_optional_text,
     normalize_required_text,
 )
-
 
 router = APIRouter(
     prefix="/api/farms",
@@ -95,10 +93,10 @@ def create_farm(
 def list_farms(
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
-    state: Optional[str] = Query(default=None),
-    district: Optional[str] = Query(default=None),
-    primary_crop: Optional[str] = Query(default=None),
-    is_active: Optional[bool] = Query(default=True),
+    state: str | None = Query(default=None),
+    district: str | None = Query(default=None),
+    primary_crop: str | None = Query(default=None),
+    is_active: bool | None = Query(default=True),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -154,11 +152,11 @@ def list_farms(
 def admin_list_all_farms(
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
-    owner_email: Optional[str] = Query(default=None),
-    state: Optional[str] = Query(default=None),
-    district: Optional[str] = Query(default=None),
-    primary_crop: Optional[str] = Query(default=None),
-    is_active: Optional[bool] = Query(default=None),
+    owner_email: str | None = Query(default=None),
+    state: str | None = Query(default=None),
+    district: str | None = Query(default=None),
+    primary_crop: str | None = Query(default=None),
+    is_active: bool | None = Query(default=None),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_role("admin")),
 ):
@@ -244,9 +242,9 @@ def admin_list_all_farms(
     response_model=FarmSummaryResponse,
 )
 def get_farm_summary(
-    state: Optional[str] = Query(default=None),
-    district: Optional[str] = Query(default=None),
-    primary_crop: Optional[str] = Query(default=None),
+    state: str | None = Query(default=None),
+    district: str | None = Query(default=None),
+    primary_crop: str | None = Query(default=None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):

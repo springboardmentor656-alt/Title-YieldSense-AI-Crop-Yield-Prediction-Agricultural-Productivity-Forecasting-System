@@ -4,7 +4,6 @@ import json
 import math
 from typing import Any
 
-import numpy as np
 from fastapi import HTTPException, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -34,7 +33,6 @@ from app.services.prediction_validation import (
     resolve_supported_state,
 )
 from ml.model_loader import get_yield_model
-
 
 MAX_CANDIDATE_CROPS = 30
 MAX_ALTERNATIVES = 4

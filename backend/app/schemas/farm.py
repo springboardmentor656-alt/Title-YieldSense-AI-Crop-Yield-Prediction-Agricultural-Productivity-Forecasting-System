@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -20,35 +19,35 @@ class FarmBase(BaseModel):
         max_length=120,
     )
 
-    village: Optional[str] = Field(
+    village: str | None = Field(
         default=None,
         max_length=120,
     )
 
     area_hectares: float = Field(gt=0)
 
-    soil_type: Optional[str] = Field(
+    soil_type: str | None = Field(
         default=None,
         max_length=100,
     )
 
-    primary_crop: Optional[str] = Field(
+    primary_crop: str | None = Field(
         default=None,
         max_length=100,
     )
 
-    irrigation_type: Optional[str] = Field(
+    irrigation_type: str | None = Field(
         default=None,
         max_length=100,
     )
 
-    latitude: Optional[float] = Field(
+    latitude: float | None = Field(
         default=None,
         ge=-90,
         le=90,
     )
 
-    longitude: Optional[float] = Field(
+    longitude: float | None = Field(
         default=None,
         ge=-180,
         le=180,
@@ -60,56 +59,56 @@ class FarmCreateRequest(FarmBase):
 
 
 class FarmUpdateRequest(BaseModel):
-    farm_name: Optional[str] = Field(
+    farm_name: str | None = Field(
         default=None,
         min_length=2,
         max_length=120,
     )
 
-    state: Optional[str] = Field(
+    state: str | None = Field(
         default=None,
         min_length=2,
         max_length=120,
     )
 
-    district: Optional[str] = Field(
+    district: str | None = Field(
         default=None,
         min_length=2,
         max_length=120,
     )
 
-    village: Optional[str] = Field(
+    village: str | None = Field(
         default=None,
         max_length=120,
     )
 
-    area_hectares: Optional[float] = Field(
+    area_hectares: float | None = Field(
         default=None,
         gt=0,
     )
 
-    soil_type: Optional[str] = Field(
+    soil_type: str | None = Field(
         default=None,
         max_length=100,
     )
 
-    primary_crop: Optional[str] = Field(
+    primary_crop: str | None = Field(
         default=None,
         max_length=100,
     )
 
-    irrigation_type: Optional[str] = Field(
+    irrigation_type: str | None = Field(
         default=None,
         max_length=100,
     )
 
-    latitude: Optional[float] = Field(
+    latitude: float | None = Field(
         default=None,
         ge=-90,
         le=90,
     )
 
-    longitude: Optional[float] = Field(
+    longitude: float | None = Field(
         default=None,
         ge=-180,
         le=180,

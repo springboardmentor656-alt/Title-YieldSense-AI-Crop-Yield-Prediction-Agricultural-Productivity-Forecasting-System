@@ -1,35 +1,34 @@
+import math
+
 from fastapi import (
     APIRouter,
     Depends,
     File,
     HTTPException,
+    Query,
     UploadFile,
     status,
 )
-from sqlalchemy.orm import Session
-import math
-from typing import Optional
-
-from fastapi import Query
 from sqlalchemy import func
+from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, require_role
 from app.db.database import get_db
-from app.models.user import User
-from app.schemas.dataset import (
-    DatasetImportResponse,
-    HistoricalCropYieldResponse,
-    StateSoilResponse,
-    StateWeatherResponse,
-    HistoricalYieldSummaryResponse,
-    SoilSummaryResponse,
-    WeatherSummaryResponse,
-    FarmReferenceOptionsResponse,
-)
 from app.models.agriculture import (
     HistoricalCropYield,
     StateSoilReference,
     StateWeatherReference,
+)
+from app.models.user import User
+from app.schemas.dataset import (
+    DatasetImportResponse,
+    FarmReferenceOptionsResponse,
+    HistoricalCropYieldResponse,
+    HistoricalYieldSummaryResponse,
+    SoilSummaryResponse,
+    StateSoilResponse,
+    StateWeatherResponse,
+    WeatherSummaryResponse,
 )
 from app.services.dataset_import_service import (
     DatasetImportException,
@@ -37,7 +36,6 @@ from app.services.dataset_import_service import (
     import_state_soil,
     import_state_weather,
 )
-
 
 router = APIRouter(
     prefix="/api/datasets",
@@ -160,15 +158,7 @@ async def import_historical_yield_dataset(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(error),
-        )
-
-    except Exception as error:
-        db.rollback()
-
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Historical yield import failed: {error}",
-        )
+        ) from error
 
     finally:
         await file.close()
@@ -197,15 +187,7 @@ async def import_soil_dataset(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(error),
-        )
-
-    except Exception as error:
-        db.rollback()
-
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Soil dataset import failed: {error}",
-        )
+        ) from error
 
     finally:
         await file.close()
@@ -234,15 +216,7 @@ async def import_weather_dataset(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(error),
-        )
-
-    except Exception as error:
-        db.rollback()
-
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Weather dataset import failed: {error}",
-        )
+        ) from error
 
     finally:
         await file.close()
@@ -251,10 +225,10 @@ async def import_weather_dataset(
 def get_historical_yield_records(
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
-    state: Optional[str] = Query(default=None),
-    crop: Optional[str] = Query(default=None),
-    season: Optional[str] = Query(default=None),
-    year: Optional[int] = Query(default=None),
+    state: str | None = Query(default=None),
+    crop: str | None = Query(default=None),
+    season: str | None = Query(default=None),
+    year: int | None = Query(default=None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -310,7 +284,7 @@ def get_historical_yield_records(
 def get_soil_records(
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
-    state: Optional[str] = Query(default=None),
+    state: str | None = Query(default=None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -345,8 +319,8 @@ def get_soil_records(
 def get_weather_records(
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
-    state: Optional[str] = Query(default=None),
-    year: Optional[int] = Query(default=None),
+    state: str | None = Query(default=None),
+    year: int | None = Query(default=None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -390,8 +364,8 @@ def get_weather_records(
     response_model=HistoricalYieldSummaryResponse,
 )
 def get_historical_yield_summary(
-    state: Optional[str] = Query(default=None),
-    crop: Optional[str] = Query(default=None),
+    state: str | None = Query(default=None),
+    crop: str | None = Query(default=None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -486,7 +460,7 @@ def get_soil_summary(
     response_model=WeatherSummaryResponse,
 )
 def get_weather_summary(
-    state: Optional[str] = Query(default=None),
+    state: str | None = Query(default=None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):

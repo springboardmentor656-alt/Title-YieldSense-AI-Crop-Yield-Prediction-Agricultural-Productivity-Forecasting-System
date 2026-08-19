@@ -1,12 +1,11 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import jwt, JWTError
+from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.db.database import get_db
 from app.models.user import User
-
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/api/auth/token"
@@ -36,8 +35,8 @@ def get_current_user(
 
         email = email.strip().lower()
 
-    except JWTError:
-        raise credentials_exception
+    except JWTError as error:
+        raise credentials_exception from error
 
     user = (
         db.query(User)

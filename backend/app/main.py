@@ -10,32 +10,30 @@ from app.api.routes import (
     datasets,
     farms,
     predictions,
+    reports,
     soil_analysis,
     weather_analysis,
-    reports,
 )
+from app.api.routes.crop_recommendation import (
+    router as crop_recommendation_router,
+)
+from app.core.config import settings
 from app.core.logging_config import configure_logging
 from app.middleware.request_logging import (
     request_logging_middleware,
 )
-from app.models.prediction import YieldPrediction
+
 # These imports register the SQLAlchemy models for Alembic/model discovery.
-from app.models.agriculture import (
-    HistoricalCropYield,
-    StateSoilReference,
-    StateWeatherReference,
-)
-from app.models.farm import Farm
-from app.models.user import EmailOTP, Role, User
-from app.api.routes.crop_recommendation import (
-    router as crop_recommendation_router,
-)
-
-
 
 configure_logging()
 
 logger = logging.getLogger("yieldsense.application")
+
+cors_origins = [
+    origin.strip()
+    for origin in settings.CORS_ORIGINS.split(",")
+    if origin.strip()
+]
 
 
 @asynccontextmanager
@@ -62,12 +60,7 @@ app.middleware("http")(request_logging_middleware)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:4173",
-        "http://127.0.0.1:4173",
-    ],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -94,6 +87,13 @@ def root():
     }
 
 
-@app.get("/test-error", include_in_schema=False)
-def test_error():
-    raise RuntimeError("Temporary logging test")
+@app.get(
+    "/health",
+    tags=["Health"],
+)
+def health_check():
+    return {
+        "status": "healthy",
+        "service": "YieldSense AI API",
+        "version": "1.0.0",
+    }

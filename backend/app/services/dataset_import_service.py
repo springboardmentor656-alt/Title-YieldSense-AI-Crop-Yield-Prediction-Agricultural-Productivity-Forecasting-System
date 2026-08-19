@@ -3,6 +3,7 @@ from io import BytesIO
 from typing import Any
 
 import pandas as pd
+from pandas.errors import ParserError
 from sqlalchemy.orm import Session
 
 from app.models.agriculture import (
@@ -66,8 +67,10 @@ def to_float(
 
     try:
         number = float(value)
-    except (TypeError, ValueError):
-        raise ValueError(f"{field_name} must be numeric")
+    except (TypeError, ValueError) as error:
+        raise ValueError(
+            f"{field_name} must be numeric"
+        ) from error
 
     if math.isnan(number) or math.isinf(number):
         raise ValueError(f"{field_name} contains an invalid number")
@@ -96,14 +99,14 @@ def read_csv_file(file_content: bytes) -> pd.DataFrame:
                 BytesIO(file_content),
                 encoding="latin-1",
             )
-        except Exception as error:
+        except (UnicodeDecodeError, ParserError, ValueError) as error:
             raise DatasetImportException(
                 f"Unable to decode CSV file: {error}"
-            )
-    except Exception as error:
-        raise DatasetImportException(
-            f"Unable to read CSV file: {error}"
-        )
+            ) from error
+    except (ParserError, ValueError) as error:
+            raise DatasetImportException(
+                f"Unable to read CSV file: {error}"
+            ) from error
 
     if dataframe.empty:
         raise DatasetImportException(

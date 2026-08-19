@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List
 
 from pydantic import (
     BaseModel,
@@ -92,11 +91,11 @@ class CropRecommendationResponse(BaseModel):
 
     historical_record_count: int
 
-    alternatives: List[
+    alternatives: list[
         CropRecommendationOption
     ]
 
-    reasons: List[str]
+    reasons: list[str]
 
     model_name: str
 
@@ -144,7 +143,7 @@ class CropRecommendationHistoryItem(BaseModel):
 class CropRecommendationHistoryResponse(
     BaseModel
 ):
-    items: List[
+    items: list[
         CropRecommendationHistoryItem
     ]
 

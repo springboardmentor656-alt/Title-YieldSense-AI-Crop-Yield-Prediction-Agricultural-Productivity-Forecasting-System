@@ -1,5 +1,4 @@
 from datetime import date
-from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
@@ -7,6 +6,9 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.db.database import get_db
+from app.models.crop_recommendation import (
+    CropRecommendation,
+)
 from app.models.prediction import YieldPrediction
 from app.models.user import User
 from app.reports.report_utils import (
@@ -14,19 +16,15 @@ from app.reports.report_utils import (
     create_csv_buffer,
     create_pdf_buffer,
 )
-from app.services.report_service import (
-    PREDICTION_HEADERS,
-    apply_prediction_filters,
-    prediction_rows,
-)
-
-from app.models.crop_recommendation import (
-    CropRecommendation,
-)
 from app.services.recommendation_report_service import (
     RECOMMENDATION_HEADERS,
     apply_recommendation_filters,
     recommendation_rows,
+)
+from app.services.report_service import (
+    PREDICTION_HEADERS,
+    apply_prediction_filters,
+    prediction_rows,
 )
 
 router = APIRouter(
@@ -36,20 +34,20 @@ router = APIRouter(
 
 @router.get("/predictions/csv")
 def export_predictions_csv(
-    farm_id: Optional[int] = Query(
+    farm_id: int | None = Query(
         default=None,
         gt=0,
     ),
-    crop: Optional[str] = Query(
+    crop: str | None = Query(
         default=None,
     ),
-    season: Optional[str] = Query(
+    season: str | None = Query(
         default=None,
     ),
-    start_date: Optional[date] = Query(
+    start_date: date | None = Query(
         default=None,
     ),
-    end_date: Optional[date] = Query(
+    end_date: date | None = Query(
         default=None,
     ),
     db: Session = Depends(get_db),
@@ -106,20 +104,20 @@ def export_predictions_csv(
 
 @router.get("/predictions/pdf")
 def export_predictions_pdf(
-    farm_id: Optional[int] = Query(
+    farm_id: int | None = Query(
         default=None,
         gt=0,
     ),
-    crop: Optional[str] = Query(
+    crop: str | None = Query(
         default=None,
     ),
-    season: Optional[str] = Query(
+    season: str | None = Query(
         default=None,
     ),
-    start_date: Optional[date] = Query(
+    start_date: date | None = Query(
         default=None,
     ),
-    end_date: Optional[date] = Query(
+    end_date: date | None = Query(
         default=None,
     ),
     db: Session = Depends(get_db),
@@ -219,28 +217,28 @@ def export_predictions_pdf(
 
 @router.get("/recommendations/csv")
 def export_recommendations_csv(
-    farm_id: Optional[int] = Query(
+    farm_id: int | None = Query(
         default=None,
         gt=0,
     ),
-    recommended_crop: Optional[str] = Query(
+    recommended_crop: str | None = Query(
         default=None,
     ),
-    season: Optional[str] = Query(
+    season: str | None = Query(
         default=None,
     ),
-    crop_year: Optional[int] = Query(
+    crop_year: int | None = Query(
         default=None,
         ge=1990,
         le=2100,
     ),
-    recommendation_strength: Optional[str] = Query(
+    recommendation_strength: str | None = Query(
         default=None,
     ),
-    start_date: Optional[date] = Query(
+    start_date: date | None = Query(
         default=None,
     ),
-    end_date: Optional[date] = Query(
+    end_date: date | None = Query(
         default=None,
     ),
     db: Session = Depends(get_db),
@@ -302,28 +300,28 @@ def export_recommendations_csv(
 
 @router.get("/recommendations/pdf")
 def export_recommendations_pdf(
-    farm_id: Optional[int] = Query(
+    farm_id: int | None = Query(
         default=None,
         gt=0,
     ),
-    recommended_crop: Optional[str] = Query(
+    recommended_crop: str | None = Query(
         default=None,
     ),
-    season: Optional[str] = Query(
+    season: str | None = Query(
         default=None,
     ),
-    crop_year: Optional[int] = Query(
+    crop_year: int | None = Query(
         default=None,
         ge=1990,
         le=2100,
     ),
-    recommendation_strength: Optional[str] = Query(
+    recommendation_strength: str | None = Query(
         default=None,
     ),
-    start_date: Optional[date] = Query(
+    start_date: date | None = Query(
         default=None,
     ),
-    end_date: Optional[date] = Query(
+    end_date: date | None = Query(
         default=None,
     ),
     db: Session = Depends(get_db),

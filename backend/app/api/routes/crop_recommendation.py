@@ -5,6 +5,7 @@ from fastapi import (
 )
 from sqlalchemy.orm import Session
 
+from app.api.deps import get_current_user
 from app.db.database import get_db
 from app.models.user import User
 from app.schemas.crop_recommendation import (
@@ -12,8 +13,6 @@ from app.schemas.crop_recommendation import (
     CropRecommendationRequest,
     CropRecommendationResponse,
 )
-from app.api.deps import get_current_user
-    
 from app.services.crop_recommendation_service import (
     build_recommendation_response,
     create_crop_recommendation,

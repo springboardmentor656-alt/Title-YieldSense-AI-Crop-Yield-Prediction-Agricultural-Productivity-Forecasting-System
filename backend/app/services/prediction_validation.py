@@ -8,7 +8,6 @@ from typing import Any
 import pandas as pd
 from fastapi import HTTPException, status
 
-
 BACKEND_ROOT = Path(__file__).resolve().parents[2]
 
 PROCESSED_DATASET_PATH = (

@@ -5,7 +5,6 @@ import uuid
 from fastapi import Request
 from starlette.responses import Response
 
-
 logger = logging.getLogger("yieldsense.request")
 
 
